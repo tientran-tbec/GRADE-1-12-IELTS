@@ -32,7 +32,7 @@ function who_(d) {
   var id = identity_(d);
   if (id) {
     if (id.role === 'student' && assignedSets_(id.cls).indexOf(String(d.set_id)) < 0) return null;   // bài chưa được giao cho lớp này
-    d.student_name = id.name; d.student_class = id.cls; return id.username;
+    d.student_name = id.name; d.student_class = id.cls; d._role = id.role; return id.username;
   }
   if (REQUIRE_LOGIN) return null;
   return '';
@@ -41,6 +41,7 @@ function who_(d) {
 function handlePractice(d) {
   var uname = who_(d);
   if (uname === null) return ContentService.createTextOutput('error: unauthorized');
+  if (d._role && d._role !== 'student') return ContentService.createTextOutput('ok');   // admin/giáo viên làm thử: không lưu
   var ss = SpreadsheetApp.openById(SHEET_ID);
   migrateOldSheets_(ss);
   var sh = ss.getSheetByName(GRADE_SHEET_PRACTICE) || ss.insertSheet(GRADE_SHEET_PRACTICE);
@@ -55,6 +56,7 @@ function handleGrade(d) {
   if (d.action === 'grade_practice') { var lk = LockService.getScriptLock(); lk.waitLock(20000); try { return handlePractice(d); } finally { lk.releaseLock(); } }
   var uname = who_(d);
   if (uname === null) return ContentService.createTextOutput('error: unauthorized');
+  if (d._role && d._role !== 'student') return ContentService.createTextOutput('ok');   // admin/giáo viên làm thử: không lưu
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {

@@ -23,7 +23,7 @@ with sync_playwright() as pw:
             print('SKIP (không phải trang quiz):', rel); pg.close(); continue
         for u in pg.evaluate('Array.from(document.querySelectorAll("audio source,audio")).map(function(a){return a.getAttribute("src")||""}).filter(Boolean)'):
             if not os.path.exists(os.path.normpath(os.path.join(os.path.dirname(f), u))): errs.append('MISSING audio ' + u)
-        pg.click('#startBtn')
+        (pg.click('#startBtn') if pg.is_visible('#startBtn') else None)
         items = pg.evaluate('Object.keys(window.QUIZ.ANS)')
         for iid in items:
             a = pg.evaluate('window.QUIZ.ANS["%s"]' % iid); t = pg.evaluate('window.QUIZ.items["%s"].t' % iid)

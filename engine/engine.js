@@ -272,8 +272,8 @@
     var au = window.GNAuth && GNAuth.get();
     if (au) {   // đã đăng nhập: dùng danh tính tài khoản, không nhập tay
       $('#stName').value = au.user.name; $('#stClass').value = au.user.cls || '';
-      var lbs = $$('#startModal label'); lbs.forEach(function (l) { l.hidden = true; });
-      var hp = $('#startModal p'); if (hp) hp.innerHTML = 'Xin chào <b>' + (au.user.name || '').replace(/</g, '&lt;') + '</b>' + (au.user.cls ? ' · lớp ' + au.user.cls : '') + '. Kết quả sẽ được ghi vào tài khoản của bạn.';
+      var lbs = $$('#startModal label'); lbs.forEach(function (l) { l.hidden = true; l.style.display = 'none'; });
+      var hp = $('#startModal p'); if (hp) hp.innerHTML = 'Xin chào <b>' + (au.user.name || '').replace(/</g, '&lt;') + '</b>' + (au.user.cls ? ' · lớp ' + au.user.cls : '') + (au.user.role === 'student' ? '. Kết quả sẽ được ghi vào tài khoản của bạn.' : '. Bạn đang làm thử — kết quả không được lưu.');
       var skb = $('#skipBtn'); if (skb) skb.hidden = true;
     } else {
       try { var s = JSON.parse(lsGet('gnomio_student') || 'null'); if (s) { $('#stName').value = s.name || ''; $('#stClass').value = s.cls || ''; } } catch (e) {}
@@ -283,6 +283,7 @@
       if (testMode && !au && (!n || !c)) { $('#stErr').textContent = 'Vui lòng nhập họ tên và lớp.'; return; }
       begin(n || 'Ẩn danh', c);
     };
+    if (au && !testMode) begin(au.user.name || '', au.user.cls || '');   // luyện tập: tự vào bài bằng danh tính tài khoản, không hỏi lại
     var sk = $('#skipBtn'); if (sk) sk.onclick = function () { state.started = true; state.t0 = now(); $('#startModal').hidden = true; };
     $('#warnOk').onclick = function () { $('#warnModal').hidden = true; };
 

@@ -34,6 +34,12 @@ ok(g.api({ action: 'auth_change_password', token: T, old_password: gvPw, new_pas
 // logout giải phóng ngay
 ok(g.api({ action: 'auth_logout', token: T }).ok, 'logout');
 r = L('hoant', 'matkhau1', 'gv-laptop'); ok(r.ok, 'logout xong đăng nhập thiết bị khác ngay'); T = r.token;
+// admin/GV làm thử: trả ok nhưng không ghi
+{ const nR = () => (g.sheets['Lop11_KetQua'] || g.sheets['KetQua'] || {rows: []}).rows.length; const tot = () => Object.keys(g.sheets).reduce((a, k) => a + g.sheets[k].rows.length, 0);
+  const before = tot();
+  const o1 = g.post({ action: 'grade_save_result', token: A, set_id: 'lop11-mt1-test01', page_id: 'kiem-tra', mode: 'test', score: 9, total: 10 });
+  const o2 = g.post({ action: 'grade_practice', event: 'enter', token: T, set_id: 'lop11-u2-botro', page_id: 'p', done: 0, total: 3 });
+  ok(o1 === 'ok' && o2 === 'ok', 'admin/GV làm thử trả ok: ' + o1 + ' / ' + o2); ok(tot() === before, 'admin/GV làm thử không ghi dữ liệu'); }
 // ---- học sinh ----
 r = g.api({ action: 'adm_users_import', token: T, rows: [{ name: 'Trần Văn An', cls: '11A1' }, { name: 'Lê Thị An', cls: '11A1' }, { name: 'Phạm Đức Anh', cls: '11A2' }, { name: 'Võ Thị Lan', cls: '11A3' }] });
 ok(r.created.length === 3 && r.skipped.length === 1, 'import: ' + JSON.stringify(r.skipped));
