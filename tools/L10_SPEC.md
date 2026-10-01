@@ -19,3 +19,13 @@ QUY ƯỚC:
 - Sửa lỗi nguồn (ký tự rác, số câu nhảy, phương án bị cắt…) trong generator và ghi vào GHI_CHU_RA_SOAT.
 - Kiểm tra bắt buộc: `python tools/check_set.py lop10_u1_<slug>` = 0 lỗi; sau đó `python build.py lop10-u1-<slug>` (chạy build cho riêng bộ này, KHÔNG chạy build toàn bộ) rồi mở một vài trang trong WebBaiTap/Lop10/Unit1/<slug>/ bằng playwright (python, chromium sẵn có), điền đáp án đúng, nộp, xác nhận 100% và không lỗi JS (xem tests/smoke_test.py, tests/authstub.py để tham khảo cách mở trang không cần đăng nhập). Không hỏi lại; tự quyết hợp lý.
 - Báo cáo cuối (≤ 200 từ, tiếng Việt): số trang, số câu mỗi trang, có nghe/ảnh không, danh sách câu đã sửa khoá hoặc còn nghi ngờ, tên file tạo ra.
+
+
+---
+BỔ SUNG CHO UNIT 2 & 3 (Lớp 10). Unit 1 đã xong — LÀM THEO ĐÚNG KIỂU của units/lop10_u1_*.py, units/lop10_u1_*_dapan.py và tools/gen_l10u1_*.py (cùng cấu trúc trang, cách ghi GHI_CHU_RA_SOAT, cách test). Thay u1→uN:
+  Unit 2 = HUMANS AND THE ENVIRONMENT (title 'Unit 2 – Humans and the environment: ...'), nguồn src/l10u2/{lt,bt,cs}.txt và *_c.txt.
+  Unit 3 = MUSIC (title 'Unit 3 – Music: ...'), nguồn src/l10u3/{lt,bt,cs}.txt và *_c.txt.
+  id: lop10-uN-luyentap | lop10-uN-botro | lop10-uN-chuyensau; file units/lop10_uN_<slug>.py và _dapan.py, tools/gen_l10uN_<slug>.py, ảnh assets/lop10_uN/<slug>/, audio audio/lop10_uN_<slug>_nghe.mp3 (đã đăng ký sẵn trong build.py; KHÔNG sửa build.py). Build riêng: python build.py lop10-uN-<slug>.
+  Word gốc ở /mnt/user-data/uploads/04. GRADE 1-12/GRADE 10/... (Unit 3 bổ trợ có mp3 'Nghe-Bai-tap-bo-tro-...UNIT-3-MUSIC.mp3' cùng thư mục "2. BÀI TẬP BỔ TRỢ/0. GỐC"; Unit 2 bổ trợ không có mp3 -> không có trang nghe audio, nếu Word có bài nghe thì giữ dạng câu hỏi không audio hoặc bỏ và ghi chú).
+  Chỉ lấy đúng nội dung của Unit đó; nếu file nguồn lẫn nội dung unit khác (vd ôn tập nhiều unit) thì chỉ lấy phần đúng unit, ghi chú.
+  Nếu bộ có khoá tô màu (⟦…⟧) thì lấy khoá rồi tự giải đối chiếu; nếu không có khoá thì tự giải kỹ và ghi các câu chưa chắc.
