@@ -1,6 +1,7 @@
 @echo off
+if not "%~1"=="run" (start "PUSH" cmd /k "%~f0" run & exit /b)
 chcp 65001 >nul
-cd /d %~dp0
+cd /d "%~dp0"
 setlocal enabledelayedexpansion
 echo ===============================================
 echo   BUILD + PUSH LEN GITHUB  (1 file duy nhat)
@@ -35,7 +36,7 @@ git commit -m "Cap nhat %date% %time%" >nul 2>&1
 git push -u origin main
 if %errorlevel% neq 0 (
   echo.
-  echo Push bi tu choi (repo moi co the co noi dung khac). Ghi de bang ban nay?
+  echo Push bi tu choi ^(repo moi co the co noi dung khac^). Ghi de bang ban nay?
   set /p OK=Go Y de ghi de, phim khac de huy: 
   if /i "!OK!"=="Y" git push -u origin main --force
 )
@@ -46,10 +47,10 @@ for /f "tokens=1,2 delims=/" %%a in ("%U%") do (set OWNER=%%a& set NAME=%%b)
 set NAME=%NAME:.git=%
 set WEB=https://%OWNER%.github.io/%NAME%/
 echo.
-echo Cho GitHub Pages cap nhat (~60 giay)...
+echo Cho GitHub Pages cap nhat ~60 giay...
 timeout /t 60 /nobreak >nul
 set LIVE=%WEB%WebBaiTap/Lop11/Unit2/botro/doc.html
-curl -s -L "%LIVE%" | findstr /c:"sI-sQj" >nul
+curl -s -L "%LIVE%" | findstr /i /c:"AKfycbyZ4U" >nul
 if %errorlevel%==0 (
   echo [OK] Trang that DA dung link Apps Script moi.
 ) else (

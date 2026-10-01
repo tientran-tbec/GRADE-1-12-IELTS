@@ -12,12 +12,22 @@
  *   rồi chạy: python update_links.py "<link /exec mới>"
  */
 var SHEET_ID = "1Xl515oEdU1j-NrptU-3aUKK0fsOa9VylSIrMD7jqikQ";
-var GRADE_SHEET_RESULT = 'Lop6-12_KetQua';
-var GRADE_SHEET_LOG = 'Lop6-12_NhatKy';
-var GRADE_SHEET_PRACTICE = 'Lop6-12_LuyenTap';
+var GRADE_SHEET_RESULT = 'Lop1-12_KetQua';
+var GRADE_SHEET_LOG = 'Lop1-12_NhatKy';
+var GRADE_SHEET_PRACTICE = 'Lop1-12_LuyenTap';
+
+// Tự đổi tên tab cũ (Lop6-12_*) sang tên mới (Lop1-12_*) – giữ nguyên dữ liệu cũ.
+function migrateOldSheets_(ss) {
+  var map = {'Lop6-12_KetQua': GRADE_SHEET_RESULT, 'Lop6-12_NhatKy': GRADE_SHEET_LOG, 'Lop6-12_LuyenTap': GRADE_SHEET_PRACTICE};
+  for (var oldName in map) {
+    var o = ss.getSheetByName(oldName);
+    if (o && !ss.getSheetByName(map[oldName])) o.setName(map[oldName]);
+  }
+}
 
 function handlePractice(d) {
   var ss = SpreadsheetApp.openById(SHEET_ID);
+  migrateOldSheets_(ss);
   var sh = ss.getSheetByName(GRADE_SHEET_PRACTICE) || ss.insertSheet(GRADE_SHEET_PRACTICE);
   if (sh.getLastRow() === 0) { sh.appendRow(['Thời gian', 'Sự kiện', 'Học sinh', 'Lớp', 'Bộ bài', 'Trang', 'Đã làm', 'Đúng', 'Tổng', 'Câu sai', 'Số lần làm lại', 'Thời gian ở trang (s)']); sh.setFrozenRows(1); }
   var ev = {enter: 'VÀO LÀM', reset: 'LÀM LẠI', leave: 'RỜI TRANG'}[d.event] || d.event;
@@ -32,6 +42,7 @@ function handleGrade(d) {
   try {
     var ss = SpreadsheetApp.openById(SHEET_ID);
     var isResult = d.action === 'grade_save_result' || d.action === 'grade_save_partial';
+    migrateOldSheets_(ss);
     var sh = ss.getSheetByName(isResult ? GRADE_SHEET_RESULT : GRADE_SHEET_LOG) || ss.insertSheet(isResult ? GRADE_SHEET_RESULT : GRADE_SHEET_LOG);
     if (isResult) {
       if (sh.getLastRow() === 0) { sh.appendRow(['Thời gian', 'Loại', 'Học sinh', 'Lớp', 'Bộ bài', 'Trang', 'Chế độ', 'Điểm', 'Tổng', '%', 'Thang 10',
@@ -56,4 +67,13 @@ function doPost(e) {
     if (String(d.action || '').indexOf('grade_') === 0) return handleGrade(d);
     return ContentService.createTextOutput('ignored');
   } catch (err) { return ContentService.createTextOutput('error: ' + err); }
+}
+
+/* Kiểm tra nhanh: mở link /exec trên trình duyệt phải hiện "GRADE script OK". */
+function doGet(e) { return ContentService.createTextOutput('GRADE script OK'); }
+
+/* Chạy thử trong trình soạn thảo (chọn hàm testWrite > Run): cấp quyền + ghi 1 dòng thử vào Sheet. */
+function testWrite() {
+  handlePractice({event: 'enter', student_name: 'TEST', student_class: 'x', set_id: 'test', page_id: 'test'});
+  Logger.log('Đã ghi thử – xem tab ' + GRADE_SHEET_PRACTICE);
 }

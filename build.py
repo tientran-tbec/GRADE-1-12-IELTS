@@ -7,8 +7,8 @@ import os, sys, json, re, html, importlib.util
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(ROOT, 'WebBaiTap')
-APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyfZgrcZfOw-g5nCLlQ5QyLCCADuct8QRxW31SG8F3IZfkgL0x_3LOoPWBHRFRNiXA1/exec'   # update_links.py sẽ thay giá trị này
-PAGES_URL = 'https://tientran-tbec.github.io/GRADE-6-12/'
+APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyZ4UJgI763vPb4TZhKbKgxl6p-lGCQCJnZDqgCL9mHCVQpUzb4sbJGg89GLWSI-sQj/exec'   # update_links.py sẽ thay giá trị này
+PAGES_URL = 'https://tientran-tbec.github.io/GRADE-1-12-IELTS/'
 
 # (id bộ, file dữ liệu, file đáp án, thư mục lớp, thư mục unit, slug thư mục, ảnh)
 REGISTRY = [
