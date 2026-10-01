@@ -1,9 +1,11 @@
 <!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Điểm của tôi – GNOMIO</title><link rel="stylesheet" href="engine/app.css?v=1790856739">
-<script>window.GN_URL="https://script.google.com/macros/s/AKfycbyZ4UJgI763vPb4TZhKbKgxl6p-lGCQCJnZDqgCL9mHCVQpUzb4sbJGg89GLWSI-sQj/exec";window.GN_ROOT="";</script><script src="engine/auth.js?v=1790856739"></script><script>GNAuth.require()</script></head><body>
+<title>Điểm của tôi – GRADE 1-12-IELTS</title><link rel="stylesheet" href="engine/app.css?v=1790859256">
+<script>window.GN_URL="https://script.google.com/macros/s/AKfycbyZ4UJgI763vPb4TZhKbKgxl6p-lGCQCJnZDqgCL9mHCVQpUzb4sbJGg89GLWSI-sQj/exec";window.GN_ROOT="";</script><script src="engine/auth.js?v=1790859256"></script><script>GNAuth.require()</script></head><body>
 <div class="top"><h1>Điểm của tôi</h1><a href="index.html">⌂ Trang bài tập</a><span id="chip"></span></div>
 <div class="wrapp"><div class="card"><div class="tw"><table><thead><tr><th>Thời gian</th><th>Loại</th><th>Bộ bài</th><th>Trang</th><th>Điểm</th><th>Thang 10</th><th>Thời gian làm</th></tr></thead><tbody id="tb"><tr><td colspan="7">Đang tải…</td></tr></tbody></table></div>
-<p class="err" id="er"></p></div></div>
+<p class="err" id="er"></p></div>
+<div class="card" id="sum" style="margin-top:12px" hidden><b>Tiến độ của tôi</b><p id="sumt" style="margin:6px 0 0"></p></div>
+<div class="card" id="gopy" style="margin-top:12px"><b>Góp ý của tôi</b><p class="mut" style="margin:4px 0 8px">Mở bài tương ứng và bấm nút “💬 Góp ý” để xem hoặc trả lời giáo viên.</p><div id="fbl">Đang tải…</div></div></div>
 <script>
 GNAuth.chip('#chip');GNAuth.verify();
 var E=GNAuth.esc;
@@ -11,5 +13,12 @@ GNAuth.api('my_results').then(function(j){
   var tb=document.getElementById('tb');
   if(!j.rows.length){tb.innerHTML='<tr><td colspan="7">Chưa có kết quả nào.</td></tr>';return}
   tb.innerHTML=j.rows.map(function(r){return '<tr><td>'+E(r.time)+'</td><td>'+E(r.type)+'</td><td>'+E(r.set_id)+'</td><td>'+E(r.page_id)+'</td><td>'+E(r.score)+'/'+E(r.total)+'</td><td><b>'+E(r.score10)+'</b></td><td>'+Math.round((+r.time_spent||0)/60)+' phút</td></tr>'}).join('');
+  var by={};j.rows.forEach(function(r){if(!/^ĐÃ NỘP/.test(r.type||''))return;var k=r.set_id+'|'+r.page_id;if(!(k in by))by[k]=+r.score10||0});
+  var ks=Object.keys(by);if(ks.length){var avg=ks.reduce(function(a,k){return a+by[k]},0)/ks.length;document.getElementById('sum').hidden=false;
+    document.getElementById('sumt').innerHTML='Đã nộp <b>'+ks.length+'</b> trang bài · điểm trung bình <b>'+(Math.round(avg*10)/10)+'</b>/10'}
 }).catch(function(e){document.getElementById('er').textContent=e.message;document.getElementById('tb').innerHTML=''});
+GNAuth.api('fb_mine').then(function(j){
+  var el=document.getElementById('fbl');
+  el.innerHTML=j.threads.length?j.threads.map(function(t){return '<div style="padding:8px 0;border-top:1px solid var(--line)">'+(t.path?'<a href="'+E(t.path)+'"><b>'+E(t.title||t.page)+'</b></a>':'<b>'+E(t.title||t.page)+'</b>')+(t.unread?' <b style="background:#e11d48;color:#fff;border-radius:9px;padding:0 6px;font-size:11px">'+t.unread+' tin mới</b>':'')+'<br><small class="mut">'+E(t.lastText)+' · '+E(t.last)+'</small></div>'}).join(''):'Bạn chưa gửi góp ý nào.';
+}).catch(function(){document.getElementById('gopy').hidden=true});
 </script></body></html>

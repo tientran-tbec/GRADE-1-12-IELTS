@@ -28,7 +28,12 @@
     },
     sessionLost: function (msg) { A.clear(); location.replace(ROOT + 'login.html?msg=' + encodeURIComponent(msg || 'Phiên đăng nhập đã kết thúc. Hãy đăng nhập lại.')); },
     /* Học sinh chỉ vào được bài đã được giao cho lớp mình. */
-    allowed: function (setId) { var s = A.get(); if (!s) return false; var u = s.user; if (u.role !== 'student') return true; return !!(u.sets && u.sets.indexOf(setId) >= 0); },
+    allowed: function (setId) { var s = A.get(); if (!s) return false; var u = s.user; if (u.role !== 'student') return true; return !!(u.sets && u.sets.indexOf(setId) >= 0) && !A.overdue(setId); },
+    /* Hạn nộp (yyyy-mm-dd, giờ VN) của một bộ bài; '' nếu không có. */
+    assigned: function (setId) { var s = A.get(); if (!s) return false; var u = s.user; return u.role !== 'student' || !!(u.sets && u.sets.indexOf(setId) >= 0); },
+    due: function (setId) { var s = A.get(); return s && s.user.due && s.user.due[setId] || ''; },
+    overdue: function (setId) { var d = A.due(setId); return !!d && new Date(Date.now() + 7 * 3600000).toISOString().slice(0, 10) > d; },
+    unread: 0,
     requireSet: function (setId) {
       if (!A.get() || A.allowed(setId)) return true;
       document.documentElement.style.visibility = 'hidden'; location.replace(ROOT + 'index.html?denied=1'); return false;
@@ -60,14 +65,21 @@
       opts = opts || {};
       var s = A.get(), host = typeof where === 'string' ? document.querySelector(where) : where;
       if (!s || !host) return;
+      if (!document.getElementById('gn-bell-css')) { var st = document.createElement('style'); st.id = 'gn-bell-css'; st.textContent = '.gn-bell{text-decoration:none!important}.gn-n{display:none;background:#e11d48;color:#fff;border-radius:9px;font-size:11px;font-weight:700;padding:0 6px;margin-left:3px;line-height:16px}'; document.head.appendChild(st); }
       var u = s.user, d = document.createElement('div');
       d.className = 'gn-chip';
       var links = '';
       if (u.role === 'admin' || u.role === 'teacher') links += '<a href="' + ROOT + 'admin.html">Quản trị</a>';
+      var bell = u.role === 'student' ? ROOT + 'me.html#gopy' : ROOT + 'admin.html#gopy';
+      links += '<a class="gn-bell" href="' + bell + '" title="Góp ý / tin nhắn">💬<b class="gn-n"></b></a>';
       links += '<a href="' + ROOT + 'me.html">Điểm của tôi</a><a href="' + ROOT + 'login.html?change=1">Đổi mật khẩu</a><a href="#" data-gn="out">Đăng xuất</a>';
       d.innerHTML = '<span class="gn-name">👤 ' + esc(u.name) + ' <small>' + (u.cls ? esc(u.cls) + ' · ' : '') + ROLE[u.role] + '</small></span><span class="gn-links">' + links + '</span>';
       d.querySelector('[data-gn=out]').onclick = function (e) { e.preventDefault(); A.logout(); };
-      host.appendChild(d);
+      host.appendChild(d); A._bell();
+    },
+    _bell: function () {
+      var n = A.unread || 0;
+      [].forEach.call(document.querySelectorAll('.gn-bell .gn-n'), function (b) { b.textContent = n > 99 ? '99+' : n; b.style.display = n ? 'inline-block' : 'none'; });
     },
     /* Kiểm tra phiên với máy chủ (nền); phiên hỏng → đăng nhập lại. */
     verify: function (onUpdate) {
@@ -75,9 +87,10 @@
       var tick = function () {
         if (document.hidden && A._t) return;
         A.api('auth_ping').then(function (j) {
-          var s = load(); if (!s) return; var before = JSON.stringify(s.user.sets || null) + s.user.cls;
+          var s = load(); if (!s) return; var before = JSON.stringify(s.user.sets || null) + JSON.stringify(s.user.due || null) + s.user.cls;
           A.set(s.token, j.user);
-          if (onUpdate && (JSON.stringify(j.user.sets || null) + j.user.cls) !== before) onUpdate(j.user);
+          A.unread = +j.unread || 0; A._bell(); try { window.dispatchEvent(new CustomEvent('gn-unread', { detail: A.unread })); } catch (e) {}
+          if (onUpdate && (JSON.stringify(j.user.sets || null) + JSON.stringify(j.user.due || null) + j.user.cls) !== before) onUpdate(j.user);
         }).catch(function () {});
       };
       tick(); A._t = setInterval(tick, 60000);

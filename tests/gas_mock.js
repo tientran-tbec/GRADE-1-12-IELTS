@@ -10,6 +10,7 @@ function loadGas(file, opts) {
   class Range {
     constructor(sh, r, c, nr, nc) { Object.assign(this, { sh, r, c, nr: nr || 1, nc: nc || 1 }); }
     getValue() { return (this.sh.rows[this.r - 1] || [])[this.c - 1] === undefined ? '' : this.sh.rows[this.r - 1][this.c - 1]; }
+    setNumberFormat() { return this; }
     setValue(v) { while (this.sh.rows.length < this.r) this.sh.rows.push([]); this.sh.rows[this.r - 1][this.c - 1] = v; return this; }
     setValues(vs) { vs.forEach((row, i) => row.forEach((v, j) => new Range(this.sh, this.r + i, this.c + j).setValue(v))); return this; }
     getValues() { const w = this.sh.getLastColumn(); const o = []; for (let i = 0; i < this.nr; i++) { const row = []; for (let j = 0; j < (this.nc || w); j++) { const x = (this.sh.rows[this.r - 1 + i] || [])[this.c - 1 + j]; row.push(x === undefined ? '' : x); } o.push(row); } return o; }

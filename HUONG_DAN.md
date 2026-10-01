@@ -60,3 +60,33 @@ Bấm đúp `push_github.bat`. Lần đầu nó hỏi link repo (lưu vào `.rep
 - Học sinh đã đăng nhập không phải nhập tên/lớp; kết quả vào cùng Sheet (`Lop1-12_KetQua`, `Lop1-12_NhatKy`) với cột *Chế độ* = `ielts-reading`, *Chi tiết* bắt đầu bằng `Band x.x`. Admin/giáo viên làm thử không ghi.
 - Listening, Writing, Speaking: thẻ "Sắp có" (chỉ admin/giáo viên thấy).
 - **Phải dán lại `code.gs` và Deploy phiên bản mới** (có thêm nhật ký sự kiện IELTS).
+
+
+## Giao diện, nhiều lớp, hạn nộp, góp ý
+- Tên hệ thống: **GRADE 1-12-IELTS** (trang chủ, đăng nhập, quản trị, điểm của tôi).
+- **Học sinh nhiều lớp:** khi thêm/sửa học sinh, tick nhiều lớp (nhập danh sách: ngăn các lớp bằng dấu `;`, vd `Nguyễn Văn An, 11A1;IELTS1`). Học sinh thấy bài được giao cho mọi lớp mình thuộc; kết quả ghi vào lớp đã giao bài đó. Giáo viên chỉ đổi được các lớp mình phụ trách, lớp của giáo viên khác được giữ nguyên.
+- **Hạn nộp:** tab Giao bài → ô ngày cạnh bộ đã tích (hoặc chọn ngày rồi *Áp dụng* cho cả các bộ đã tích). Hết ngày hạn (giờ VN) bài hiện mờ “Hết hạn”, không vào làm được; bài đang làm dở nộp được trong 60 phút (ghi “ĐÃ NỘP (TRỄ HẠN)”).
+- **Tab Tiến độ:** số trang đã nộp, điểm TB thang 10 theo lớp; nút Tải CSV (cũng có ở tab Kết quả).
+- **Góp ý:** xem mục *Quy tắc ô góp ý* bên dưới (cũng có trong `tools/MT1_SPEC.md`).
+
+
+---
+
+## QUY TẮC BẮT BUỘC: Ô GÓP Ý (CHAT HỌC SINH ↔ GIÁO VIÊN) — ÁP DỤNG CHO MỌI BÀI TẬP / TEST (WEB)
+
+Mọi trang bài (luyện tập, kiểm tra, IELTS Reading/Listening/Writing/Speaking, bài mới sau này) đều phải có **nút "💬 Góp ý"** để học sinh gửi ý kiến về bài cho giáo viên, và giáo viên trả lời lại (chat qua lại, mỗi học sinh một cuộc trò chuyện cho mỗi trang bài).
+
+**Cách có được tính năng này (không cần viết lại trong từng file HTML):**
+1. Ô góp ý là `engine/feedback.js`, được `build.py` / `ielts.py` **tự chèn vào cuối mọi trang** khi build. Người tạo đề **không** tự viết khung chat, **không** tự gọi API góp ý.
+2. Đưa đề vào đúng chỗ để build bọc được: IELTS → `ielts_src/reading/FullTest/TestN_Reading.html` hoặc `ielts_src/reading/TheoDang/<Dạng>/TestN_PassageP_<Dạng>.html` (tên file đúng mẫu); bài Lớp 1–12 → khai báo trong `REGISTRY` của `build.py`. Trang phải có đủ thẻ `<head>` và `</body>`.
+3. Kỹ năng/bộ bài mới (vd Listening, Writing, Speaking, Lớp khác): thêm vào `ielts.py` (hoặc `REGISTRY`) với **mã bộ bài** riêng — ô góp ý dùng mã bộ bài + tên file trang để tách cuộc trò chuyện, nên không cần cấu hình thêm.
+
+**Ràng buộc khi thiết kế trang (để ô góp ý không bị che / không bị chặn):**
+- Nút góp ý nằm ở **cạnh phải, khoảng giữa-trên màn hình** (`right:0; top:38%`, z-index 9990–9991). Không đặt nút/phần tử `position:fixed` khác vào vùng này; các phần tử cố định khác dùng z-index < 9990.
+- Không dùng id/class bắt đầu bằng `gnfb-`.
+- Chức năng chống gian lận (chặn dán/chuột phải/phím tắt) không được chặn bên trong `.gnfb-box` (ô góp ý đã tự `stopPropagation` cho copy/paste; đừng thêm listener chặn phím ở pha capture lên `textarea`).
+- Chỉ tài khoản **học sinh** thấy nút; admin/giáo viên làm thử không thấy. Học sinh chỉ góp ý được ở bài đã được giao cho mình.
+
+**Phía giáo viên / admin:** trang Quản trị → tab **Góp ý** (hộp thư, chấm đỏ số tin chưa đọc, trả lời ngay). Giáo viên thấy góp ý của học sinh thuộc lớp mình phụ trách; admin thấy tất cả. Học sinh thấy chấm đỏ khi có trả lời, và liệt kê trong trang **Điểm của tôi → Góp ý của tôi**.
+
+**Dữ liệu:** tab Sheet `Feedback` (mỗi tin một dòng: thời gian, học sinh, lớp, bộ bài, trang, người gửi, nội dung, đã đọc…). API `fb_send`, `fb_list`, `fb_mine`, `fb_inbox`, `fb_thread`, `fb_reply` (trong `code.gs`). Giới hạn 1000 ký tự/tin, tối đa 20 tin / 10 phút / học sinh.

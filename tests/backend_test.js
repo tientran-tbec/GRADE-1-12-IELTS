@@ -101,6 +101,59 @@ ok(g.api({ action: 'auth_me', token: T }).code === 'session', 'đặt lại MK �
 // chống dò
 for (let i = 0; i < 5; i++) L('anlt', 'sai' + i);
 r = L('anlt', 'sai'); ok(!r.ok && /quá nhiều/.test(r.error), 'khoá sau 5 lần sai');
+
+// ---- nhiều lớp + hạn nộp + góp ý ----
+{
+  ok(g.api({ action: 'adm_class_save', token: A, cls: { id: 'X1', name: 'X1', grade: 11, teacher: 'hoant' } }).ok && g.api({ action: 'adm_class_save', token: A, cls: { id: 'X2', name: 'X2', grade: 'IELTS' } }).ok, 'tạo lớp X1 (GV hoant), X2 (IELTS)');
+  let r2 = g.api({ action: 'adm_user_save', token: A, user: { name: 'Phạm Hai Lớp', classes: ['X1', 'X2'] } });
+  ok(r2.ok && r2.user.classes.length === 2 && r2.user.cls === 'X1,X2', 'HS thuộc 2 lớp');
+  const un2 = r2.user.username, pw2 = r2.password;
+  const vnDate = (ms) => new Date(Date.now() + ms + 7 * 3600e3).toISOString().slice(0, 10);
+  ok(g.api({ action: 'adm_assign_save', token: A, cls: 'X1', sets: ['setA', 'setD'], due: { setD: vnDate(0) } }).ok, 'giao X1: setA, setD(hạn hôm nay)');
+  ok(g.api({ action: 'adm_assign_save', token: A, cls: 'X2', sets: ['setB', 'setC'], due: { setB: '2000-01-01', setC: '2999-01-01' } }).ok, 'giao X2: setB(quá hạn), setC(còn hạn)');
+  const gd = g.api({ action: 'adm_assign_get', token: A, cls: 'X2' }); ok(gd.sets.length === 2 && gd.due.setB === '2000-01-01', 'đọc lại giao bài kèm hạn');
+  let lg = L(un2, pw2, 'dev-x'); ok(lg.ok, 'HS 2 lớp đăng nhập'); const S3 = lg.token;
+  ok(['setA', 'setB', 'setC', 'setD'].every(x => lg.user.sets.includes(x)) && lg.user.due.setB === '2000-01-01' && !lg.user.due.setA, 'HS thấy bài của cả hai lớp + hạn: ' + JSON.stringify(lg.user.sets));
+  const save = (tok, set, extra) => g.post(Object.assign({ action: 'grade_save_result', token: tok, set_id: set, page_id: 'p', mode: 'test', score: 3, total: 4, ts: new Date().toISOString() }, extra || {}));
+  const lastRow = () => { const rs = g.sheets['Lop1-12_KetQua'].rows; return rs[rs.length - 1]; };
+  ok(save(S3, 'setA') === 'ok' && lastRow()[3] === 'X1' && lastRow()[1] === 'ĐÃ NỘP', 'nộp setA → ghi lớp X1');
+  ok(save(S3, 'setC') === 'ok' && lastRow()[3] === 'X2', 'nộp setC → ghi lớp X2');
+  ok(/unauthorized/.test(save(S3, 'setB')), 'setB quá hạn (ngoài ân hạn) → từ chối');
+  ok(/unauthorized/.test(g.post({ action: 'grade_practice', event: 'enter', token: S3, set_id: 'setB', page_id: 'p', done: 0, total: 1 })), 'vào bài quá hạn → từ chối');
+  ok(/unauthorized/.test(save(S3, 'setZ')), 'bài không được giao ở lớp nào → từ chối');
+  // GV chỉ sửa phần lớp của mình, giữ lớp khác
+  const gvLogin = L('hoant', gv2, 'gv-new'); ok(gvLogin.ok, 'GV hoant đăng nhập lại: ' + gvLogin.error); T = gvLogin.token;
+  const uList = g.api({ action: 'adm_users', token: T }); ok(uList.users.some(u => u.username === un2), 'GV hoant thấy HS thuộc X1 (dù có lớp khác)');
+  r2 = g.api({ action: 'adm_user_save', token: T, user: { username: un2, name: 'Phạm Hai Lớp', classes: ['X1'] } }); ok(r2.ok && r2.user.classes.slice().sort().join() === 'X1,X2', 'GV sửa giữ nguyên lớp của GV khác: ' + (r2.user && r2.user.cls));
+  ok(!g.api({ action: 'adm_user_save', token: T, user: { username: un2, name: 'x', classes: ['X2'] } }).ok, 'GV không gán HS vào lớp không phụ trách');
+  // ---- góp ý ----
+  ok(!g.api({ action: 'fb_send', token: S3, set_id: 'setA', page_id: 'p1', text: '   ' }).ok, 'góp ý rỗng bị từ chối');
+  ok(!g.api({ action: 'fb_send', token: S3, set_id: 'setZ', page_id: 'p1', text: 'hi' }).ok, 'góp ý ở bài chưa giao bị từ chối');
+  let f = g.api({ action: 'fb_send', token: S3, set_id: 'setA', page_id: 'p1', title: 'Bài A', text: 'Câu 3 có hai đáp án đúng ạ' });
+  ok(f.ok && f.msgs.length === 1 && f.msgs[0].role === 'student', 'HS gửi góp ý');
+  ok(!g.api({ action: 'fb_send', token: T, set_id: 'setA', page_id: 'p1', text: 'x' }).ok, 'GV không dùng fb_send');
+  g.advance(31e3);
+  ok(g.api({ action: 'auth_ping', token: T }).unread >= 1, 'GV có tin chưa đọc (chấm đỏ)');
+  const ib = g.api({ action: 'fb_inbox', token: T }); ok(ib.ok && ib.threads.length === 1 && ib.threads[0].unread === 1 && ib.threads[0].set === 'setA', 'GV thấy cuộc trò chuyện chưa đọc');
+  const gvB = g.api({ action: 'adm_user_save', token: A, user: { name: 'Giáo Viên Khác', role: 'teacher' } });
+  const T2 = L(gvB.user.username, gvB.password, 'gv2').token;
+  ok(g.api({ action: 'fb_inbox', token: T2 }).threads.length === 0 && g.api({ action: 'fb_thread', token: T2, student: un2, set_id: 'setA', page_id: 'p1' }).msgs.length === 0, 'GV lớp khác không thấy góp ý');
+  ok(!g.api({ action: 'fb_reply', token: T2, student: un2, set_id: 'setA', page_id: 'p1', text: 'xen vào' }).ok, 'GV lớp khác không trả lời được');
+  ok(g.api({ action: 'fb_inbox', token: A }).threads.length === 1, 'admin thấy tất cả');
+  let th = g.api({ action: 'fb_thread', token: T, student: un2, set_id: 'setA', page_id: 'p1' }); ok(th.msgs.length === 1, 'GV mở cuộc trò chuyện');
+  ok(g.api({ action: 'auth_ping', token: T }).unread === 0, 'mở xong → hết chấm đỏ');
+  f = g.api({ action: 'fb_reply', token: T, student: un2, set_id: 'setA', page_id: 'p1', text: 'Cô sẽ kiểm tra lại nhé' }); ok(f.ok && f.msgs.length === 2 && f.msgs[1].role === 'teacher', 'GV trả lời');
+  g.advance(31e3);
+  ok(g.api({ action: 'auth_ping', token: S3 }).unread === 1, 'HS có tin trả lời chưa đọc');
+  const fl = g.api({ action: 'fb_list', token: S3, set_id: 'setA', page_id: 'p1' }); ok(fl.msgs.length === 2 && fl.msgs[1].text.includes('Cô sẽ'), 'HS đọc được trả lời');
+  ok(g.api({ action: 'auth_ping', token: S3 }).unread === 0, 'HS đọc xong → hết chấm đỏ');
+  ok(g.api({ action: 'fb_list', token: S3, set_id: 'setA', page_id: 'p2' }).msgs.length === 0, 'cuộc trò chuyện tách theo trang');
+  // ---- nộp trễ trong ân hạn rồi hết ân hạn (đặt cuối vì tua đồng hồ) ----
+  { const end = Date.parse(vnDate(0) + 'T23:59:59+07:00'); g.advance(end - Date.now() + 10 * 60e3);
+    ok(save(S3, 'setD') === 'ok' && lastRow()[1] === 'ĐÃ NỘP (TRỄ HẠN)', 'nộp trong 60 phút sau hạn → ghi "TRỄ HẠN": ' + lastRow()[1]);
+    ok(/unauthorized/.test(g.post({ action: 'grade_practice', event: 'enter', token: S3, set_id: 'setD', page_id: 'p', done: 0, total: 1 })), 'vào bài mới sau hạn → từ chối');
+    g.advance(2 * 3600e3); ok(/unauthorized/.test(save(S3, 'setD')), 'quá ân hạn 60 phút → từ chối'); }
+}
 // xoá lớp
 ok(!g.api({ action: 'adm_class_delete', token: A, id: '11A1' }).ok, 'không xoá lớp còn HS');
 ok(!JSON.stringify(g.sheets['Users'].rows).includes(hsPw) && !JSON.stringify(g.sheets['Users'].rows).includes('Admin@123'), 'Users không lưu mật khẩu rõ');

@@ -186,8 +186,9 @@ def _page_shell(title, sub, body, extra_head='', badge='', h1=None, sid=''):
     return ('<!doctype html>\n<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
             '<title>%s</title><link rel="stylesheet" href="../../../../engine/engine.css?v=@@V@@">%s%s</head><body>'
             '<header class="top"><div class="wrap">%s<h1>%s</h1><div class="sub">%s</div>%%NAV%%</div></header>%s'
-            '<script>GNAuth.chip(".top .wrap");GNAuth.verify();</script></body></html>'
-            % (html.escape(title), AUTH_HEAD % (APPS_SCRIPT_URL, '../../../../', '../../../../') + ('<script>GNAuth.requireSet(%s)</script>' % json.dumps(sid) if sid else ''), extra_head, badge, html.escape(h1 or title), html.escape(sub), body))
+            '<script>GNAuth.chip(".top .wrap");GNAuth.verify();</script>%s</body></html>'
+            % (html.escape(title), AUTH_HEAD % (APPS_SCRIPT_URL, '../../../../', '../../../../') + ('<script>GNAuth.requireSet(%s)</script>' % json.dumps(sid) if sid else ''), extra_head, badge, html.escape(h1 or title), html.escape(sub), body,
+               ('<script>window.GN_SET=%s</script><script src="../../../../engine/feedback.js?v=@@V@@"></script>' % json.dumps(sid)) if sid else ''))
 
 
 def build_theory_page(S, slug):
@@ -303,7 +304,7 @@ INDEX_CSS = """
 [hidden]{display:none!important}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 .top{position:sticky;top:0;z-index:30;background:linear-gradient(90deg,var(--pri),var(--pri2));color:#fff;display:flex;align-items:center;gap:12px;padding:10px 16px}
 .top h1{font-size:17px;margin:0;flex:1}.top button{background:rgba(255,255,255,.2);border:0;color:#fff;border-radius:10px;padding:8px 12px;font-size:15px;cursor:pointer}
-.locked{display:none!important}.menu{display:none}.gn-chip{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:14px}.gn-chip small{opacity:.8}.gn-chip a{color:#fff;margin-left:10px;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+.locked{display:none!important}.expired{opacity:.5;pointer-events:none;filter:grayscale(.6)}.duem{color:#b45309;font-weight:600}.menu{display:none}.gn-chip{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:14px}.gn-chip small{opacity:.8}.gn-chip a{color:#fff;margin-left:10px;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
 .layout{display:grid;grid-template-columns:270px 1fr;min-height:calc(100vh - 52px)}
 .sb{background:var(--sb);border-right:1px solid var(--line);padding:18px 16px;position:sticky;top:52px;height:calc(100vh - 52px);overflow:auto}
 .sb h4{margin:18px 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}.sb h4:first-child{margin-top:0}
@@ -342,12 +343,18 @@ try{var sv=JSON.parse(localStorage.getItem('gn_idx')||'{}');for(var k in st)if(s
 var cards=[].slice.call(document.querySelectorAll('.setcard'));
 function save(){try{localStorage.setItem('gn_idx',JSON.stringify(st))}catch(e){}}
 function norm(s){return (s||'').toLowerCase()}
+function dueMark(el,sid,stu){
+  var d=GNAuth.due(sid),ex=stu&&GNAuth.overdue(sid),m=el.querySelector('.duem');
+  if(!d){if(m)m.remove();el.classList.remove('expired');return}
+  if(!m){m=document.createElement('span');m.className='duem';(el.querySelector('small')||el.querySelector('.settitle')||el).appendChild(m)}
+  var p=d.split('-');m.textContent=(ex?' · Hết hạn ':' · Hạn ')+p[2]+'/'+p[1];el.classList.toggle('expired',!!ex);
+}
 function lockAll(){
   var u=window.GNAuth&&GNAuth.user();var stu=u&&u.role==='student';
   cards.forEach(function(c){
     var tl=[].slice.call(c.querySelectorAll('.tile[data-sid]'));
-    if(tl.length){var any=false;tl.forEach(function(t){var lk=stu&&!GNAuth.allowed(t.dataset.sid);t.classList.toggle('locked',lk);if(!lk)any=true});c.classList.toggle('locked',!any)}
-    else c.classList.toggle('locked',!!(stu&&c.dataset.sid&&!GNAuth.allowed(c.dataset.sid)));
+    if(tl.length){var any=false;tl.forEach(function(t){var lk=stu&&!GNAuth.assigned(t.dataset.sid);t.classList.toggle('locked',lk);if(!lk){any=true;dueMark(t,t.dataset.sid,stu)}});c.classList.toggle('locked',!any)}
+    else{var lk2=!!(stu&&c.dataset.sid&&!GNAuth.assigned(c.dataset.sid));c.classList.toggle('locked',lk2);if(!lk2&&c.dataset.sid)dueMark(c,c.dataset.sid,stu)}
   });
   var vis=cards.filter(function(c){return !c.classList.contains('locked')});
   [].forEach.call(document.querySelectorAll('.f[data-f=g][data-v]'),function(b){if(!b.dataset.v)return;var n=vis.filter(function(c){return c.dataset.g===b.dataset.v}).length;var sm=b.querySelector('small');if(sm)sm.textContent=n?n+' bộ':'chưa giao';if(stu)b.hidden=!n});
@@ -403,8 +410,8 @@ def build_index(done):
     def cnt(fn):
         return sum(1 for e, _, _ in done if fn(e))
     o = ['<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-         '<title>Bài luyện tập & đề kiểm tra</title><style>%s</style>%s</head><body>' % (INDEX_CSS, AUTH_HEAD % (APPS_SCRIPT_URL, '', '')),
-         '<div class="top"><button class="menu" aria-label="Mở bộ lọc">☰ Bộ lọc</button><h1>GNOMIO · Lớp 1–12</h1><span id="chip"></span></div>',
+         '<title>GRADE 1-12-IELTS</title><style>%s</style>%s</head><body>' % (INDEX_CSS, AUTH_HEAD % (APPS_SCRIPT_URL, '', '')),
+         '<div class="top"><button class="menu" aria-label="Mở bộ lọc">☰ Bộ lọc</button><h1>GRADE 1-12-IELTS</h1><span id="chip"></span></div>',
          '<div class="layout"><aside class="sb">',
          '<h4>Tìm kiếm</h4><input id="q" type="search" placeholder="Tên unit, kỹ năng…">',
          '<h4>Lớp</h4><div class="fl"><button class="f" data-f="g" data-v="">Tất cả lớp</button>']

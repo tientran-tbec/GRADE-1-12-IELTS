@@ -11,3 +11,25 @@ QUY ƯỚC CHO MỖI TEST (Test NN, NN=01..13):
 - Sửa lỗi nguồn (ký tự rác, số câu nhảy, phương án bị cắt...) trong generator, ghi vào GHI_CHU_RA_SOAT.
 - Kiểm tra: python tools/check_set.py mt1_testNN phải 0 lỗi. KHÔNG chạy build.py toàn bộ (index chưa được chỉnh); nếu muốn thử render, chạy `python build.py lop11-mt1-testNN` rồi tests (tôi đã đăng ký REGISTRY), mở file WebBaiTap/Lop11/MidTerm1/testNN/kiem-tra.html bằng playwright, điền đáp án đúng, nộp, xác nhận 100% và không lỗi JS (tham khảo tests/smoke_test.py).
 - Báo cáo cuối (≤ 200 từ, tiếng Việt): mỗi test: số câu, số phút, có nghe/ảnh không, danh sách câu đã sửa đáp án và câu còn mơ hồ, tên file tạo ra. Không hỏi lại; tự quyết hợp lý.
+
+
+---
+
+## QUY TẮC BẮT BUỘC: Ô GÓP Ý (CHAT HỌC SINH ↔ GIÁO VIÊN) — ÁP DỤNG CHO MỌI BÀI TẬP / TEST (WEB)
+
+Mọi trang bài (luyện tập, kiểm tra, IELTS Reading/Listening/Writing/Speaking, bài mới sau này) đều phải có **nút "💬 Góp ý"** để học sinh gửi ý kiến về bài cho giáo viên, và giáo viên trả lời lại (chat qua lại, mỗi học sinh một cuộc trò chuyện cho mỗi trang bài).
+
+**Cách có được tính năng này (không cần viết lại trong từng file HTML):**
+1. Ô góp ý là `engine/feedback.js`, được `build.py` / `ielts.py` **tự chèn vào cuối mọi trang** khi build. Người tạo đề **không** tự viết khung chat, **không** tự gọi API góp ý.
+2. Đưa đề vào đúng chỗ để build bọc được: IELTS → `ielts_src/reading/FullTest/TestN_Reading.html` hoặc `ielts_src/reading/TheoDang/<Dạng>/TestN_PassageP_<Dạng>.html` (tên file đúng mẫu); bài Lớp 1–12 → khai báo trong `REGISTRY` của `build.py`. Trang phải có đủ thẻ `<head>` và `</body>`.
+3. Kỹ năng/bộ bài mới (vd Listening, Writing, Speaking, Lớp khác): thêm vào `ielts.py` (hoặc `REGISTRY`) với **mã bộ bài** riêng — ô góp ý dùng mã bộ bài + tên file trang để tách cuộc trò chuyện, nên không cần cấu hình thêm.
+
+**Ràng buộc khi thiết kế trang (để ô góp ý không bị che / không bị chặn):**
+- Nút góp ý nằm ở **cạnh phải, khoảng giữa-trên màn hình** (`right:0; top:38%`, z-index 9990–9991). Không đặt nút/phần tử `position:fixed` khác vào vùng này; các phần tử cố định khác dùng z-index < 9990.
+- Không dùng id/class bắt đầu bằng `gnfb-`.
+- Chức năng chống gian lận (chặn dán/chuột phải/phím tắt) không được chặn bên trong `.gnfb-box` (ô góp ý đã tự `stopPropagation` cho copy/paste; đừng thêm listener chặn phím ở pha capture lên `textarea`).
+- Chỉ tài khoản **học sinh** thấy nút; admin/giáo viên làm thử không thấy. Học sinh chỉ góp ý được ở bài đã được giao cho mình.
+
+**Phía giáo viên / admin:** trang Quản trị → tab **Góp ý** (hộp thư, chấm đỏ số tin chưa đọc, trả lời ngay). Giáo viên thấy góp ý của học sinh thuộc lớp mình phụ trách; admin thấy tất cả. Học sinh thấy chấm đỏ khi có trả lời, và liệt kê trong trang **Điểm của tôi → Góp ý của tôi**.
+
+**Dữ liệu:** tab Sheet `Feedback` (mỗi tin một dòng: thời gian, học sinh, lớp, bộ bài, trang, người gửi, nội dung, đã đọc…). API `fb_send`, `fb_list`, `fb_mine`, `fb_inbox`, `fb_thread`, `fb_reply` (trong `code.gs`). Giới hạn 1000 ký tự/tin, tối đa 20 tin / 10 phút / học sinh.

@@ -27,7 +27,7 @@ def _wrap(src, out, root_rel, set_id, page_id, kind, apps_url, auth_head, bv):
             + '<script src="%sengine/reading_shim.js?v=%s"></script>' % (root_rel, bv))
     assert '<head>' in t and '</body>' in t, src
     t = t.replace('<head>', '<head>' + head, 1)
-    t = t.replace('</body>', '<script>GNAuth.verify()</script></body>', 1)
+    t = t.replace('</body>', '<script>GNAuth.verify()</script><script src="%sengine/feedback.js?v=%s"></script></body>' % (root_rel, bv), 1)
     os.makedirs(os.path.dirname(out), exist_ok=True)
     open(out, 'w', encoding='utf8').write(t)
     return t

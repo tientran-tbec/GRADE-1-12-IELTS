@@ -31,8 +31,17 @@ function ensureUserCol_(sh) {
 function who_(d) {
   var id = identity_(d);
   if (id) {
-    if (id.role === 'student' && assignedSets_(id.cls).indexOf(String(d.set_id)) < 0) return null;   // bài chưa được giao cho lớp này
-    d.student_name = id.name; d.student_class = id.cls; d._role = id.role; return id.username;
+    var cls = id.cls;
+    if (id.role === 'student') {
+      var info = assignedMap_(clsList_(id.cls))[String(d.set_id)];
+      if (!info) return null;   // bài chưa được giao cho lớp nào của học sinh
+      cls = info.cls;
+      var end = dueEnd_(info.due);
+      if (end && Date.now() > end) {   // quá hạn: chỉ nhận bài nộp của người đã vào làm, tối đa 60 phút sau hạn
+        if (/^grade_save_(result|partial)$/.test(String(d.action)) && Date.now() <= end + 60 * 60000) d._late = true; else return null;
+      }
+    }
+    d.student_name = id.name; d.student_class = cls; d._role = id.role; return id.username;
   }
   if (REQUIRE_LOGIN) return null;
   return '';
@@ -68,7 +77,7 @@ function handleGrade(d) {
       if (sh.getLastRow() === 0) { sh.appendRow(['Thời gian', 'Loại', 'Học sinh', 'Lớp', 'Bộ bài', 'Trang', 'Chế độ', 'Điểm', 'Tổng', '%', 'Thang 10',
         'Thời gian làm (s)', 'Chuyển tab', 'Mất focus', 'Thoát toàn màn hình', 'Số lần nghe', 'Chi tiết câu trả lời', 'Tài khoản']); sh.setFrozenRows(1); }
       ensureUserCol_(sh);
-      sh.appendRow([tsVN_(d.ts), d.action === 'grade_save_partial' ? 'LƯU DỞ (rời trang)' : 'ĐÃ NỘP',
+      sh.appendRow([tsVN_(d.ts), d.action === 'grade_save_partial' ? 'LƯU DỞ (rời trang)' : (d._late ? 'ĐÃ NỘP (TRỄ HẠN)' : 'ĐÃ NỘP'),
         d.student_name, d.student_class, d.set_id, d.page_id, d.mode, d.score, d.total, d.pct, d.score10,
         d.time_spent, d.tab_switch, d.blur, d.fullscreen_exit, d.audio_plays, d.answers ? JSON.stringify(d.answers) : '', uname]);
     } else {
@@ -92,7 +101,7 @@ var ADMIN_USER = 'admin';
 var ADMIN_PASS = '';            // ← đặt mật khẩu admin ở đây, chạy setupAdmin(), rồi xoá lại thành ''
 var SHEET_USERS = 'Users', SHEET_CLASSES = 'Classes';
 var USER_HEADERS = ['Tài khoản', 'Họ tên', 'Vai trò', 'Lớp', 'Salt', 'Hash', 'Hoạt động', 'Phải đổi MK', 'Ngày tạo', 'Đăng nhập gần nhất', 'Phiên', 'Thiết bị'];
-var SHEET_ASSIGN = 'Assignments', ASSIGN_HEADERS = ['Lớp', 'Bộ bài', 'Giao bởi', 'Ngày'];
+var SHEET_ASSIGN = 'Assignments', ASSIGN_HEADERS = ['Lớp', 'Bộ bài', 'Giao bởi', 'Ngày', 'Hạn'];
 var PING_SEC = 200;   // thiết bị coi là đang online nếu có tín hiệu trong ngần này giây
 var CLASS_HEADERS = ['Mã lớp', 'Tên lớp', 'Khối', 'GV phụ trách', 'Ghi chú'];
 var TOKEN_DAYS = 3;
@@ -159,9 +168,19 @@ function findUser_(username, list) {
   for (var i = 0; i < list.length; i++) if (list[i].username === username) return list[i];
   return null;
 }
-function pub_(u) { return {username: u.username, name: u.name, role: u.role, cls: u.cls, active: u.active, mustChange: u.mustChange, created: u.created, last: u.last, online: isOnline_(u)}; }
+function clsList_(v) {
+  var a = Array.isArray(v) ? v : String(v == null ? '' : v).split(/[,;]+/), seen = {}, out = [];
+  a.forEach(function (x) { x = String(x).trim(); if (x && !seen[x]) { seen[x] = 1; out.push(x); } });
+  return out;
+}
+function sharesClass_(mine, u) { return clsList_(u.cls).some(function (c) { return mine.indexOf(c) >= 0; }); }
+function pub_(u) { return {username: u.username, name: u.name, role: u.role, cls: clsList_(u.cls).join(','), classes: clsList_(u.cls), active: u.active, mustChange: u.mustChange, created: u.created, last: u.last, online: isOnline_(u)}; }
 function isOnline_(u) { return !!(u.sid && CacheService.getScriptCache().get('ping_' + u.username)); }
-function userView_(u) { var o = pub_(u); o.sets = u.role === 'student' ? assignedSets_(u.cls) : null; return o; }
+function userView_(u) {
+  var o = pub_(u); o.sets = null; o.due = null;
+  if (u.role === 'student') { var m = assignedMap_(clsList_(u.cls)); o.sets = Object.keys(m); o.due = {}; o.sets.forEach(function (k) { if (m[k].due) o.due[k] = m[k].due; }); }
+  return o;
+}
 function writeUser_(u, isNew) {
   var sh = sheetOf_(SHEET_USERS, USER_HEADERS);
   var row = [u.username, u.name, u.role, u.cls, u.salt, u.hash, u.active, u.mustChange, u.created || tsVN_(), u.last || '', u.sid || '', u.dev || ''];
@@ -212,25 +231,74 @@ function makeUsername_(name, taken) {
 function canManage_(me, target, classes) {
   if (me.role === 'admin') return true;
   if (me.role !== 'teacher') return false;
-  return target.role === 'student' && teacherClasses_(me.username, classes).indexOf(target.cls) >= 0;
+  return target.role === 'student' && sharesClass_(teacherClasses_(me.username, classes), target);
 }
 
 /* ----- giao bài theo lớp ----- */
 function readAssign_() {
   var sh = sheetOf_(SHEET_ASSIGN, ASSIGN_HEADERS), v = sh.getDataRange().getValues(), out = [];
-  for (var i = 1; i < v.length; i++) if (v[i][0] && v[i][1]) out.push({row: i + 1, cls: String(v[i][0]), set: String(v[i][1])});
+  for (var i = 1; i < v.length; i++) if (v[i][0] && v[i][1]) out.push({row: i + 1, cls: String(v[i][0]), set: String(v[i][1]), due: dueStr_(v[i][4])});
   return out;
 }
-function assignedSets_(cls) {
-  var cache = CacheService.getScriptCache(), k = 'asg_' + cls, c = cache.get(k);
+function dueStr_(x) {   // 'yyyy-MM-dd' hoặc ''
+  if (x instanceof Date) return Utilities.formatDate(x, 'Asia/Ho_Chi_Minh', 'yyyy-MM-dd');
+  var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(x || '')); return m ? m[0] : '';
+}
+function dueEnd_(due) { return due ? new Date(due + 'T23:59:59+07:00').getTime() : 0; }   // hết ngày hạn (giờ VN)
+function assignedOfClass_(cls) {
+  var cache = CacheService.getScriptCache(), k = 'asg2_' + cls, c = cache.get(k);
   if (c) return JSON.parse(c);
-  var r = readAssign_().filter(function (a) { return a.cls === cls; }).map(function (a) { return a.set; });
+  var r = readAssign_().filter(function (a) { return a.cls === cls; }).map(function (a) { return {set: a.set, due: a.due}; });
   cache.put(k, JSON.stringify(r), 60);
   return r;
+}
+/* Gộp bài được giao của nhiều lớp: {bộ: {cls, due}}. Bộ giao cho nhiều lớp → lấy lớp không hạn, nếu không thì hạn muộn nhất. */
+function assignedMap_(classes) {
+  var m = {};
+  clsList_(classes).forEach(function (cls) {
+    assignedOfClass_(cls).forEach(function (a) {
+      var cur = m[a.set];
+      if (!cur || (cur.due && (!a.due || a.due > cur.due))) m[a.set] = {cls: cls, due: a.due};
+    });
+  });
+  return m;
 }
 function canAssign_(me, cls) {
   if (me.role === 'admin') return true;
   return teacherClasses_(me.username).indexOf(cls) >= 0;
+}
+
+
+/* ----- GÓP Ý / TRÒ CHUYỆN HỌC SINH ↔ GIÁO VIÊN (mỗi học sinh một cuộc cho mỗi trang bài) ----- */
+var SHEET_FB = 'Feedback', FB_HEADERS = ['Mã', 'Thời gian', 'Tài khoản HS', 'Họ tên HS', 'Lớp', 'Bộ bài', 'Trang', 'Tiêu đề', 'Người gửi', 'Vai trò', 'Nội dung', 'HS đã đọc', 'GV đã đọc'];
+function truthy_(x) { return x === true || String(x).toUpperCase() === 'TRUE'; }
+function fmtT_(x) { return x instanceof Date ? Utilities.formatDate(x, 'Asia/Ho_Chi_Minh', 'dd/MM/yyyy HH:mm:ss') : String(x || ''); }
+function fbRows_() {
+  var sh = sheetOf_(SHEET_FB, FB_HEADERS), v = sh.getDataRange().getValues(), out = [];
+  for (var i = 1; i < v.length; i++) if (v[i][0]) out.push({row: i + 1, id: v[i][0], time: fmtT_(v[i][1]), student: String(v[i][2]).toLowerCase(), name: v[i][3], cls: String(v[i][4] || ''), set: String(v[i][5]),
+    page: String(v[i][6]), title: v[i][7], from: String(v[i][8]), role: String(v[i][9]), text: String(v[i][10] || ''), rs: truthy_(v[i][11]), rt: truthy_(v[i][12])});
+  return out;
+}
+function fbVisible_(me, r, mine) {   // GV thấy cuộc trò chuyện của học sinh cùng lớp mình phụ trách; admin thấy tất cả
+  return me.role === 'admin' || sharesClass_(mine || [], {cls: r.cls});
+}
+function fbMsg_(r) { return {id: r.id, time: r.time, from: r.from, name: r.role === 'student' ? r.name : (r.name || r.from), role: r.role, text: r.text}; }
+function unreadFor_(me) {
+  var cache = CacheService.getScriptCache(), k = 'fbu_' + me.username, c = cache.get(k);
+  if (c !== null && c !== undefined && c !== '') return +c;
+  var n = 0;
+  if (me.role === 'student') fbRows_().forEach(function (r) { if (r.student === me.username && r.role !== 'student' && !r.rs) n++; });
+  else { var mine = me.role === 'teacher' ? teacherClasses_(me.username) : null; fbRows_().forEach(function (r) { if (r.role === 'student' && !r.rt && fbVisible_(me, r, mine)) n++; }); }
+  cache.put(k, String(n), 30);
+  return n;
+}
+function fbMark_(rows, col) { var sh = sheetOf_(SHEET_FB, FB_HEADERS); rows.forEach(function (r) { sh.getRange(r.row, col).setValue(true); }); }
+function fbAppend_(vals) { var sh = sheetOf_(SHEET_FB, FB_HEADERS); sh.appendRow(vals); }
+function fbText_(d) {
+  var t = String(d.text || '').replace(/\r/g, '').trim();
+  if (!t) throw new Error('Hãy nhập nội dung.');
+  if (t.length > 1000) throw new Error('Tin nhắn quá dài (tối đa 1000 ký tự).');
+  return t;
 }
 
 var API = {
@@ -254,7 +322,7 @@ var API = {
     return {token: makeToken_(u), user: userView_(u)};
   },
   auth_me: function (d) { var u = authUser_(d); CacheService.getScriptCache().put('ping_' + u.username, u.dev || '1', PING_SEC); return {user: userView_(u)}; },
-  auth_ping: function (d) { var u = authUser_(d); CacheService.getScriptCache().put('ping_' + u.username, u.dev || '1', PING_SEC); return {user: userView_(u)}; },
+  auth_ping: function (d) { var u = authUser_(d); CacheService.getScriptCache().put('ping_' + u.username, u.dev || '1', PING_SEC); return {user: userView_(u), unread: unreadFor_(u)}; },
   auth_logout: function (d) {
     var t = verifyToken_(d.token), u = t ? findUser_(t.u) : null;
     if (u && u.sid === t.s && u.role !== 'admin') { u.sid = ''; u.dev = ''; writeUser_(u, false); CacheService.getScriptCache().remove('ping_' + u.username); }
@@ -278,19 +346,23 @@ var API = {
     var me = authUser_(d, ['admin', 'teacher']), all = readUsers_(), cl = readClasses_();
     var mine = me.role === 'teacher' ? teacherClasses_(me.username, cl) : null;
     var list = all.filter(function (u) {
-      if (me.role === 'teacher') return u.role === 'student' && mine.indexOf(u.cls) >= 0;
+      if (me.role === 'teacher') return u.role === 'student' && sharesClass_(mine, u);
       return !d.role || u.role === d.role;
     });
-    if (d.cls) list = list.filter(function (u) { return u.cls === d.cls; });
+    if (d.cls) list = list.filter(function (u) { return clsList_(u.cls).indexOf(String(d.cls)) >= 0; });
     return {users: list.map(pub_)};
   },
   adm_user_save: function (d) {
     var me = authUser_(d, ['admin', 'teacher']), cl = readClasses_(), all = readUsers_(), x = d.user || {}, name = String(x.name || '').trim();
     if (!name) throw new Error('Thiếu họ tên.');
     var role = me.role === 'teacher' ? 'student' : (['admin', 'teacher', 'student'].indexOf(x.role) >= 0 ? x.role : 'student');
-    var cls = role === 'student' ? String(x.cls || '').trim() : '';
-    var target = x.username ? findUser_(x.username, all) : null, pw = null;
-    if (me.role === 'teacher' && teacherClasses_(me.username, cl).indexOf(cls) < 0) throw new Error('Bạn chỉ quản lý học sinh thuộc lớp mình phụ trách.');
+    var chosen = role === 'student' ? clsList_(x.classes !== undefined ? x.classes : x.cls) : [];
+    var target = x.username ? findUser_(x.username, all) : null, pw = null, cls = chosen.join(',');
+    if (me.role === 'teacher') {
+      var mineC = teacherClasses_(me.username, cl);
+      if (!chosen.length || chosen.some(function (c) { return mineC.indexOf(c) < 0; })) throw new Error('Bạn chỉ quản lý học sinh thuộc lớp mình phụ trách.');
+      if (target) cls = clsList_(target.cls).filter(function (c) { return mineC.indexOf(c) < 0; }).concat(chosen).join(',');   // giữ nguyên các lớp của GV khác
+    }
     if (target) {
       if (!canManage_(me, target, cl)) throw new Error('Bạn không có quyền sửa tài khoản này.');
       if (target.username === me.username && x.active === false) throw new Error('Không thể tự khoá tài khoản của mình.');
@@ -322,9 +394,9 @@ var API = {
     all.forEach(function (u) { taken[u.username] = true; });
     var created = [], skipped = [];
     (d.rows || []).forEach(function (r) {
-      var name = String(r.name || '').trim(), cls = String(r.cls || d.cls || '').trim();
+      var name = String(r.name || '').trim(), cls = clsList_(r.cls || d.cls || '').join(',');
       if (!name) return;
-      if (me.role === 'teacher' && mine.indexOf(cls) < 0) { skipped.push({name: name, reason: 'Lớp "' + cls + '" không thuộc quyền quản lý'}); return; }
+      if (me.role === 'teacher' && (!cls || clsList_(cls).some(function (c) { return mine.indexOf(c) < 0; }))) { skipped.push({name: name, reason: 'Lớp "' + cls + '" không thuộc quyền quản lý'}); return; }
       var uname = makeUsername_(name, taken), pw = genPassword_(), salt = newSalt_();
       writeUser_({username: uname, name: name, role: 'student', cls: cls, salt: salt, hash: hashPw_(salt, pw), active: true, mustChange: true, created: tsVN_(), last: ''}, true);
       created.push({username: uname, name: name, cls: cls, password: pw});
@@ -351,14 +423,15 @@ var API = {
     authUser_(d, ['admin']);
     var ex = readClasses_().filter(function (k) { return k.id === String(d.id); })[0];
     if (!ex) throw new Error('Không tìm thấy lớp.');
-    if (readUsers_().some(function (u) { return u.role === 'student' && u.cls === ex.id && u.active; })) throw new Error('Lớp còn học sinh đang hoạt động – hãy chuyển hoặc khoá họ trước.');
+    if (readUsers_().some(function (u) { return u.role === 'student' && clsList_(u.cls).indexOf(ex.id) >= 0 && u.active; })) throw new Error('Lớp còn học sinh đang hoạt động – hãy chuyển hoặc khoá họ trước.');
     sheetOf_(SHEET_CLASSES, CLASS_HEADERS).deleteRow(ex.row);
     return {};
   },
   adm_assign_get: function (d) {
     var me = authUser_(d, ['admin', 'teacher']), cls = String(d.cls || '');
     if (!canAssign_(me, cls)) throw new Error('Bạn không phụ trách lớp này.');
-    return {sets: readAssign_().filter(function (a) { return a.cls === cls; }).map(function (a) { return a.set; })};
+    return {sets: readAssign_().filter(function (a) { return a.cls === cls; }).map(function (a) { return a.set; }),
+            due: readAssign_().filter(function (a) { return a.cls === cls && a.due; }).reduce(function (o, a) { o[a.set] = a.due; return o; }, {})};
   },
   adm_assign_save: function (d) {
     var me = authUser_(d, ['admin', 'teacher']), cls = String(d.cls || ''), sets = d.sets || [];
@@ -366,12 +439,66 @@ var API = {
     var lock = LockService.getScriptLock(); lock.waitLock(20000);
     try {
       var sh = sheetOf_(SHEET_ASSIGN, ASSIGN_HEADERS), all = readAssign_();
+      sh.getRange(1, 5).setValue('Hạn'); sh.getRange(2, 5, Math.max(sh.getLastRow() - 1, 1), 1).setNumberFormat('@');   // cột Hạn dạng văn bản (tránh bị đổi thành ngày)
       for (var i = all.length - 1; i >= 0; i--) if (all[i].cls === cls) sh.deleteRow(all[i].row);
       var seen = {};
-      sets.forEach(function (s) { s = String(s); if (s && !seen[s]) { seen[s] = 1; sh.appendRow([cls, s, me.username, tsVN_()]); } });
-      CacheService.getScriptCache().remove('asg_' + cls);
+      var dues = d.due || {};
+      sets.forEach(function (s) { s = String(s); if (s && !seen[s]) { seen[s] = 1; sh.appendRow([cls, s, me.username, tsVN_(), dueStr_(dues[s])]); } });
+      CacheService.getScriptCache().remove('asg2_' + cls);
     } finally { lock.releaseLock(); }
     return {count: Object.keys(seen).length};
+  },
+  fb_send: function (d) {
+    var u = authUser_(d, ['student']), text = fbText_(d), set = String(d.set_id || ''), page = String(d.page_id || ''), cache = CacheService.getScriptCache(), rk = 'fbr_' + u.username;
+    if (!set || !page) throw new Error('Thiếu thông tin bài.');
+    if (!assignedMap_(clsList_(u.cls))[set]) throw new Error('Bài này chưa được giao cho bạn.');
+    var n = +cache.get(rk) || 0; if (n >= 20) throw new Error('Bạn gửi quá nhiều tin trong thời gian ngắn, hãy thử lại sau ít phút.');
+    cache.put(rk, String(n + 1), 600);
+    var lock = LockService.getScriptLock(); lock.waitLock(20000);
+    try { fbAppend_([Utilities.getUuid(), tsVN_(), u.username, u.name, clsList_(u.cls).join(','), set, page, String(d.title || '').slice(0, 120), u.username, 'student', text, true, false]); }
+    finally { lock.releaseLock(); }
+    cache.remove('fbu_' + u.username);
+    return {msgs: fbRows_().filter(function (r) { return r.student === u.username && r.set === set && r.page === page; }).map(fbMsg_)};
+  },
+  fb_list: function (d) {
+    var u = authUser_(d), set = String(d.set_id || ''), page = String(d.page_id || '');
+    if (u.role !== 'student') return {msgs: []};
+    var rows = fbRows_().filter(function (r) { return r.student === u.username && r.set === set && r.page === page; });
+    var un = rows.filter(function (r) { return r.role !== 'student' && !r.rs; });
+    if (un.length) { fbMark_(un, 12); CacheService.getScriptCache().remove('fbu_' + u.username); }
+    return {msgs: rows.map(fbMsg_)};
+  },
+  fb_inbox: function (d) {
+    var me = authUser_(d, ['admin', 'teacher']), mine = me.role === 'teacher' ? teacherClasses_(me.username) : null, th = {}, order = [];
+    fbRows_().forEach(function (r) {
+      if (!fbVisible_(me, r, mine)) return;
+      var k = r.student + '|' + r.set + '|' + r.page, t = th[k];
+      if (!t) { t = th[k] = {student: r.student, name: r.name, cls: r.cls, set: r.set, page: r.page, title: r.title, count: 0, unread: 0}; order.push(k); }
+      t.count++; t.last = r.time; t.lastText = r.text.slice(0, 80); t.lastRole = r.role; t.order = r.row;
+      if (r.role === 'student' && !r.rt) t.unread++;
+    });
+    var list = order.map(function (k) { return th[k]; }).sort(function (a, b) { return b.order - a.order; }).slice(0, 300);
+    return {threads: list, unread: list.reduce(function (n, t) { return n + t.unread; }, 0)};
+  },
+  fb_thread: function (d) {
+    var me = authUser_(d, ['admin', 'teacher']), mine = me.role === 'teacher' ? teacherClasses_(me.username) : null, st = String(d.student || '').toLowerCase();
+    var rows = fbRows_().filter(function (r) { return r.student === st && r.set === String(d.set_id) && r.page === String(d.page_id) && fbVisible_(me, r, mine); });
+    var un = rows.filter(function (r) { return r.role === 'student' && !r.rt; });
+    if (un.length) { fbMark_(un, 13); CacheService.getScriptCache().remove('fbu_' + me.username); }
+    return {msgs: rows.map(fbMsg_)};
+  },
+  fb_reply: function (d) {
+    var me = authUser_(d, ['admin', 'teacher']), text = fbText_(d), st = findUser_(d.student), set = String(d.set_id || ''), page = String(d.page_id || '');
+    if (!st || st.role !== 'student') throw new Error('Không tìm thấy học sinh.');
+    if (!canManage_(me, st, readClasses_())) throw new Error('Học sinh này không thuộc lớp bạn phụ trách.');
+    var prev = fbRows_().filter(function (r) { return r.student === st.username && r.set === set && r.page === page; });
+    if (!prev.length) throw new Error('Chưa có góp ý nào ở bài này.');
+    var lock = LockService.getScriptLock(); lock.waitLock(20000);
+    try { fbAppend_([Utilities.getUuid(), tsVN_(), st.username, st.name, clsList_(st.cls).join(','), set, page, prev[0].title, me.username, me.role, text, false, true]); }
+    finally { lock.releaseLock(); }
+    var un = prev.filter(function (r) { return r.role === 'student' && !r.rt; }); if (un.length) fbMark_(un, 13);
+    CacheService.getScriptCache().remove('fbu_' + me.username);
+    return {msgs: fbRows_().filter(function (r) { return r.student === st.username && r.set === set && r.page === page; }).map(fbMsg_)};
   },
   adm_results: function (d) { return {rows: resultRows_(authUser_(d, ['admin', 'teacher']), d)}; },
   my_results: function (d) { return {rows: resultRows_(authUser_(d), d, true)}; }
@@ -426,7 +553,7 @@ function doPost(e) {
     var d = JSON.parse(e.postData.contents);
     var a = String(d.action || '');
     if (a.indexOf('grade_') === 0) return handleGrade(d);
-    if (/^(auth_|adm_|my_)/.test(a)) return handleApi(d);
+    if (/^(auth_|adm_|my_|fb_)/.test(a)) return handleApi(d);
     return ContentService.createTextOutput('ignored');
   } catch (err) { return ContentService.createTextOutput('error: ' + err); }
 }
