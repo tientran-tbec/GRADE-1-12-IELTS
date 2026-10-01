@@ -26,6 +26,7 @@ with sync_playwright() as pw:
         for iid in items:
             a = pg.evaluate('window.QUIZ.ANS["%s"]' % iid); t = pg.evaluate('window.QUIZ.items["%s"].t' % iid)
             sel = '.q[data-id="%s"]' % iid
+            if isinstance(a, list) and t != 'fill': a = a[0]   # nhiều đáp án chấp nhận → thử đáp án đầu
             if t in ('mcq', 'tf', 'tfng'):
                 pg.eval_on_selector('%s input[value="%s"]' % (sel, a), 'e=>e.click()')
             elif t == 'fill':

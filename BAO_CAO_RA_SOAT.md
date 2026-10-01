@@ -53,3 +53,27 @@ Cách làm giống Unit 1: tự giải độc lập từng câu, đối chiếu 
 - Phần Nghe (cả hai bộ) chưa nhận dạng lại bằng Whisper; transcript lấy từ Word. Nếu bạn muốn kiểm tra khớp audio, báo mình chạy.
 - Giải thích song ngữ Anh–Việt: vẫn chưa làm.
 - Bổ trợ ph1 (dạng yếu/mạnh): bài thực hành đọc theo cặp, không chấm điểm.
+
+## Unit 3 – Cities of the Future
+
+**Bổ trợ (281 câu, 7 trang):** giữ đáp án theo Word, nhưng cần xem lại: vg1.2 (Word key "site", đúng phải "zone"), re3.5, re3.8 (T/F), ph3.6, sp4.4, kt.13. ph3.8 Word không đánh dấu → đặt D. Word không có word bank cho kt16-21 → thêm 2 từ gây nhiễu "connect", "convenience". vg1.29 trùng đáp án "pays" → đổi D thành "takes".
+
+**4 kỹ năng (193 câu, 8 trang):** kiem-tra Q17 B/C trùng "believe" → C sửa thành "believes"; Q22 key "loveable" yếu; Q45 key C có thể sai (B hợp hơn) – giữ key Word và nói trong giải thích; wr2.1 key B "information … are collected" (đúng là "is"); gr1.8 "feel" cũng có thể đúng.
+Lời thoại phần nghe lấy từ Word, chưa đối chiếu Whisper với file mp3.
+
+---
+
+# Đã tự sửa đáp án (Unit 1–3) – file `units/fixes.py`
+
+Quy ước từ nay: câu nào Word gốc sai/mơ hồ thì sửa trong `units/fixes.py` (không đụng file sinh dữ liệu), ghi vào đây; câu "mơ hồ" có nhiều đáp án đúng → chấp nhận tất cả đáp án hợp lí.
+
+**Đã đổi đáp án / sửa đề**
+- U3 bổ trợ vg1.2: site → **zone (D)**; re3.5: F → **T**; re3.8: F → **T**; sp4.4: I wonder → **No doubt**; ph3.6: thay "telephoto" bằng *telecommunication* (đề cũ cả 4 từ cùng nhấn âm 1).
+- U3 4kn kiem-tra câu 45: C → **B**; wr2.1: sửa "are collected" → "is collected".
+- U1 4kn pr1.4: thay "strength" bằng *surgery* → đáp án **energy (A)**.
+
+**Chấp nhận nhiều đáp án (cả hai đều đúng)**
+- U1 bổ trợ sp3.5: B hoặc D. U3 bổ trợ vg3.8: A hoặc D; vg6.11 (depend / am depending); vg6.13 (see / am seeing).
+- U2 bổ trợ vg2.28 (A/B/C), vg2.29 (B/D), vg2.31 (A/B), vg2.35 (A/B), vg2.39 (B/D), kt.11 (B/C): các cặp must / have to…
+
+**Giữ nguyên (còn mơ hồ nhưng không có phương án tốt hơn)**: U3 4kn kiem-tra câu 22 (loveable/liveable), pr1.3 (privacy), gr1.8; U3 bổ trợ kt.13; U1 4KN vo4.3, re2.3; U2 4kn vo4.3; các câu 2 phương án vg4.4, vg8.9 (U2) vì chấp nhận cả hai thì mất ý nghĩa câu hỏi.

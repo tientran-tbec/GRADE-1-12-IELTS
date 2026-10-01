@@ -16,6 +16,8 @@ REGISTRY = [
     ('lop11-u1-4kn', 'units/lop11_u1_4kn.py', 'units/lop11_u1_4kn_dapan.py', 'Lop11', 'Unit1', '4kn', 'assets/lop11_u1/4kn', 'audio/lop11_u1_4kn_nghe.mp3'),
     ('lop11-u2-botro', 'units/lop11_u2_botro.py', 'units/lop11_u2_botro_dapan.py', 'Lop11', 'Unit2', 'botro', 'assets/lop11_u2/botro', 'audio/lop11_u2_botro_nghe.mp3'),
     ('lop11-u2-4kn', 'units/lop11_u2_4kn.py', 'units/lop11_u2_4kn_dapan.py', 'Lop11', 'Unit2', '4kn', 'assets/lop11_u2/4kn', 'audio/lop11_u2_4kn_nghe.mp3'),
+    ('lop11-u3-botro', 'units/lop11_u3_botro.py', 'units/lop11_u3_botro_dapan.py', 'Lop11', 'Unit3', 'botro', 'assets/lop11_u3/botro', 'audio/lop11_u3_botro_nghe.mp3'),
+    ('lop11-u3-4kn', 'units/lop11_u3_4kn.py', 'units/lop11_u3_4kn_dapan.py', 'Lop11', 'Unit3', '4kn', 'assets/lop11_u3/4kn', 'audio/lop11_u3_4kn_nghe.mp3'),
 ]
 
 
@@ -223,10 +225,34 @@ def build_quiz_page(S, P, ANS, EXP, slug, imgbase, audio_src):
     return s.replace('%NAV%', nav_tabs(S, P['id'], slug))
 
 
+def apply_fixes(sid, S, ANS, EXP):
+    """Áp dụng units/fixes.py (sửa đáp án/đề/giải thích sau khi sinh dữ liệu). Báo lỗi nếu id không tồn tại."""
+    FX = (load_py('units/fixes.py', 'FIXES') or {}).get(sid, {})
+    if not FX:
+        return
+    items = {it['id']: it for P in S['pages'] for g in P['groups'] for it in g['items']}
+    for iid, f in FX.items():
+        if iid not in items:
+            raise SystemExit('fixes.py: %s không có câu %s' % (sid, iid))
+        it = items[iid]
+        if 'ans' in f:
+            ANS[iid] = f['ans']
+        if 'exp' in f:
+            EXP[iid] = f['exp']
+        if 'exp_add' in f:
+            EXP[iid] = (EXP.get(iid, '') + ' ' + f['exp_add']).strip()
+        if 'q' in f:
+            it['q'] = f['q']
+        for k, txt in (f.get('o') or {}).items():
+            it['o'][k] = txt
+    print('  [fixes] %s: %d câu đã sửa' % (sid, len(FX)))
+
+
 def build_set(entry):
     sid, data_p, ans_p, gdir, udir, slug, imgdir, audio = entry
     S = load_py(data_p, 'SET')
     ANS, EXP = load_answers(ans_p)
+    apply_fixes(sid, S, ANS, EXP)
     d = os.path.join(OUT, gdir, udir, slug)
     os.makedirs(d, exist_ok=True)
     imgbase = '../../../../' + imgdir

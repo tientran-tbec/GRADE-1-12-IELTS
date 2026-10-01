@@ -58,10 +58,19 @@
       }
       return true;
     }
+    if (Array.isArray(a)) return a.indexOf(v) >= 0;   // nhiều đáp án chấp nhận (mcq/tf)
     return v === a;
   }
+  function acc(a, v) { return Array.isArray(a) ? a.indexOf(v) >= 0 : v === a; }
   function showAnsText(id) {
     var it = Q.items[id], a = Q.ANS[id], el = qEl(id);
+    if (Array.isArray(a) && it.t !== 'fill') {
+      return a.map(function (x) { return showAnsText1(id, x); }).join('  hoặc  ');
+    }
+    return showAnsText1(id, a);
+  }
+  function showAnsText1(id, a) {
+    var it = Q.items[id], el = qEl(id);
     if (it.t === 'mcq') {
       var lab = $('input[value="' + a + '"]', el);
       var txt = lab ? lab.parentNode.textContent.replace(/^\s*[A-D]\.\s*/, '').trim() : '';
@@ -89,7 +98,7 @@
     if (it.t === 'mcq' || it.t === 'tf' || it.t === 'tfng') {
       $$('label.opt', el).forEach(function (l) {
         var v = $('input', l).value; l.classList.remove('right', 'wrong');
-        if (v === a) l.classList.add('right');
+        if (acc(a, v)) l.classList.add('right');
         else if ($('input', l).checked) l.classList.add('wrong');
       });
     } else if (it.t === 'fill') {
