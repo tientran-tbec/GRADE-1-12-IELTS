@@ -51,3 +51,12 @@ Bấm đúp `push_github.bat`. Lần đầu nó hỏi link repo (lưu vào `.rep
 - **Giao bài:** tab *Giao bài* (hoặc nút *Giao bài* ở tab Lớp) → chọn lớp → tích các bộ bài (Unit, Test, Ôn tập…) → *Lưu*. Học sinh chỉ thấy và làm được bài đã giao cho lớp mình; vào link bài chưa giao sẽ bị đưa về trang chủ, và máy chủ cũng từ chối ghi kết quả của bài chưa giao. Giáo viên chỉ giao cho lớp mình phụ trách. Lớp chưa được giao bài thì học sinh thấy thông báo "Chưa có bài nào được giao".
 - **Mỗi tài khoản một thiết bị:** học sinh/giáo viên đang đăng nhập ở một thiết bị thì thiết bị khác không đăng nhập được (admin không bị giới hạn). Thiết bị đang dùng gửi tín hiệu mỗi 60 giây; nếu tắt trình duyệt mà không bấm *Đăng xuất*, sau khoảng 3 phút tài khoản được giải phóng. Giáo viên/admin có thể bấm *Đăng xuất thiết bị* ở danh sách để giải phóng ngay (cột *Thiết bị* hiện ● Đang đăng nhập). Đặt lại mật khẩu cũng đăng xuất thiết bị đang dùng.
 - Sau khi cập nhật `code.gs`, tab `Users` tự thêm 2 cột *Phiên*, *Thiết bị* và tab `Assignments` tự tạo — chỉ cần dán code, Deploy bản mới và chạy `push_github.bat`.
+
+## IELTS Reading (mục IELTS trên trang chủ)
+
+- Nguồn: `ielts_src/reading/FullTest` (10 đề) và `ielts_src/reading/TheoDang/<Dạng>` (74 trang, 5 dạng). Giữ nguyên nội dung; khi `build.py` chạy sẽ chèn đăng nhập + cầu nối kết quả rồi ghi ra `WebBaiTap/IELTS/Reading/`.
+- **Thêm/sửa đề:** thay file trong `ielts_src/reading/...` (giữ tên `TestN_Reading.html`, `TestN_PassageP_<Dạng>.html`) rồi chạy `python build.py` và `push_github.bat`.
+- **Lớp IELTS:** tab *Lớp* → tạo lớp, ô *Khối* nhập `IELTS`. Tab *Giao bài* của lớp IELTS chỉ liệt kê 15 mục: Full Test 1–10 và 5 dạng bài (giao 1 dạng = mở toàn bộ trang của dạng đó).
+- Học sinh đã đăng nhập không phải nhập tên/lớp; kết quả vào cùng Sheet (`Lop1-12_KetQua`, `Lop1-12_NhatKy`) với cột *Chế độ* = `ielts-reading`, *Chi tiết* bắt đầu bằng `Band x.x`. Admin/giáo viên làm thử không ghi.
+- Listening, Writing, Speaking: thẻ "Sắp có" (chỉ admin/giáo viên thấy).
+- **Phải dán lại `code.gs` và Deploy phiên bản mới** (có thêm nhật ký sự kiện IELTS).

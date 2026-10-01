@@ -74,7 +74,7 @@ function handleGrade(d) {
     } else {
       if (sh.getLastRow() === 0) { sh.appendRow(['Thời gian', 'Sự kiện', 'Học sinh', 'Lớp', 'Bộ bài', 'Trang', 'Chế độ', 'Tài khoản']); sh.setFrozenRows(1); }
       ensureUserCol_(sh);
-      sh.appendRow([tsVN_(d.ts), 'VÀO BÀI', d.student_name, d.student_class, d.set_id, d.page_id, d.mode, uname]);
+      sh.appendRow([tsVN_(d.ts), d.action === 'grade_rd_event' ? 'IELTS · ' + String(d.event || '').slice(0, 40) + (d.detail ? ' · ' + String(d.detail).slice(0, 120) : '') : 'VÀO BÀI', d.student_name, d.student_class, d.set_id, d.page_id, d.mode || 'ielts-reading', uname]);
     }
     return ContentService.createTextOutput('ok');
   } catch (err) {

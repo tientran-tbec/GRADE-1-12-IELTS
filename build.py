@@ -4,6 +4,8 @@ Chạy:  python3 build.py            (sinh toàn bộ WebBaiTap/ + index.html)
        python3 build.py lop11-u1-botro   (chỉ 1 bộ)
 """
 import os, sys, json, re, html, importlib.util
+import ielts
+IELTS = {'cards': [], 'catalog': [], 'n': 0}   # nạp bởi ielts.build() trong main
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(ROOT, 'WebBaiTap')
@@ -368,7 +370,7 @@ function apply(){
   document.getElementById('empty').hidden=shown>0||(document.getElementById('nobai')&&!document.getElementById('nobai').hidden);
   document.getElementById('cnt').textContent=shown+' bộ bài';
   [].forEach.call(document.querySelectorAll('.f[data-f]'),function(b){b.classList.toggle('on',(st[b.dataset.f]||'')===b.dataset.v)});
-  var t=[];if(st.g)t.push('Lớp '+st.g);if(st.u)t.push(st.u==='MidTerm1'?'Mid-term 1':'Unit '+st.u);
+  var t=[];if(st.g)t.push(st.g==='IELTS'?'IELTS':'Lớp '+st.g);if(st.u)t.push(st.u==='MidTerm1'?'Mid-term 1':/^\\d+$/.test(st.u)?'Unit '+st.u:st.u);
   document.getElementById('ttl').textContent=t.length?t.join(' · '):'Tất cả bài học';
   save();
 }
@@ -412,12 +414,18 @@ def build_index(done):
             o.append('<button class="f" data-f="g" data-v="%d">Lớp %d <small>%d bộ</small></button>' % (g, g, n))
         else:
             o.append('<button class="f" disabled>Lớp %d <small>sắp có</small></button>' % g)
+    o.append('<button class="f" data-f="g" data-v="IELTS">IELTS <small>%d bộ</small></button>' % len(IELTS['catalog']))
     o.append('</div><h4>Unit</h4><div class="fl"><button class="f" data-f="u" data-v="">Tất cả unit</button>')
     for g, u in units:
         o.append('<button class="f" data-f="u" data-v="%s">Lớp %s · %s</button>' % (u, g, ulabel(u)))
+    if IELTS['cards']:
+        o.append('<button class="f" data-f="u" data-v="Reading">IELTS · Reading</button>')
+        for sk in ('Listening', 'Writing', 'Speaking'):
+            o.append('<button class="f" disabled>IELTS · %s <small>sắp có</small></button>' % sk)
     o.append('</div><h4>Loại bài tập</h4><div class="seg kinds"><button class="f" data-f="k" data-v="">Tất cả</button>'
              '<button class="f" data-f="k" data-v="botro">Bổ trợ</button><button class="f" data-f="k" data-v="4kn">4 kỹ năng</button>'
-             '<button class="f" data-f="k" data-v="ontap">Ôn tập</button><button class="f" data-f="k" data-v="test">Đề kiểm tra</button></div>'
+             '<button class="f" data-f="k" data-v="ontap">Ôn tập</button><button class="f" data-f="k" data-v="test">Đề kiểm tra</button>'
+             '<button class="f" data-f="k" data-v="full">IELTS Full Test</button><button class="f" data-f="k" data-v="dang">IELTS theo dạng</button></div>'
              '<h4>Hình thức</h4><div class="seg"><button class="f" data-f="m" data-v="">Tất cả</button>'
              '<button class="f" data-f="m" data-v="prac">Luyện tập</button><button class="f" data-f="m" data-v="test">Kiểm tra</button></div>'
              '<button class="reset" id="reset">↺ Xoá bộ lọc</button></aside><div class="scrim"></div><main>'
@@ -446,6 +454,7 @@ def build_index(done):
             o.append('<a class="tile t-test" data-m="test" data-sid="%s" href="WebBaiTap/%s/%s/%s/%s.html"><span class="ic">%s</span><b>%s</b><small>%d câu · %d phút%s</small></a>'
                      % (S['id'], entry[3], entry[4], entry[5], pid, '🎧' if P0.get('audio') else '📝', html.escape(num), n, P0.get('minutes', 0), ' · có nghe' if P0.get('audio') else ''))
         o.append('</div></section>')
+    o.extend(IELTS['cards'])
     o.append('<div class="empty" id="nobai" hidden>Chưa có bài nào được giao cho lớp của bạn. Hãy nhờ giáo viên giao bài.</div><div class="empty" id="denied" hidden>Bài đó chưa được giao cho lớp của bạn.</div><div class="empty" id="empty" hidden>Không có bộ bài phù hợp. Hãy bấm “Xoá bộ lọc”.</div>'
              '<div class="foot">Học sinh làm bài trên điện thoại hoặc máy tính · Kết quả ghi tự động về giáo viên</div></main></div>'
              '<script>GNAuth.chip("#chip");</script><script>%s</script><script>GNAuth.verify(function(){window.gnApply&&gnApply()});if(/denied=1/.test(location.search)){var d=document.getElementById("denied");if(d)d.hidden=false}</script></body></html>' % INDEX_JS)
@@ -458,7 +467,7 @@ def catalog(done):
     for e, S, pages in done:
         slug = e[5]
         out.append({'id': S['id'], 'title': S['title'], 'grade': int(e[3][3:]), 'unit': ulabel(unum(e[4])), 'kind': 'test' if slug.startswith('test') else slug})
-    return out
+    return out + IELTS['catalog']
 
 
 def build_site_pages(done=None):
@@ -480,4 +489,6 @@ if __name__ == '__main__':
         done.append((e, S, pages))
         print(e[0], '->', len(pages), 'trang,', sum(p[3] for p in pages), 'câu')
     if not want:
+        IELTS.update(ielts.build(ROOT, APPS_SCRIPT_URL, AUTH_HEAD, BV))
+        print('IELTS Reading ->', IELTS['n'], 'bộ,', len(IELTS['cards']), 'thẻ')
         build_index(done)
