@@ -1,0 +1,15 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Điểm của tôi – GNOMIO</title><link rel="stylesheet" href="engine/app.css">
+<script>window.GN_URL="%GN_URL%";window.GN_ROOT="";</script><script src="engine/auth.js"></script><script>GNAuth.require()</script></head><body>
+<div class="top"><h1>Điểm của tôi</h1><a href="index.html">⌂ Trang bài tập</a><span id="chip"></span></div>
+<div class="wrapp"><div class="card"><div class="tw"><table><thead><tr><th>Thời gian</th><th>Loại</th><th>Bộ bài</th><th>Trang</th><th>Điểm</th><th>Thang 10</th><th>Thời gian làm</th></tr></thead><tbody id="tb"><tr><td colspan="7">Đang tải…</td></tr></tbody></table></div>
+<p class="err" id="er"></p></div></div>
+<script>
+GNAuth.chip('#chip');GNAuth.verify();
+var E=GNAuth.esc;
+GNAuth.api('my_results').then(function(j){
+  var tb=document.getElementById('tb');
+  if(!j.rows.length){tb.innerHTML='<tr><td colspan="7">Chưa có kết quả nào.</td></tr>';return}
+  tb.innerHTML=j.rows.map(function(r){return '<tr><td>'+E(r.time)+'</td><td>'+E(r.type)+'</td><td>'+E(r.set_id)+'</td><td>'+E(r.page_id)+'</td><td>'+E(r.score)+'/'+E(r.total)+'</td><td><b>'+E(r.score10)+'</b></td><td>'+Math.round((+r.time_spent||0)/60)+' phút</td></tr>'}).join('');
+}).catch(function(e){document.getElementById('er').textContent=e.message;document.getElementById('tb').innerHTML=''});
+</script></body></html>

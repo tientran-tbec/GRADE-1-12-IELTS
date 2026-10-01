@@ -18,6 +18,21 @@ REGISTRY = [
     ('lop11-u2-4kn', 'units/lop11_u2_4kn.py', 'units/lop11_u2_4kn_dapan.py', 'Lop11', 'Unit2', '4kn', 'assets/lop11_u2/4kn', 'audio/lop11_u2_4kn_nghe.mp3'),
     ('lop11-u3-botro', 'units/lop11_u3_botro.py', 'units/lop11_u3_botro_dapan.py', 'Lop11', 'Unit3', 'botro', 'assets/lop11_u3/botro', 'audio/lop11_u3_botro_nghe.mp3'),
     ('lop11-u3-4kn', 'units/lop11_u3_4kn.py', 'units/lop11_u3_4kn_dapan.py', 'Lop11', 'Unit3', '4kn', 'assets/lop11_u3/4kn', 'audio/lop11_u3_4kn_nghe.mp3'),
+    # --- Lớp 11 · Mid-term 1 ---
+    ('lop11-mt1-ontap', 'units/mt1_ontap.py', 'units/mt1_ontap_dapan.py', 'Lop11', 'MidTerm1', 'ontap', 'assets/mt1/ontap', 'audio/mt1_ontap.mp3'),
+    ('lop11-mt1-test01', 'units/mt1_test01.py', 'units/mt1_test01_dapan.py', 'Lop11', 'MidTerm1', 'test01', 'assets/mt1/test01', 'audio/mt1_test01.mp3'),
+    ('lop11-mt1-test02', 'units/mt1_test02.py', 'units/mt1_test02_dapan.py', 'Lop11', 'MidTerm1', 'test02', 'assets/mt1/test02', 'audio/mt1_test02.mp3'),
+    ('lop11-mt1-test03', 'units/mt1_test03.py', 'units/mt1_test03_dapan.py', 'Lop11', 'MidTerm1', 'test03', 'assets/mt1/test03', 'audio/mt1_test03.mp3'),
+    ('lop11-mt1-test04', 'units/mt1_test04.py', 'units/mt1_test04_dapan.py', 'Lop11', 'MidTerm1', 'test04', 'assets/mt1/test04', 'audio/mt1_test04.mp3'),
+    ('lop11-mt1-test05', 'units/mt1_test05.py', 'units/mt1_test05_dapan.py', 'Lop11', 'MidTerm1', 'test05', 'assets/mt1/test05', 'audio/mt1_test05.mp3'),
+    ('lop11-mt1-test06', 'units/mt1_test06.py', 'units/mt1_test06_dapan.py', 'Lop11', 'MidTerm1', 'test06', 'assets/mt1/test06', 'audio/mt1_test06.mp3'),
+    ('lop11-mt1-test07', 'units/mt1_test07.py', 'units/mt1_test07_dapan.py', 'Lop11', 'MidTerm1', 'test07', 'assets/mt1/test07', 'audio/mt1_test07.mp3'),
+    ('lop11-mt1-test08', 'units/mt1_test08.py', 'units/mt1_test08_dapan.py', 'Lop11', 'MidTerm1', 'test08', 'assets/mt1/test08', 'audio/mt1_test08.mp3'),
+    ('lop11-mt1-test09', 'units/mt1_test09.py', 'units/mt1_test09_dapan.py', 'Lop11', 'MidTerm1', 'test09', 'assets/mt1/test09', 'audio/mt1_test09.mp3'),
+    ('lop11-mt1-test10', 'units/mt1_test10.py', 'units/mt1_test10_dapan.py', 'Lop11', 'MidTerm1', 'test10', 'assets/mt1/test10', 'audio/mt1_test10.mp3'),
+    ('lop11-mt1-test11', 'units/mt1_test11.py', 'units/mt1_test11_dapan.py', 'Lop11', 'MidTerm1', 'test11', 'assets/mt1/test11', 'audio/mt1_test11.mp3'),
+    ('lop11-mt1-test12', 'units/mt1_test12.py', 'units/mt1_test12_dapan.py', 'Lop11', 'MidTerm1', 'test12', 'assets/mt1/test12', 'audio/mt1_test12.mp3'),
+    ('lop11-mt1-test13', 'units/mt1_test13.py', 'units/mt1_test13_dapan.py', 'Lop11', 'MidTerm1', 'test13', 'assets/mt1/test13', 'audio/mt1_test13.mp3'),
 ]
 
 
@@ -147,7 +162,7 @@ def render_item(it, num, test_mode, imgbase):
 
 # ------------------------------------------------------------------ ghép trang
 def nav_tabs(S, cur_id, slug):
-    items = [('ly-thuyet', 'Lý thuyết')] + [(p['id'], p['title']) for p in S['pages']]
+    items = ([('ly-thuyet', 'Lý thuyết')] if S.get('theory') else []) + [(p['id'], p['title']) for p in S['pages']]
     return '<nav class="tabs">%s<a href="../../../../index.html">⌂ Trang chủ</a></nav>' % ''.join(
         '<a href="%s.html"%s>%s</a>' % (i, ' class="cur"' if i == cur_id else '', html.escape(t)) for i, t in items)
 
@@ -156,16 +171,20 @@ def json_script(obj):
     return json.dumps(obj, ensure_ascii=False).replace('</', '<\\/')
 
 
-def page_shell(title, sub, body, extra_head='', badge='', h1=None):
+AUTH_HEAD = '<script>window.GN_URL="%s";window.GN_ROOT="%s";</script><script src="%sengine/auth.js"></script><script>GNAuth.require()</script>'
+
+
+def page_shell(title, sub, body, extra_head='', badge='', h1=None, sid=''):
     return ('<!doctype html>\n<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-            '<title>%s</title><link rel="stylesheet" href="../../../../engine/engine.css">%s</head><body>'
-            '<header class="top"><div class="wrap">%s<h1>%s</h1><div class="sub">%s</div>%%NAV%%</div></header>%s</body></html>'
-            % (html.escape(title), extra_head, badge, html.escape(h1 or title), html.escape(sub), body))
+            '<title>%s</title><link rel="stylesheet" href="../../../../engine/engine.css">%s%s</head><body>'
+            '<header class="top"><div class="wrap">%s<h1>%s</h1><div class="sub">%s</div>%%NAV%%</div></header>%s'
+            '<script>GNAuth.chip(".top .wrap");GNAuth.verify();</script></body></html>'
+            % (html.escape(title), AUTH_HEAD % (APPS_SCRIPT_URL, '../../../../', '../../../../') + ('<script>GNAuth.requireSet(%s)</script>' % json.dumps(sid) if sid else ''), extra_head, badge, html.escape(h1 or title), html.escape(sub), body))
 
 
 def build_theory_page(S, slug):
     body = '<div class="wrap"><div class="card theory">%s</div></div>' % S['theory']
-    s = page_shell('Lý thuyết – ' + S['title'], 'Từ vựng, phát âm, ngữ pháp trọng tâm của Unit', body, badge='<span class="badge">Lý thuyết</span>', h1='Lý thuyết')
+    s = page_shell('Lý thuyết – ' + S['title'], 'Từ vựng, phát âm, ngữ pháp trọng tâm của Unit', body, badge='<span class="badge">Lý thuyết</span>', h1='Lý thuyết', sid=S['id'])
     return s.replace('%NAV%', nav_tabs(S, 'ly-thuyet', slug))
 
 
@@ -221,7 +240,7 @@ def build_quiz_page(S, P, ANS, EXP, slug, imgbase, audio_src):
     scripts = '<script>window.QUIZ=%s;</script><script src="../../../../engine/engine.js"></script><script src="../../../../engine/tools.js"></script>' % json_script(cfg)
     badge = '<span class="badge%s">%s</span>' % (' test' if test_mode else '', 'Kiểm tra' if test_mode else 'Luyện tập')
     sub = '%s  ·  %d câu' % (S['title'], len(order))
-    s = page_shell(P['title'] + ' – ' + S['title'], sub, ''.join(body) + bar + modal + warn + scripts, badge=badge, h1=P['title'])
+    s = page_shell(P['title'] + ' – ' + S['title'], sub, ''.join(body) + bar + modal + warn + scripts, badge=badge, h1=P['title'], sid=S['id'])
     return s.replace('%NAV%', nav_tabs(S, P['id'], slug))
 
 
@@ -251,6 +270,8 @@ def apply_fixes(sid, S, ANS, EXP):
 def build_set(entry):
     sid, data_p, ans_p, gdir, udir, slug, imgdir, audio = entry
     S = load_py(data_p, 'SET')
+    if S is None:
+        return None, []   # bộ chưa soạn xong → bỏ qua
     ANS, EXP = load_answers(ans_p)
     apply_fixes(sid, S, ANS, EXP)
     d = os.path.join(OUT, gdir, udir, slug)
@@ -258,8 +279,9 @@ def build_set(entry):
     imgbase = '../../../../' + imgdir
     audio_src = '../../../../' + audio
     pages = []
-    with open(os.path.join(d, 'ly-thuyet.html'), 'w', encoding='utf8') as f:
-        f.write(build_theory_page(S, slug))
+    if S.get('theory'):
+        with open(os.path.join(d, 'ly-thuyet.html'), 'w', encoding='utf8') as f:
+            f.write(build_theory_page(S, slug))
     for P in S['pages']:
         with open(os.path.join(d, P['id'] + '.html'), 'w', encoding='utf8') as f:
             f.write(build_quiz_page(S, P, ANS, EXP, slug, imgbase, audio_src))
@@ -273,7 +295,7 @@ INDEX_CSS = """
 [hidden]{display:none!important}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 .top{position:sticky;top:0;z-index:30;background:linear-gradient(90deg,var(--pri),var(--pri2));color:#fff;display:flex;align-items:center;gap:12px;padding:10px 16px}
 .top h1{font-size:17px;margin:0;flex:1}.top button{background:rgba(255,255,255,.2);border:0;color:#fff;border-radius:10px;padding:8px 12px;font-size:15px;cursor:pointer}
-.menu{display:none}
+.locked{display:none!important}.menu{display:none}.gn-chip{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:14px}.gn-chip small{opacity:.8}.gn-chip a{color:#fff;margin-left:10px;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
 .layout{display:grid;grid-template-columns:270px 1fr;min-height:calc(100vh - 52px)}
 .sb{background:var(--sb);border-right:1px solid var(--line);padding:18px 16px;position:sticky;top:52px;height:calc(100vh - 52px);overflow:auto}
 .sb h4{margin:18px 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}.sb h4:first-child{margin-top:0}
@@ -282,7 +304,7 @@ INDEX_CSS = """
 .f{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;border:0;background:none;color:var(--ink);font-size:15px;text-align:left;cursor:pointer}
 .f:hover{background:var(--bg)}.f.on{background:linear-gradient(90deg,var(--pri),var(--pri2));color:#fff;font-weight:600}
 .f small{opacity:.75;font-size:12px}.f[disabled]{opacity:.4;cursor:not-allowed}
-.seg{display:flex;gap:6px;flex-wrap:wrap}.seg .f{border:1px solid var(--line);padding:7px 11px;flex:1;justify-content:center}.seg .f.on{border-color:transparent}
+.seg{display:flex;gap:6px;flex-wrap:wrap}.seg .f{border:1px solid var(--line);padding:7px 11px;flex:1;justify-content:center}.seg .f.on{border-color:transparent}.seg.kinds{display:grid;grid-template-columns:1fr 1fr}.seg.kinds .f{white-space:nowrap;padding:7px 8px}
 .reset{margin-top:18px;width:100%;padding:9px;border:1px dashed var(--line);border-radius:10px;background:none;color:var(--mut);cursor:pointer}
 main{padding:22px 24px 60px;max-width:1100px;width:100%}
 .bar{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;flex-wrap:wrap}.bar h2{margin:0;font-size:22px}.bar span{color:var(--mut)}
@@ -312,21 +334,35 @@ try{var sv=JSON.parse(localStorage.getItem('gn_idx')||'{}');for(var k in st)if(s
 var cards=[].slice.call(document.querySelectorAll('.setcard'));
 function save(){try{localStorage.setItem('gn_idx',JSON.stringify(st))}catch(e){}}
 function norm(s){return (s||'').toLowerCase()}
+function lockAll(){
+  var u=window.GNAuth&&GNAuth.user();var stu=u&&u.role==='student';
+  cards.forEach(function(c){
+    var tl=[].slice.call(c.querySelectorAll('.tile[data-sid]'));
+    if(tl.length){var any=false;tl.forEach(function(t){var lk=stu&&!GNAuth.allowed(t.dataset.sid);t.classList.toggle('locked',lk);if(!lk)any=true});c.classList.toggle('locked',!any)}
+    else c.classList.toggle('locked',!!(stu&&c.dataset.sid&&!GNAuth.allowed(c.dataset.sid)));
+  });
+  var vis=cards.filter(function(c){return !c.classList.contains('locked')});
+  [].forEach.call(document.querySelectorAll('.f[data-f=g][data-v]'),function(b){if(!b.dataset.v)return;var n=vis.filter(function(c){return c.dataset.g===b.dataset.v}).length;var sm=b.querySelector('small');if(sm)sm.textContent=n?n+' bộ':'chưa giao';if(stu)b.hidden=!n});
+  [].forEach.call(document.querySelectorAll('.f[data-f=u][data-v]'),function(b){if(!b.dataset.v)return;if(stu)b.hidden=!vis.some(function(c){return c.dataset.u===b.dataset.v})});
+  var nb=document.getElementById('nobai');if(nb)nb.hidden=!(stu&&!vis.length);
+}
 function apply(){
+  lockAll();
   var shown=0;
   cards.forEach(function(c){
+    if(c.classList.contains('locked')){c.hidden=true;return}
     var ok=(!st.g||c.dataset.g===st.g)&&(!st.u||c.dataset.u===st.u)&&(!st.k||c.dataset.k===st.k)&&(!st.q||norm(c.textContent).indexOf(norm(st.q))>=0);
     c.hidden=!ok;
     [].forEach.call(c.querySelectorAll('.tile'),function(t){
-      var tm=t.dataset.m||'';t.hidden=!!(st.m&&tm!==st.m);
+      var tm=t.dataset.m||'';t.hidden=!!(t.classList.contains('locked')||(st.m&&tm!==st.m));
     });
     if(ok&&st.m&&!c.querySelector('.tile:not([hidden])'))c.hidden=true;
     if(!c.hidden)shown++;
   });
-  document.getElementById('empty').hidden=shown>0;
+  document.getElementById('empty').hidden=shown>0||(document.getElementById('nobai')&&!document.getElementById('nobai').hidden);
   document.getElementById('cnt').textContent=shown+' bộ bài';
   [].forEach.call(document.querySelectorAll('.f[data-f]'),function(b){b.classList.toggle('on',(st[b.dataset.f]||'')===b.dataset.v)});
-  var t=[];if(st.g)t.push('Lớp '+st.g);if(st.u)t.push('Unit '+st.u);
+  var t=[];if(st.g)t.push('Lớp '+st.g);if(st.u)t.push(st.u==='MidTerm1'?'Mid-term 1':'Unit '+st.u);
   document.getElementById('ttl').textContent=t.length?t.join(' · '):'Tất cả bài học';
   save();
 }
@@ -339,19 +375,28 @@ document.addEventListener('click',function(e){
 });
 document.getElementById('q').addEventListener('input',function(e){st.q=e.target.value;apply()});
 document.getElementById('q').value=st.q||'';
+window.gnApply=apply;
 apply();
 })();
 """
 
 
+def unum(udir):
+    return udir[4:] if udir.startswith('Unit') else udir
+
+
+def ulabel(u):
+    return 'Mid-term 1' if u == 'MidTerm1' else 'Unit ' + u
+
+
 def build_index(done):
     grades = sorted({e[3][3:] for e, _, _ in done}, key=int)
-    units = sorted({(e[3][3:], e[4][4:]) for e, _, _ in done}, key=lambda x: (int(x[0]), int(x[1])))
+    units = sorted({(e[3][3:], unum(e[4])) for e, _, _ in done}, key=lambda x: (int(x[0]), 0 if x[1].isdigit() else 1, int(x[1]) if x[1].isdigit() else 0))
     def cnt(fn):
         return sum(1 for e, _, _ in done if fn(e))
     o = ['<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-         '<title>Bài luyện tập & đề kiểm tra</title><style>%s</style></head><body>' % INDEX_CSS,
-         '<div class="top"><button class="menu" aria-label="Mở bộ lọc">☰ Bộ lọc</button><h1>GNOMIO · Lớp 1–12</h1></div>',
+         '<title>Bài luyện tập & đề kiểm tra</title><style>%s</style>%s</head><body>' % (INDEX_CSS, AUTH_HEAD % (APPS_SCRIPT_URL, '', '')),
+         '<div class="top"><button class="menu" aria-label="Mở bộ lọc">☰ Bộ lọc</button><h1>GNOMIO · Lớp 1–12</h1><span id="chip"></span></div>',
          '<div class="layout"><aside class="sb">',
          '<h4>Tìm kiếm</h4><input id="q" type="search" placeholder="Tên unit, kỹ năng…">',
          '<h4>Lớp</h4><div class="fl"><button class="f" data-f="g" data-v="">Tất cả lớp</button>']
@@ -363,28 +408,58 @@ def build_index(done):
             o.append('<button class="f" disabled>Lớp %d <small>sắp có</small></button>' % g)
     o.append('</div><h4>Unit</h4><div class="fl"><button class="f" data-f="u" data-v="">Tất cả unit</button>')
     for g, u in units:
-        o.append('<button class="f" data-f="u" data-v="%s">Lớp %s · Unit %s</button>' % (u, g, u))
-    o.append('</div><h4>Loại bài tập</h4><div class="seg"><button class="f" data-f="k" data-v="">Tất cả</button>'
-             '<button class="f" data-f="k" data-v="botro">Bổ trợ</button><button class="f" data-f="k" data-v="4kn">4 kỹ năng</button></div>'
+        o.append('<button class="f" data-f="u" data-v="%s">Lớp %s · %s</button>' % (u, g, ulabel(u)))
+    o.append('</div><h4>Loại bài tập</h4><div class="seg kinds"><button class="f" data-f="k" data-v="">Tất cả</button>'
+             '<button class="f" data-f="k" data-v="botro">Bổ trợ</button><button class="f" data-f="k" data-v="4kn">4 kỹ năng</button>'
+             '<button class="f" data-f="k" data-v="ontap">Ôn tập</button><button class="f" data-f="k" data-v="test">Đề kiểm tra</button></div>'
              '<h4>Hình thức</h4><div class="seg"><button class="f" data-f="m" data-v="">Tất cả</button>'
              '<button class="f" data-f="m" data-v="prac">Luyện tập</button><button class="f" data-f="m" data-v="test">Kiểm tra</button></div>'
              '<button class="reset" id="reset">↺ Xoá bộ lọc</button></aside><div class="scrim"></div><main>'
              '<div class="bar"><h2 id="ttl">Tất cả bài học</h2><span id="cnt"></span></div>')
-    icons = {'phat-am': '🔊', 'tu-vung': '🔤', 'tu-vung-ngu-phap': '🔤', 'ngu-phap': '🧩', 'nghe': '🎧', 'noi': '🗣️', 'doc': '📖', 'viet': '✍️', 'kiem-tra': '📝'}
-    for entry, S, pages in done:
+    icons = {'phat-am': '🔊', 'tu-vung': '🔤', 'tu-vung-ngu-phap': '🔤', 'ngu-phap': '🧩', 'nghe': '🎧', 'noi': '🗣️', 'doc': '📖', 'viet': '✍️', 'kiem-tra': '📝', 'phat-am': '🔊', 'loi-sai': '🔍', 'dien-tu': '🧩', 'doc-hieu': '📖', 'noi-giao-tiep': '🗣️'}
+    tests = [x for x in done if x[0][5].startswith('test')]
+    for entry, S, pages in [x for x in done if not x[0][5].startswith('test')]:
         gdir, udir, slug = entry[3], entry[4], entry[5]
-        g, u = gdir[3:], udir[4:]
-        o.append('<section class="card setcard" data-g="%s" data-u="%s" data-k="%s"><div class="settitle"><span class="chip">Lớp %s · Unit %s</span><h3>%s</h3></div><div class="tiles">'
-                 % (g, u, slug, g, u, html.escape(S['title'])))
-        o.append('<a class="tile" data-m="prac" href="WebBaiTap/%s/%s/%s/ly-thuyet.html"><span class="ic">📘</span><b>Lý thuyết</b><small>Từ vựng · ngữ pháp</small></a>' % (gdir, udir, slug))
+        g, u = gdir[3:], unum(udir)
+        kind = 'test' if slug.startswith('test') else slug
+        o.append('<section class="card setcard" data-g="%s" data-u="%s" data-k="%s" data-sid="%s"><div class="settitle"><span class="chip">Lớp %s · %s</span><h3>%s</h3></div><div class="tiles">'
+                 % (g, u, kind, S['id'], g, ulabel(u), html.escape(S['title'])))
+        if S.get('theory'):
+            o.append('<a class="tile" data-m="prac" href="WebBaiTap/%s/%s/%s/ly-thuyet.html"><span class="ic">📘</span><b>Lý thuyết</b><small>Từ vựng · ngữ pháp</small></a>' % (gdir, udir, slug))
         for pid, title, mode, n in pages:
             o.append('<a class="tile %s" data-m="%s" href="WebBaiTap/%s/%s/%s/%s.html"><span class="ic">%s</span><b>%s</b><small>%d câu%s</small></a>'
                      % ('t-test' if mode == 'test' else '', 'test' if mode == 'test' else 'prac', gdir, udir, slug, pid, icons.get(pid, '✏️'), html.escape(title), n, ' · có tính giờ' if mode == 'test' else ''))
         o.append('</div></section>')
-    o.append('<div class="empty" id="empty" hidden>Không có bộ bài phù hợp. Hãy bấm “Xoá bộ lọc”.</div>'
+    if tests:   # các Test riêng gom thành một thẻ
+        g, u = tests[0][0][3][3:], unum(tests[0][0][4])
+        o.append('<section class="card setcard" data-g="%s" data-u="%s" data-k="test"><div class="settitle"><span class="chip">Lớp %s · %s</span><h3>Đề kiểm tra Mid-term 1 (%d test)</h3></div><div class="tiles">' % (g, u, g, ulabel(u), len(tests)))
+        for entry, S, pages in tests:
+            pid, title, mode, n = pages[0]
+            P0 = S['pages'][0]
+            num = S['title'].split('–')[0].strip()
+            o.append('<a class="tile t-test" data-m="test" data-sid="%s" href="WebBaiTap/%s/%s/%s/%s.html"><span class="ic">%s</span><b>%s</b><small>%d câu · %d phút%s</small></a>'
+                     % (S['id'], entry[3], entry[4], entry[5], pid, '🎧' if P0.get('audio') else '📝', html.escape(num), n, P0.get('minutes', 0), ' · có nghe' if P0.get('audio') else ''))
+        o.append('</div></section>')
+    o.append('<div class="empty" id="nobai" hidden>Chưa có bài nào được giao cho lớp của bạn. Hãy nhờ giáo viên giao bài.</div><div class="empty" id="denied" hidden>Bài đó chưa được giao cho lớp của bạn.</div><div class="empty" id="empty" hidden>Không có bộ bài phù hợp. Hãy bấm “Xoá bộ lọc”.</div>'
              '<div class="foot">Học sinh làm bài trên điện thoại hoặc máy tính · Kết quả ghi tự động về giáo viên</div></main></div>'
-             '<script>%s</script></body></html>' % INDEX_JS)
+             '<script>GNAuth.chip("#chip");</script><script>%s</script><script>GNAuth.verify(function(){window.gnApply&&gnApply()});if(/denied=1/.test(location.search)){var d=document.getElementById("denied");if(d)d.hidden=false}</script></body></html>' % INDEX_JS)
     open(os.path.join(ROOT, 'index.html'), 'w', encoding='utf8').write(''.join(o))
+    build_site_pages(done)
+
+
+def catalog(done):
+    out = []
+    for e, S, pages in done:
+        slug = e[5]
+        out.append({'id': S['id'], 'title': S['title'], 'grade': int(e[3][3:]), 'unit': ulabel(unum(e[4])), 'kind': 'test' if slug.startswith('test') else slug})
+    return out
+
+
+def build_site_pages(done=None):
+    """site/*.html (đăng nhập, quản trị, điểm của tôi) → thư mục gốc, gắn link Apps Script."""
+    for n in ('login.html', 'admin.html', 'me.html'):
+        t = open(os.path.join(ROOT, 'site', n), encoding='utf8').read().replace('%GN_URL%', APPS_SCRIPT_URL).replace('%CATALOG%', json.dumps(catalog(done or []), ensure_ascii=False))
+        open(os.path.join(ROOT, n), 'w', encoding='utf8').write(t)
 
 
 if __name__ == '__main__':
@@ -394,6 +469,8 @@ if __name__ == '__main__':
         if want and e[0] not in want:
             continue
         S, pages = build_set(e)
+        if S is None:
+            continue
         done.append((e, S, pages))
         print(e[0], '->', len(pages), 'trang,', sum(p[3] for p in pages), 'câu')
     if not want:

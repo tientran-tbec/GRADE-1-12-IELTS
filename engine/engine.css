@@ -202,3 +202,5 @@ body.testmode .wrap{-webkit-user-select:text;user-select:text}
 .modal-actions{margin-top:12px}
 @media print{.tools,.draw-layer{display:none!important}}
 .tools{z-index:40}.bar{z-index:35}.audio{z-index:12}
+
+.gn-chip{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:.85rem;margin-top:8px;color:#fff}.gn-chip small{opacity:.85}.gn-chip a{color:#fff;margin-left:10px;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}

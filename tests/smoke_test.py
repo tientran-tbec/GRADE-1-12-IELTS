@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Smoke test: mở từng trang bài tập, điền ĐÁP ÁN ĐÚNG, nộp, kiểm tra 100% & không lỗi JS / file thiếu."""
 import glob, os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from playwright.sync_api import sync_playwright
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -8,8 +9,10 @@ pages = sorted(p for p in glob.glob(os.path.join(ROOT, 'WebBaiTap', '**', '*.htm
 bad = 0
 with sync_playwright() as pw:
     br = pw.chromium.launch()
+    from authstub import new_ctx
+    ctx = new_ctx(br)
     for f in pages:
-        pg = br.new_page(); errs = []
+        pg = ctx.new_page(); errs = []
         pg.on('pageerror', lambda e: errs.append('JS: %s' % e))
         pg.on('requestfailed', lambda r: errs.append('FAIL: %s' % r.url[-60:]) if not (r.url.endswith('.mp3') or 'script.google.com' in r.url or 'googleusercontent' in r.url) else None)
         pg.on('response', lambda r: errs.append('HTTP %d: %s' % (r.status, r.url[-60:])) if r.status >= 400 else None)
@@ -20,7 +23,6 @@ with sync_playwright() as pw:
             print('SKIP (không phải trang quiz):', rel); pg.close(); continue
         for u in pg.evaluate('Array.from(document.querySelectorAll("audio source,audio")).map(function(a){return a.getAttribute("src")||""}).filter(Boolean)'):
             if not os.path.exists(os.path.normpath(os.path.join(os.path.dirname(f), u))): errs.append('MISSING audio ' + u)
-        pg.fill('#stName', 'Test'); pg.fill('#stClass', '11A')
         pg.click('#startBtn')
         items = pg.evaluate('Object.keys(window.QUIZ.ANS)')
         for iid in items:

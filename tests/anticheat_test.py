@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 """Kiểm tra chống gian lận trên trang kiểm tra: toàn màn hình, chặn chuột phải/copy/dán/phím tắt, đếm vi phạm, hết giờ + gia hạn, tắt sau khi nộp."""
-import os
+import os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from authstub import new_ctx
 from playwright.sync_api import sync_playwright
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 f = 'file://' + os.path.join(ROOT, 'WebBaiTap/Lop11/Unit1/botro/kiem-tra.html')
 res = []
 def chk(n, ok): res.append(ok); print('OK  ' if ok else 'FAIL', n)
 with sync_playwright() as pw:
-    pg = pw.chromium.launch().new_page(); errs = []
+    pg = new_ctx(pw.chromium.launch()).new_page(); errs = []
     pg.on('pageerror', lambda e: errs.append(str(e)))
     pg.on('dialog', lambda d: d.accept())
     pg.goto(f)
-    pg.click('#startBtn'); chk('bắt buộc nhập tên/lớp', 'Vui lòng' in pg.inner_text('#stErr'))
-    pg.fill('#stName', 'A'); pg.fill('#stClass', '11A'); pg.click('#startBtn')
+    chk('đã đăng nhập: modal chào tên, không bắt nhập tay', 'Học Sinh Test' in pg.inner_text('#startModal') and not pg.is_visible('#stName'))
+    pg.click('#startBtn')
     chk('đóng popup sau khi nhập', pg.evaluate("document.getElementById('startModal').hidden"))
     chk('body có class testmode', pg.evaluate("document.body.classList.contains('testmode')"))
     chk('user-select none', pg.evaluate("getComputedStyle(document.querySelector('body')).userSelect") == 'none')

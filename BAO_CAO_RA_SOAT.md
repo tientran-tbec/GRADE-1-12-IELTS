@@ -77,3 +77,18 @@ Quy ước từ nay: câu nào Word gốc sai/mơ hồ thì sửa trong `units/f
 - U2 bổ trợ vg2.28 (A/B/C), vg2.29 (B/D), vg2.31 (A/B), vg2.35 (A/B), vg2.39 (B/D), kt.11 (B/C): các cặp must / have to…
 
 **Giữ nguyên (còn mơ hồ nhưng không có phương án tốt hơn)**: U3 4kn kiem-tra câu 22 (loveable/liveable), pr1.3 (privacy), gr1.8; U3 bổ trợ kt.13; U1 4KN vo4.3, re2.3; U2 4kn vo4.3; các câu 2 phương án vg4.4, vg8.9 (U2) vì chấp nhận cả hai thì mất ý nghĩa câu hỏi.
+
+---
+
+# Lớp 11 · Mid-term 1 (mục mới trên trang chủ)
+
+**Cấu trúc:** 1 bộ *Ôn tập đề cương* (gộp 4 file đề cương: 469 câu, 9 trang; bỏ 21 câu trùng; có lý thuyết, bài luyện từng dạng và bài kiểm tra tổng hợp 40 câu) + 13 test riêng. Test 1–3 = bộ đề 25-26 (đề 1, 2, 3); Test 4–9 = Đề 5, 6, 7, 8, 9, 10; Test 10–13 = Đề 1, 2, 3, 4.
+Tất cả test: chế độ kiểm tra tính giờ (45–60 phút), đáp án + giải thích tiếng Việt sau khi nộp. Test 6–13 có phần nghe (mp3 ghép/cắt thành 1 file mỗi test; script nhận dạng bằng Whisper rồi đối chiếu).
+
+**Ghi chú rà soát (chi tiết nằm trong `GHI_CHU_RA_SOAT` của từng file `units/mt1_*_dapan.py`):**
+- Test 1–3: khoá Word chỉ 1 đáp án nhưng nhiều phương án đúng → chấp nhận cả hai ở câu 9 (cả ba đề); câu 12 cả ba đề (Lots/Plenty…) và Test 3 câu 11 còn mơ hồ, giữ khoá Word.
+- Test 4: Q28 chấp nhận A/B (that/which); Q36 giữ khoá. Test 5: Q32 chấp nhận C/B (searing/warming) – nên xem lại; Q29 giữ B.
+- Test 6: Q13 Word không tô → chọn D; Q22 chấp nhận C/D. Test 7: Q7 B/C, Q12 B/D, Blank 1 A/B; đề gốc ghi "blanks 1 to 6" nhưng chỉ có 5 ô → sửa thành 5. File mp3 có thêm hội thoại cửa hàng quần áo không thuộc đề → đã cắt.
+- Test 8: g3.10 (A/B), g3.11 (A/C), g5.29 (C/D); g7.37 đáp án đúng "consider". Test 9: g3.15 (A/D).
+- Test 10 (Đề 1): khoá Word sai 3 câu nghe → đã dùng đáp án đúng: câu 1 = C, 2 = A, 5 = B (theo audio). Test 11–13: tự giải toàn bộ vì Word không có khoá; Test 11 mp3 Part 1/2 bị đặt ngược → đã ghép đúng thứ tự.
+- Ôn tập đề cương: cả 4 file Word không có khoá → tự giải 100%; 26 câu ghi chú mơ hồ (đáp án dạng danh sách).

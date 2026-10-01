@@ -136,6 +136,7 @@
     if (!url || /CHUA_CAU_HINH|YOUR_/.test(url)) return;
     payload.set_id = Q.setId; payload.page_id = Q.pageId; payload.mode = Q.mode;
     payload.student_name = state.student.name; payload.student_class = state.student.cls;
+    var au = window.GNAuth && GNAuth.get(); if (au) payload.token = au.token;   // máy chủ lấy danh tính từ token
     payload.ts = new Date().toISOString();
     var body = JSON.stringify(payload);
     try {
@@ -268,10 +269,18 @@
   /* ---------- khởi tạo ---------- */
   function init() {
     // thông tin học sinh
-    try { var s = JSON.parse(lsGet('gnomio_student') || 'null'); if (s) { $('#stName').value = s.name || ''; $('#stClass').value = s.cls || ''; } } catch (e) {}
+    var au = window.GNAuth && GNAuth.get();
+    if (au) {   // đã đăng nhập: dùng danh tính tài khoản, không nhập tay
+      $('#stName').value = au.user.name; $('#stClass').value = au.user.cls || '';
+      var lbs = $$('#startModal label'); lbs.forEach(function (l) { l.hidden = true; });
+      var hp = $('#startModal p'); if (hp) hp.innerHTML = 'Xin chào <b>' + (au.user.name || '').replace(/</g, '&lt;') + '</b>' + (au.user.cls ? ' · lớp ' + au.user.cls : '') + '. Kết quả sẽ được ghi vào tài khoản của bạn.';
+      var skb = $('#skipBtn'); if (skb) skb.hidden = true;
+    } else {
+      try { var s = JSON.parse(lsGet('gnomio_student') || 'null'); if (s) { $('#stName').value = s.name || ''; $('#stClass').value = s.cls || ''; } } catch (e) {}
+    }
     $('#startBtn').onclick = function () {
       var n = $('#stName').value.trim(), c = $('#stClass').value.trim();
-      if (testMode && (!n || !c)) { $('#stErr').textContent = 'Vui lòng nhập họ tên và lớp.'; return; }
+      if (testMode && !au && (!n || !c)) { $('#stErr').textContent = 'Vui lòng nhập họ tên và lớp.'; return; }
       begin(n || 'Ẩn danh', c);
     };
     var sk = $('#skipBtn'); if (sk) sk.onclick = function () { state.started = true; state.t0 = now(); $('#startModal').hidden = true; };
