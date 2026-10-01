@@ -269,21 +269,21 @@
   /* ---------- khởi tạo ---------- */
   function init() {
     // thông tin học sinh
-    var au = window.GNAuth && GNAuth.get();
-    if (au) {   // đã đăng nhập: dùng danh tính tài khoản, không nhập tay
-      $('#stName').value = au.user.name; $('#stClass').value = au.user.cls || '';
+    var ses = window.GNAuth && GNAuth.get();
+    if (ses) {   // đã đăng nhập: dùng danh tính tài khoản, không nhập tay
+      $('#stName').value = ses.user.name; $('#stClass').value = ses.user.cls || '';
       var lbs = $$('#startModal label'); lbs.forEach(function (l) { l.hidden = true; l.style.display = 'none'; });
-      var hp = $('#startModal p'); if (hp) hp.innerHTML = 'Xin chào <b>' + (au.user.name || '').replace(/</g, '&lt;') + '</b>' + (au.user.cls ? ' · lớp ' + au.user.cls : '') + (au.user.role === 'student' ? '. Kết quả sẽ được ghi vào tài khoản của bạn.' : '. Bạn đang làm thử — kết quả không được lưu.');
+      var hp = $('#startModal p'); if (hp) hp.innerHTML = 'Xin chào <b>' + (ses.user.name || '').replace(/</g, '&lt;') + '</b>' + (ses.user.cls ? ' · lớp ' + ses.user.cls : '') + (ses.user.role === 'student' ? '. Kết quả sẽ được ghi vào tài khoản của bạn.' : '. Bạn đang làm thử — kết quả không được lưu.');
       var skb = $('#skipBtn'); if (skb) skb.hidden = true;
     } else {
       try { var s = JSON.parse(lsGet('gnomio_student') || 'null'); if (s) { $('#stName').value = s.name || ''; $('#stClass').value = s.cls || ''; } } catch (e) {}
     }
     $('#startBtn').onclick = function () {
       var n = $('#stName').value.trim(), c = $('#stClass').value.trim();
-      if (testMode && !au && (!n || !c)) { $('#stErr').textContent = 'Vui lòng nhập họ tên và lớp.'; return; }
+      if (testMode && !ses && (!n || !c)) { $('#stErr').textContent = 'Vui lòng nhập họ tên và lớp.'; return; }
       begin(n || 'Ẩn danh', c);
     };
-    if (au && !testMode) begin(au.user.name || '', au.user.cls || '');   // luyện tập: tự vào bài bằng danh tính tài khoản, không hỏi lại
+    if (ses && !testMode) begin(ses.user.name || '', ses.user.cls || '');   // luyện tập: tự vào bài bằng danh tính tài khoản, không hỏi lại
     var sk = $('#skipBtn'); if (sk) sk.onclick = function () { state.started = true; state.t0 = now(); $('#startModal').hidden = true; };
     $('#warnOk').onclick = function () { $('#warnModal').hidden = true; };
 

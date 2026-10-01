@@ -171,12 +171,18 @@ def json_script(obj):
     return json.dumps(obj, ensure_ascii=False).replace('</', '<\\/')
 
 
-AUTH_HEAD = '<script>window.GN_URL="%s";window.GN_ROOT="%s";</script><script src="%sengine/auth.js"></script><script>GNAuth.require()</script>'
+import time as _t
+BV = str(int(_t.time()))   # chống cache trình duyệt/GitHub Pages cho engine
+AUTH_HEAD = '<script>window.GN_URL="%s";window.GN_ROOT="%s";</script><script src="%sengine/auth.js?v='+BV+'"></script><script>GNAuth.require()</script>'
 
 
 def page_shell(title, sub, body, extra_head='', badge='', h1=None, sid=''):
+    return _page_shell(title, sub, body, extra_head, badge, h1, sid).replace('@@V@@', BV)
+
+
+def _page_shell(title, sub, body, extra_head='', badge='', h1=None, sid=''):
     return ('<!doctype html>\n<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-            '<title>%s</title><link rel="stylesheet" href="../../../../engine/engine.css">%s%s</head><body>'
+            '<title>%s</title><link rel="stylesheet" href="../../../../engine/engine.css?v=@@V@@">%s%s</head><body>'
             '<header class="top"><div class="wrap">%s<h1>%s</h1><div class="sub">%s</div>%%NAV%%</div></header>%s'
             '<script>GNAuth.chip(".top .wrap");GNAuth.verify();</script></body></html>'
             % (html.escape(title), AUTH_HEAD % (APPS_SCRIPT_URL, '../../../../', '../../../../') + ('<script>GNAuth.requireSet(%s)</script>' % json.dumps(sid) if sid else ''), extra_head, badge, html.escape(h1 or title), html.escape(sub), body))
@@ -237,7 +243,7 @@ def build_quiz_page(S, P, ANS, EXP, slug, imgbase, audio_src):
            'url': APPS_SCRIPT_URL, 'audioMaxPlays': P.get('audio_max_plays', 0), 'lockSeek': bool(P.get('lock_seek')),
            'order': order, 'items': items_meta,
            'ANS': {i: ANS[i] for i in order if i in ANS}, 'EXP': {i: EXP[i] for i in order if i in EXP}}
-    scripts = '<script>window.QUIZ=%s;</script><script src="../../../../engine/engine.js"></script><script src="../../../../engine/tools.js"></script>' % json_script(cfg)
+    scripts = '<script>window.QUIZ=%s;</script><script src="../../../../engine/engine.js?v=@@V@@"></script><script src="../../../../engine/tools.js?v=@@V@@"></script>' % json_script(cfg)
     badge = '<span class="badge%s">%s</span>' % (' test' if test_mode else '', 'Kiểm tra' if test_mode else 'Luyện tập')
     sub = '%s  ·  %d câu' % (S['title'], len(order))
     s = page_shell(P['title'] + ' – ' + S['title'], sub, ''.join(body) + bar + modal + warn + scripts, badge=badge, h1=P['title'], sid=S['id'])
@@ -458,7 +464,7 @@ def catalog(done):
 def build_site_pages(done=None):
     """site/*.html (đăng nhập, quản trị, điểm của tôi) → thư mục gốc, gắn link Apps Script."""
     for n in ('login.html', 'admin.html', 'me.html'):
-        t = open(os.path.join(ROOT, 'site', n), encoding='utf8').read().replace('%GN_URL%', APPS_SCRIPT_URL).replace('%CATALOG%', json.dumps(catalog(done or []), ensure_ascii=False))
+        t = open(os.path.join(ROOT, 'site', n), encoding='utf8').read().replace('engine/auth.js"', 'engine/auth.js?v=' + BV + '"').replace('engine/app.css"', 'engine/app.css?v=' + BV + '"').replace('%GN_URL%', APPS_SCRIPT_URL).replace('%CATALOG%', json.dumps(catalog(done or []), ensure_ascii=False))
         open(os.path.join(ROOT, n), 'w', encoding='utf8').write(t)
 
 
