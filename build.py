@@ -14,6 +14,10 @@ PAGES_URL = 'https://tientran-tbec.github.io/GRADE-1-12-IELTS/'
 
 # (id bộ, file dữ liệu, file đáp án, thư mục lớp, thư mục unit, slug thư mục, ảnh)
 REGISTRY = [
+    # --- Lớp 10 · Unit 1 ---
+    ('lop10-u1-luyentap', 'units/lop10_u1_luyentap.py', 'units/lop10_u1_luyentap_dapan.py', 'Lop10', 'Unit1', 'luyentap', 'assets/lop10_u1/luyentap', 'audio/lop10_u1_luyentap_nghe.mp3'),
+    ('lop10-u1-botro', 'units/lop10_u1_botro.py', 'units/lop10_u1_botro_dapan.py', 'Lop10', 'Unit1', 'botro', 'assets/lop10_u1/botro', 'audio/lop10_u1_botro_nghe.mp3'),
+    ('lop10-u1-chuyensau', 'units/lop10_u1_chuyensau.py', 'units/lop10_u1_chuyensau_dapan.py', 'Lop10', 'Unit1', 'chuyensau', 'assets/lop10_u1/chuyensau', 'audio/lop10_u1_chuyensau_nghe.mp3'),
     ('lop11-u1-botro', 'units/lop11_u1_botro.py', 'units/lop11_u1_botro_dapan.py', 'Lop11', 'Unit1', 'botro', 'assets/lop11_u1/botro', 'audio/lop11_u1_botro_nghe.mp3'),
     ('lop11-u1-4kn', 'units/lop11_u1_4kn.py', 'units/lop11_u1_4kn_dapan.py', 'Lop11', 'Unit1', '4kn', 'assets/lop11_u1/4kn', 'audio/lop11_u1_4kn_nghe.mp3'),
     ('lop11-u2-botro', 'units/lop11_u2_botro.py', 'units/lop11_u2_botro_dapan.py', 'Lop11', 'Unit2', 'botro', 'assets/lop11_u2/botro', 'audio/lop11_u2_botro_nghe.mp3'),
@@ -430,7 +434,7 @@ def build_index(done):
         for sk in ('Listening', 'Writing', 'Speaking'):
             o.append('<button class="f" disabled>IELTS · %s <small>sắp có</small></button>' % sk)
     o.append('</div><h4>Loại bài tập</h4><div class="seg kinds"><button class="f" data-f="k" data-v="">Tất cả</button>'
-             '<button class="f" data-f="k" data-v="botro">Bổ trợ</button><button class="f" data-f="k" data-v="4kn">4 kỹ năng</button>'
+             '<button class="f" data-f="k" data-v="luyentap">Luyện tập</button><button class="f" data-f="k" data-v="botro">Bổ trợ</button><button class="f" data-f="k" data-v="chuyensau">Chuyên sâu</button><button class="f" data-f="k" data-v="4kn">4 kỹ năng</button>'
              '<button class="f" data-f="k" data-v="ontap">Ôn tập</button><button class="f" data-f="k" data-v="test">Đề kiểm tra</button>'
              '<button class="f" data-f="k" data-v="full">IELTS Full Test</button><button class="f" data-f="k" data-v="dang">IELTS theo dạng</button></div>'
              '<h4>Hình thức</h4><div class="seg"><button class="f" data-f="m" data-v="">Tất cả</button>'
