@@ -27,3 +27,29 @@ Transcript nhận dạng bằng Whisper large-v3 trên máy bạn, đối chiế
 ## D. Chưa làm
 - Giải thích song ngữ Anh–Việt kèm trích dẫn nguyên văn (hiện giải thích bằng tiếng Việt, có in đậm/trích ý chính).
 - Link Apps Script: cần dán hàm `handleGrade()` vào code.gs cũ (xem HUONG_DAN.md).
+
+---
+
+# Báo cáo rà soát – Unit 2 (The Generation Gap)
+
+Cách làm giống Unit 1: tự giải độc lập từng câu, đối chiếu với khoá (tô màu/dấu tick) trong file Word. Phần Nghe dùng script có sẵn trong file Word (chưa nghe lại audio bằng Whisper).
+
+## A. Đề gốc bị lỗi – đã chỉnh trong đề
+- Bổ trợ – vg2.5: phương án D bị cắt thành "qua" → chỉnh thành *quarrel*.
+- Bổ trợ – vg2.7: phương án D bị cắt "All are co" → chỉnh thành *All are correct*.
+- Bổ trợ – ph3.4: đề ghi "D. argument  D. cultural" (trùng chữ D) → đọc là C. argument, D. cultural.
+- Bổ trợ – vg8 (cross out): hệ thống chuyển thành chọn 1 trong 2 từ đúng (đáp án = từ KHÔNG bị gạch).
+- Bổ trợ – vg9/10/11 và kt.41–50: các câu viết lại chấp nhận 1–3 cách viết; học sinh có thể viết hơi khác vẫn bị tính sai, nên xem đáp án mẫu trong giải thích.
+
+## B. Câu mơ hồ (nhiều phương án đúng) – đang theo khoá gốc
+- Bổ trợ vg2.28 (mustn't / had better not), vg2.29 (must / have to), vg2.31 (must/have to/should/ought to), vg2.35 (have to / must), vg2.39 (must / has to), kt.11 (should loại, must/have to), vg4.4 (must/have to), vg8.9 (have to/must).
+- Bổ trợ vg2.5: *conflict* (khoá) – *argument* số ít cũng gần nghĩa.
+- Bổ trợ sp3.4: B và D đều hợp lí; theo khoá chọn D.
+- Bổ trợ kt.37: "must" → "should" (khoá chọn lỗi ở must; có thể đề muốn lỗi ở "Thus").
+- 4KN vo4.3 (adapt ↔ neglect): cặp trái nghĩa yếu, đang theo khoá.
+- 4KN gr2.3 (have to / must), kt.34 (Title A, B khá gần).
+
+## C. Chưa làm / ghi chú
+- Phần Nghe (cả hai bộ) chưa nhận dạng lại bằng Whisper; transcript lấy từ Word. Nếu bạn muốn kiểm tra khớp audio, báo mình chạy.
+- Giải thích song ngữ Anh–Việt: vẫn chưa làm.
+- Bổ trợ ph1 (dạng yếu/mạnh): bài thực hành đọc theo cặp, không chấm điểm.

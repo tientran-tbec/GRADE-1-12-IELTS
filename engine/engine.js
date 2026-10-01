@@ -204,6 +204,14 @@
     } catch (e) {}
   }
 
+  /* ---------- nhật ký luyện tập (gọn: 1 dòng / sự kiện chính) ---------- */
+  function resetsGet() { try { return parseInt(sessionStorage.getItem('rs_' + Q.setId + Q.pageId) || '0', 10) || 0; } catch (e) { return 0; } }
+  function practicePayload(ev) {
+    var t = tally(), wrong = Q.order.filter(function (id) { return answered(id) && isCorrect(id) === false; });
+    return { action: 'grade_practice', event: ev, done: t.done, score: t.ok, total: t.total, wrong: wrong.join(','), resets: resetsGet(),
+      time_spent: state.t0 ? Math.round((now() - state.t0) / 1000) : 0 };
+  }
+
   /* ---------- bắt đầu ---------- */
   function begin(name, cls) {
     state.student = { name: name, cls: cls };
@@ -211,7 +219,7 @@
     state.started = true; state.t0 = now();
     $('#startModal').hidden = true;
     log('enter');
-    send({ action: 'grade_test_enter' }, false);
+    if (testMode) send({ action: 'grade_test_enter' }, false); else send(practicePayload('enter'), false);
     if (testMode) {
       enterFullscreen();
       state.remain = (Q.minutes || 40) * 60;
@@ -283,7 +291,7 @@
       });
     });
     var sub = $('#submit'); if (sub) sub.onclick = function () { submit(false); };
-    var rs = $('#reset'); if (rs) rs.onclick = function () { if (window.confirm('Làm lại từ đầu? Kết quả hiện tại sẽ bị xoá.')) location.reload(); };
+    var rs = $('#reset'); if (rs) rs.onclick = function () { if (window.confirm('Làm lại từ đầu? Kết quả hiện tại sẽ bị xoá.')) { try { sessionStorage.setItem('rs_' + Q.setId + Q.pageId, String(resetsGet() + 1)); } catch (e) {} if (state.started && !testMode) send(practicePayload('reset'), true); state.submitted = true; location.reload(); } };
     $$('textarea.blank.long').forEach(function (ta) {
       var grow = function () { ta.style.height = 'auto'; ta.style.height = Math.max(96, ta.scrollHeight + 2) + 'px'; };
       ta.addEventListener('input', grow);
@@ -345,6 +353,7 @@
       window.addEventListener('beforeunload', function (e) { if (live()) { e.preventDefault(); e.returnValue = ''; } });
     }
     window.addEventListener('pagehide', function () {
+      if (state.started && !state.submitted && !testMode && state.student.name) send(practicePayload('leave'), true);
       if (state.started && !state.submitted && testMode) {
         var t = tally();
         send({ action: 'grade_save_partial', score: t.ok, total: t.total, tab_switch: state.tab, blur: state.blur, fullscreen_exit: state.fs,

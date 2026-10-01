@@ -14,6 +14,8 @@ PAGES_URL = 'https://tientran-tbec.github.io/GRADE-6-12/'
 REGISTRY = [
     ('lop11-u1-botro', 'units/lop11_u1_botro.py', 'units/lop11_u1_botro_dapan.py', 'Lop11', 'Unit1', 'botro', 'assets/lop11_u1/botro', 'audio/lop11_u1_botro_nghe.mp3'),
     ('lop11-u1-4kn', 'units/lop11_u1_4kn.py', 'units/lop11_u1_4kn_dapan.py', 'Lop11', 'Unit1', '4kn', 'assets/lop11_u1/4kn', 'audio/lop11_u1_4kn_nghe.mp3'),
+    ('lop11-u2-botro', 'units/lop11_u2_botro.py', 'units/lop11_u2_botro_dapan.py', 'Lop11', 'Unit2', 'botro', 'assets/lop11_u2/botro', 'audio/lop11_u2_botro_nghe.mp3'),
+    ('lop11-u2-4kn', 'units/lop11_u2_4kn.py', 'units/lop11_u2_4kn_dapan.py', 'Lop11', 'Unit2', '4kn', 'assets/lop11_u2/4kn', 'audio/lop11_u2_4kn_nghe.mp3'),
 ]
 
 
@@ -48,7 +50,7 @@ def radio_item(it, plain=False, short=True):
     cols = ' cols' if (len(opts) <= 4 and all(len(re.sub(r'<[^>]+>', '', o)) <= 22 for o in opts)) else ''
     out = ['<div class="opts%s">' % cols]
     for i, o in enumerate(opts):
-        L = 'ABCDEF'[i]
+        L = 'ABCDEFGHIJ'[i]
         if it.get('plain'):
             out.append('<label class="opt"><input type="radio" name="%s" value="%s"><span>%s</span></label>' % (esc_attr(it['id']), esc_attr(o), o))
         else:
@@ -66,7 +68,7 @@ def tf_item(it):
     return ''.join(out)
 
 
-LONG_GROUPS = {'vg8', 'kt-rw', 'wr1', 'wr2'}   # nhóm viết lại câu: dùng ô nhiều dòng, kéo giãn được
+LONG_GROUPS = {'vg8', 'kt-rw', 'wr1', 'wr2', 'vg9', 'vg10', 'vg11', 'kt-cue'}   # nhóm viết lại câu: dùng ô nhiều dòng, kéo giãn được
 
 
 def text_item(it, test_mode):
@@ -239,23 +241,124 @@ def build_set(entry):
     return S, pages
 
 
+INDEX_CSS = """
+:root{--bg:#f5f4ff;--card:#fff;--ink:#1f2140;--mut:#6b6f8d;--line:#e6e4f7;--pri:#6c4cf5;--pri2:#ff5fa2;--test:#e8590c;--sb:#ffffff}
+@media(prefers-color-scheme:dark){:root{--bg:#14152a;--card:#1d1f3a;--ink:#eceefb;--mut:#a3a7c9;--line:#2c2f55;--sb:#191b34}}
+[hidden]{display:none!important}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.top{position:sticky;top:0;z-index:30;background:linear-gradient(90deg,var(--pri),var(--pri2));color:#fff;display:flex;align-items:center;gap:12px;padding:10px 16px}
+.top h1{font-size:17px;margin:0;flex:1}.top button{background:rgba(255,255,255,.2);border:0;color:#fff;border-radius:10px;padding:8px 12px;font-size:15px;cursor:pointer}
+.menu{display:none}
+.layout{display:grid;grid-template-columns:270px 1fr;min-height:calc(100vh - 52px)}
+.sb{background:var(--sb);border-right:1px solid var(--line);padding:18px 16px;position:sticky;top:52px;height:calc(100vh - 52px);overflow:auto}
+.sb h4{margin:18px 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}.sb h4:first-child{margin-top:0}
+.sb input[type=search]{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font-size:15px}
+.fl{display:flex;flex-direction:column;gap:4px}
+.f{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;border:0;background:none;color:var(--ink);font-size:15px;text-align:left;cursor:pointer}
+.f:hover{background:var(--bg)}.f.on{background:linear-gradient(90deg,var(--pri),var(--pri2));color:#fff;font-weight:600}
+.f small{opacity:.75;font-size:12px}.f[disabled]{opacity:.4;cursor:not-allowed}
+.seg{display:flex;gap:6px;flex-wrap:wrap}.seg .f{border:1px solid var(--line);padding:7px 11px;flex:1;justify-content:center}.seg .f.on{border-color:transparent}
+.reset{margin-top:18px;width:100%;padding:9px;border:1px dashed var(--line);border-radius:10px;background:none;color:var(--mut);cursor:pointer}
+main{padding:22px 24px 60px;max-width:1100px;width:100%}
+.bar{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;flex-wrap:wrap}.bar h2{margin:0;font-size:22px}.bar span{color:var(--mut)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 18px;margin-bottom:16px;box-shadow:0 2px 10px rgba(80,60,200,.05)}
+.settitle{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}.settitle h3{margin:0;font-size:17px}
+.chip{background:var(--bg);color:var(--pri);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.tile{display:flex;flex-direction:column;gap:2px;padding:12px;border-radius:14px;border:1px solid var(--line);text-decoration:none;color:var(--ink);background:var(--bg);transition:.15s}
+.tile:hover{transform:translateY(-2px);border-color:var(--pri);box-shadow:0 6px 16px rgba(108,76,245,.18)}
+.tile .ic{font-size:22px}.tile b{font-size:14.5px}.tile small{color:var(--mut);font-size:12px}
+.tile.t-test{background:rgba(232,89,12,.08);border-color:rgba(232,89,12,.35)}.tile.t-test b{color:var(--test)}
+.empty{text-align:center;padding:50px 10px;color:var(--mut)}
+.foot{text-align:center;color:var(--mut);font-size:13px;margin-top:30px}
+.scrim{display:none}
+@media(max-width:820px){
+ .menu{display:inline-block}.layout{grid-template-columns:1fr}
+ .sb{position:fixed;left:0;top:52px;bottom:0;width:290px;max-width:86vw;height:auto;z-index:40;transform:translateX(-102%);transition:.2s;box-shadow:4px 0 20px rgba(0,0,0,.25)}
+ body.open .sb{transform:none}body.open .scrim{display:block;position:fixed;inset:52px 0 0 0;background:rgba(0,0,0,.4);z-index:35}
+ main{padding:16px 16px 50px}.tiles{grid-template-columns:repeat(2,1fr)}
+}
+"""
+
+INDEX_JS = """
+(function(){
+var st={g:'',u:'',k:'',m:'',q:''};
+try{var sv=JSON.parse(localStorage.getItem('gn_idx')||'{}');for(var k in st)if(sv[k]!==undefined)st[k]=sv[k]}catch(e){}
+var cards=[].slice.call(document.querySelectorAll('.setcard'));
+function save(){try{localStorage.setItem('gn_idx',JSON.stringify(st))}catch(e){}}
+function norm(s){return (s||'').toLowerCase()}
+function apply(){
+  var shown=0;
+  cards.forEach(function(c){
+    var ok=(!st.g||c.dataset.g===st.g)&&(!st.u||c.dataset.u===st.u)&&(!st.k||c.dataset.k===st.k)&&(!st.q||norm(c.textContent).indexOf(norm(st.q))>=0);
+    c.hidden=!ok;
+    [].forEach.call(c.querySelectorAll('.tile'),function(t){
+      var tm=t.dataset.m||'';t.hidden=!!(st.m&&tm!==st.m);
+    });
+    if(ok&&st.m&&!c.querySelector('.tile:not([hidden])'))c.hidden=true;
+    if(!c.hidden)shown++;
+  });
+  document.getElementById('empty').hidden=shown>0;
+  document.getElementById('cnt').textContent=shown+' bộ bài';
+  [].forEach.call(document.querySelectorAll('.f[data-f]'),function(b){b.classList.toggle('on',(st[b.dataset.f]||'')===b.dataset.v)});
+  var t=[];if(st.g)t.push('Lớp '+st.g);if(st.u)t.push('Unit '+st.u);
+  document.getElementById('ttl').textContent=t.length?t.join(' · '):'Tất cả bài học';
+  save();
+}
+document.addEventListener('click',function(e){
+  var b=e.target.closest&&e.target.closest('.f[data-f]');
+  if(b&&!b.disabled){st[b.dataset.f]=b.dataset.v;if(b.dataset.f==='g'){st.u=''}apply();if(window.innerWidth<=820)document.body.classList.remove('open');return}
+  if(e.target.id==='reset'){st={g:'',u:'',k:'',m:'',q:''};document.getElementById('q').value='';apply()}
+  if(e.target.closest&&(e.target.closest('.menu')||e.target.classList.contains('scrim')))document.body.classList.toggle('open');
+  if(b&&window.innerWidth<=820)document.body.classList.remove('open');
+});
+document.getElementById('q').addEventListener('input',function(e){st.q=e.target.value;apply()});
+document.getElementById('q').value=st.q||'';
+apply();
+})();
+"""
+
+
 def build_index(done):
-    out = ['<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-           '<title>Bài luyện tập & đề kiểm tra</title><link rel="stylesheet" href="engine/engine.css"></head><body>'
-           '<header class="hero"><div class="wrap"><div class="hero-in"><div class="hero-tag">GNOMIO · Lớp 6 – 12</div><h1>Luyện tập thông minh,<br>kiểm tra tự tin</h1>'
-           '<p>Bài tập tự luyện có giải thích từng câu · Đề kiểm tra có đồng hồ & chống gian lận</p></div></div></header>'
-           '<div class="wrap index">']
+    grades = sorted({e[3][3:] for e, _, _ in done}, key=int)
+    units = sorted({(e[3][3:], e[4][4:]) for e, _, _ in done}, key=lambda x: (int(x[0]), int(x[1])))
+    def cnt(fn):
+        return sum(1 for e, _, _ in done if fn(e))
+    o = ['<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+         '<title>Bài luyện tập & đề kiểm tra</title><style>%s</style></head><body>' % INDEX_CSS,
+         '<div class="top"><button class="menu" aria-label="Mở bộ lọc">☰ Bộ lọc</button><h1>GNOMIO · Lớp 1–12</h1></div>',
+         '<div class="layout"><aside class="sb">',
+         '<h4>Tìm kiếm</h4><input id="q" type="search" placeholder="Tên unit, kỹ năng…">',
+         '<h4>Lớp</h4><div class="fl"><button class="f" data-f="g" data-v="">Tất cả lớp</button>']
+    for g in range(1, 13):
+        n = cnt(lambda e, g=g: e[3][3:] == str(g))
+        if n:
+            o.append('<button class="f" data-f="g" data-v="%d">Lớp %d <small>%d bộ</small></button>' % (g, g, n))
+        else:
+            o.append('<button class="f" disabled>Lớp %d <small>sắp có</small></button>' % g)
+    o.append('</div><h4>Unit</h4><div class="fl"><button class="f" data-f="u" data-v="">Tất cả unit</button>')
+    for g, u in units:
+        o.append('<button class="f" data-f="u" data-v="%s">Lớp %s · Unit %s</button>' % (u, g, u))
+    o.append('</div><h4>Loại bài tập</h4><div class="seg"><button class="f" data-f="k" data-v="">Tất cả</button>'
+             '<button class="f" data-f="k" data-v="botro">Bổ trợ</button><button class="f" data-f="k" data-v="4kn">4 kỹ năng</button></div>'
+             '<h4>Hình thức</h4><div class="seg"><button class="f" data-f="m" data-v="">Tất cả</button>'
+             '<button class="f" data-f="m" data-v="prac">Luyện tập</button><button class="f" data-f="m" data-v="test">Kiểm tra</button></div>'
+             '<button class="reset" id="reset">↺ Xoá bộ lọc</button></aside><div class="scrim"></div><main>'
+             '<div class="bar"><h2 id="ttl">Tất cả bài học</h2><span id="cnt"></span></div>')
+    icons = {'phat-am': '🔊', 'tu-vung': '🔤', 'tu-vung-ngu-phap': '🔤', 'ngu-phap': '🧩', 'nghe': '🎧', 'noi': '🗣️', 'doc': '📖', 'viet': '✍️', 'kiem-tra': '📝'}
     for entry, S, pages in done:
         gdir, udir, slug = entry[3], entry[4], entry[5]
-        out.append('<section class="card setcard"><div class="settitle"><span class="chip">Lớp %s · %s</span><h3>%s</h3></div><div class="tiles">' % (gdir[3:], udir.replace('Unit', 'Unit '), html.escape(S['title'])))
-        out.append('<a class="tile t-theory" href="WebBaiTap/%s/%s/%s/ly-thuyet.html"><span class="ic">📘</span><b>Lý thuyết</b><small>Từ vựng · ngữ pháp</small></a>' % (gdir, udir, slug))
-        icons = {'phat-am': '🔊', 'tu-vung': '🔤', 'tu-vung-ngu-phap': '🔤', 'ngu-phap': '🧩', 'nghe': '🎧', 'noi': '🗣️', 'doc': '📖', 'viet': '✍️', 'kiem-tra': '📝'}
+        g, u = gdir[3:], udir[4:]
+        o.append('<section class="card setcard" data-g="%s" data-u="%s" data-k="%s"><div class="settitle"><span class="chip">Lớp %s · Unit %s</span><h3>%s</h3></div><div class="tiles">'
+                 % (g, u, slug, g, u, html.escape(S['title'])))
+        o.append('<a class="tile" data-m="prac" href="WebBaiTap/%s/%s/%s/ly-thuyet.html"><span class="ic">📘</span><b>Lý thuyết</b><small>Từ vựng · ngữ pháp</small></a>' % (gdir, udir, slug))
         for pid, title, mode, n in pages:
-            out.append('<a class="tile %s" href="WebBaiTap/%s/%s/%s/%s.html"><span class="ic">%s</span><b>%s</b><small>%d câu%s</small></a>'
-                       % ('t-test' if mode == 'test' else 't-prac', gdir, udir, slug, pid, icons.get(pid, '✏️'), html.escape(title), n, ' · có tính giờ' if mode == 'test' else ''))
-        out.append('</div></section>')
-    out.append('<footer class="foot">Học sinh làm bài trên điện thoại hoặc máy tính · Kết quả ghi tự động về giáo viên</footer></div></body></html>')
-    open(os.path.join(ROOT, 'index.html'), 'w', encoding='utf8').write(''.join(out))
+            o.append('<a class="tile %s" data-m="%s" href="WebBaiTap/%s/%s/%s/%s.html"><span class="ic">%s</span><b>%s</b><small>%d câu%s</small></a>'
+                     % ('t-test' if mode == 'test' else '', 'test' if mode == 'test' else 'prac', gdir, udir, slug, pid, icons.get(pid, '✏️'), html.escape(title), n, ' · có tính giờ' if mode == 'test' else ''))
+        o.append('</div></section>')
+    o.append('<div class="empty" id="empty" hidden>Không có bộ bài phù hợp. Hãy bấm “Xoá bộ lọc”.</div>'
+             '<div class="foot">Học sinh làm bài trên điện thoại hoặc máy tính · Kết quả ghi tự động về giáo viên</div></main></div>'
+             '<script>%s</script></body></html>' % INDEX_JS)
+    open(os.path.join(ROOT, 'index.html'), 'w', encoding='utf8').write(''.join(o))
 
 
 if __name__ == '__main__':
