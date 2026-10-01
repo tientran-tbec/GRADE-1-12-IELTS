@@ -154,6 +154,35 @@ r = L('anlt', 'sai'); ok(!r.ok && /quá nhiều/.test(r.error), 'khoá sau 5 l�
     ok(/unauthorized/.test(g.post({ action: 'grade_practice', event: 'enter', token: S3, set_id: 'setD', page_id: 'p', done: 0, total: 1 })), 'vào bài mới sau hạn → từ chối');
     g.advance(2 * 3600e3); ok(/unauthorized/.test(save(S3, 'setD')), 'quá ân hạn 60 phút → từ chối'); }
 }
+
+// ---- giờ hiển thị, GV nhiều lớp / lớp nhiều GV, giao bài theo học sinh ----
+{
+  const uS = g.sheets['Users']; const hdr = uS.rows[0]; const ci = hdr.indexOf('Đăng nhập gần nhất');
+  const dRow = uS.rows.findIndex((r, i) => i > 0 && r[2] === 'student'); uS.rows[dRow][ci] = g.run('new Date(Date.UTC(2026, 9, 1, 11, 32, 19))');
+  const ul = g.api({ action: 'adm_users', token: A, role: 'student' }); ok(ul.users.some(u => u.last === '01/10/2026 18:32:19'), 'ngày-giờ dạng Date được định dạng lại dd/MM/yyyy HH:mm:ss (giờ VN): ' + JSON.stringify(ul.users.map(u => u.last)));
+  // GV nhiều lớp
+  ['Y1', 'Y2', 'Y3'].forEach(c => g.api({ action: 'adm_class_save', token: A, cls: { id: c, name: c, grade: 11 } }));
+  const t1 = g.api({ action: 'adm_user_save', token: A, user: { name: 'Gv Một', role: 'teacher' } }), t2 = g.api({ action: 'adm_user_save', token: A, user: { name: 'Gv Hai', role: 'teacher' } });
+  ok(g.api({ action: 'adm_teacher_classes', token: A, username: t1.user.username, classes: ['Y1', 'Y2'] }).changed === 2, 'gán GV 1 phụ trách Y1, Y2');
+  ok(g.api({ action: 'adm_teacher_classes', token: A, username: t2.user.username, classes: ['Y2', 'Y3'] }).changed === 2, 'gán GV 2 phụ trách Y2, Y3 (Y2 có 2 GV)');
+  let cl = g.api({ action: 'adm_classes', token: A }).classes; const y2 = cl.find(c => c.id === 'Y2');
+  ok(y2.teacher.split(',').length === 2, 'lớp Y2 có 2 GV: ' + y2.teacher);
+  ok(g.api({ action: 'adm_teacher_classes', token: A, username: t1.user.username, classes: ['Y1'] }).changed === 1 && g.api({ action: 'adm_classes', token: A }).classes.find(c => c.id === 'Y2').teacher === t2.user.username, 'bỏ Y2 khỏi GV 1, giữ GV 2');
+  const L1 = L(t1.user.username, t1.password, 'g1').token, L2 = L(t2.user.username, t2.password, 'g2').token;
+  ok(g.api({ action: 'adm_classes', token: L2 }).classes.map(c => c.id).sort().join() === 'Y2,Y3' && g.api({ action: 'adm_classes', token: L1 }).classes.map(c => c.id).join() === 'Y1', 'mỗi GV chỉ thấy lớp mình phụ trách');
+  // giao bài theo học sinh
+  const mk = (n) => g.api({ action: 'adm_user_save', token: A, user: { name: n, classes: ['Y2'] } });
+  const h1 = mk('Hs Một Y'), h2 = mk('Hs Hai Y'), h3 = mk('Hs Ba Y');
+  ok(g.api({ action: 'adm_assign_save', token: L2, cls: 'Y2', sets: ['all1', 'only12'], users: { only12: [h1.user.username, h2.user.username, 'khongco'] } }).ok, 'GV giao: all1 cả lớp, only12 cho 2 HS');
+  const ag = g.api({ action: 'adm_assign_get', token: L2, cls: 'Y2' }); ok(!ag.users.all1 && ag.users.only12.length === 2 && ag.users.only12.indexOf('khongco') < 0, 'đọc lại danh sách HS (lọc tên lạ)');
+  const s1 = L(h1.user.username, h1.password, 'a').user, s3 = L(h3.user.username, h3.password, 'c').user;
+  ok(s1.sets.includes('all1') && s1.sets.includes('only12'), 'HS 1 nhận cả hai bộ');
+  ok(s3.sets.includes('all1') && !s3.sets.includes('only12'), 'HS 3 chỉ nhận bộ giao cả lớp');
+  const S33 = L(h3.user.username, h3.password, 'c').token;
+  ok(/unauthorized/.test(g.post({ action: 'grade_save_result', token: S33, set_id: 'only12', page_id: 'p', mode: 'test', score: 1, total: 2 })), 'HS 3 nộp bộ không được giao → từ chối');
+  ok(g.api({ action: 'adm_assign_save', token: L2, cls: 'Y2', sets: ['only12'], users: { only12: [h1.user.username, h2.user.username, h3.user.username] } }).ok && !Object.keys(g.api({ action: 'adm_assign_get', token: L2, cls: 'Y2' }).users).length, 'chọn đủ cả lớp = giao cả lớp');
+  ok(!g.api({ action: 'adm_assign_save', token: L1, cls: 'Y2', sets: ['x'] }).ok, 'GV khác không giao bài lớp không phụ trách');
+}
 // xoá lớp
 ok(!g.api({ action: 'adm_class_delete', token: A, id: '11A1' }).ok, 'không xoá lớp còn HS');
 ok(!JSON.stringify(g.sheets['Users'].rows).includes(hsPw) && !JSON.stringify(g.sheets['Users'].rows).includes('Admin@123'), 'Users không lưu mật khẩu rõ');

@@ -45,7 +45,7 @@ try:
         chk('tạo lớp 11A1', '11A1' in pg.inner_text('#tbC'))
         pg.click('#tabs button[data-t=teachers]'); pg.click('#addT'); pg.fill('#uname', 'Nguyễn Thị Hoa'); pg.fill('#upw', 'gv1234'); pg.click('#uf button:not(#ux)')
         pg.wait_for_selector('#cOk'); chk('tạo GV hoa nt hiện mật khẩu', 'hoant' in pg.inner_text('#mbox') and 'gv1234' in pg.inner_text('#mbox')); pg.click('#cOk')
-        pg.click('#tabs button[data-t=classes]'); pg.click('#tbC button[data-a=edit]'); pg.select_option('#ctc', 'hoant'); pg.click('#cf2 button:not(#cx)'); pg.wait_for_selector('#tbC td')
+        pg.click('#tabs button[data-t=classes]'); pg.click('#tbC button[data-a=edit]'); pg.check('#ctc input[value="hoant"]'); pg.click('#cf2 button:not(#cx)'); pg.wait_for_selector('#tbC td')
         pg.wait_for_function("document.querySelector('#tbC').innerText.includes('hoant')"); chk('gán GV cho lớp', True)
         pg.click('#tabs button[data-t=students]'); pg.click('#impS'); pg.select_option('#icls', '11A1')
         pg.fill('#itxt', 'Trần Văn An\nLê Thị Bình'); pg.click('#ig'); pg.wait_for_selector('#cOk')

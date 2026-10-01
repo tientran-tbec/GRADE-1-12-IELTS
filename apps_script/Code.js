@@ -33,7 +33,7 @@ function who_(d) {
   if (id) {
     var cls = id.cls;
     if (id.role === 'student') {
-      var info = assignedMap_(clsList_(id.cls))[String(d.set_id)];
+      var info = assignedMap_(clsList_(id.cls), id.username)[String(d.set_id)];
       if (!info) return null;   // bài chưa được giao cho lớp nào của học sinh
       cls = info.cls;
       var end = dueEnd_(info.due);
@@ -101,7 +101,7 @@ var ADMIN_USER = 'admin';
 var ADMIN_PASS = '';            // ← đặt mật khẩu admin ở đây, chạy setupAdmin(), rồi xoá lại thành ''
 var SHEET_USERS = 'Users', SHEET_CLASSES = 'Classes';
 var USER_HEADERS = ['Tài khoản', 'Họ tên', 'Vai trò', 'Lớp', 'Salt', 'Hash', 'Hoạt động', 'Phải đổi MK', 'Ngày tạo', 'Đăng nhập gần nhất', 'Phiên', 'Thiết bị'];
-var SHEET_ASSIGN = 'Assignments', ASSIGN_HEADERS = ['Lớp', 'Bộ bài', 'Giao bởi', 'Ngày', 'Hạn'];
+var SHEET_ASSIGN = 'Assignments', ASSIGN_HEADERS = ['Lớp', 'Bộ bài', 'Giao bởi', 'Ngày', 'Hạn', 'Học sinh'];
 var PING_SEC = 200;   // thiết bị coi là đang online nếu có tín hiệu trong ngần này giây
 var CLASS_HEADERS = ['Mã lớp', 'Tên lớp', 'Khối', 'GV phụ trách', 'Ghi chú'];
 var TOKEN_DAYS = 3;
@@ -157,7 +157,7 @@ function readUsers_() {
   for (var i = 1; i < v.length; i++) {
     if (!v[i][0]) continue;
     out.push({row: i + 1, username: String(v[i][0]).toLowerCase(), name: v[i][1], role: v[i][2], cls: String(v[i][3] || ''), salt: v[i][4], hash: v[i][5],
-      active: v[i][6] === true || String(v[i][6]).toUpperCase() === 'TRUE', mustChange: v[i][7] === true || String(v[i][7]).toUpperCase() === 'TRUE', created: v[i][8], last: v[i][9],
+      active: v[i][6] === true || String(v[i][6]).toUpperCase() === 'TRUE', mustChange: v[i][7] === true || String(v[i][7]).toUpperCase() === 'TRUE', created: fmtT_(v[i][8]), last: fmtT_(v[i][9]),
       sid: String(v[i][10] || ''), dev: String(v[i][11] || '')});
   }
   return out;
@@ -178,7 +178,7 @@ function pub_(u) { return {username: u.username, name: u.name, role: u.role, cls
 function isOnline_(u) { return !!(u.sid && CacheService.getScriptCache().get('ping_' + u.username)); }
 function userView_(u) {
   var o = pub_(u); o.sets = null; o.due = null;
-  if (u.role === 'student') { var m = assignedMap_(clsList_(u.cls)); o.sets = Object.keys(m); o.due = {}; o.sets.forEach(function (k) { if (m[k].due) o.due[k] = m[k].due; }); }
+  if (u.role === 'student') { var m = assignedMap_(clsList_(u.cls), u.username); o.sets = Object.keys(m); o.due = {}; o.sets.forEach(function (k) { if (m[k].due) o.due[k] = m[k].due; }); }
   return o;
 }
 function writeUser_(u, isNew) {
@@ -202,7 +202,7 @@ function readClasses_() {
   return out;
 }
 function teacherClasses_(username, classes) {
-  return (classes || readClasses_()).filter(function (c) { return c.teacher === username; }).map(function (c) { return c.id; });
+  return (classes || readClasses_()).filter(function (c) { return clsList_(c.teacher).indexOf(username) >= 0; }).map(function (c) { return c.id; });
 }
 
 /* ----- xác thực yêu cầu ----- */
@@ -237,26 +237,28 @@ function canManage_(me, target, classes) {
 /* ----- giao bài theo lớp ----- */
 function readAssign_() {
   var sh = sheetOf_(SHEET_ASSIGN, ASSIGN_HEADERS), v = sh.getDataRange().getValues(), out = [];
-  for (var i = 1; i < v.length; i++) if (v[i][0] && v[i][1]) out.push({row: i + 1, cls: String(v[i][0]), set: String(v[i][1]), due: dueStr_(v[i][4])});
+  for (var i = 1; i < v.length; i++) if (v[i][0] && v[i][1]) out.push({row: i + 1, cls: String(v[i][0]), set: String(v[i][1]), due: dueStr_(v[i][4]), users: clsList_(String(v[i][5] || '').toLowerCase())});
   return out;
 }
 function dueStr_(x) {   // 'yyyy-MM-dd' hoặc ''
-  if (x instanceof Date) return Utilities.formatDate(x, 'Asia/Ho_Chi_Minh', 'yyyy-MM-dd');
+  if (x instanceof Date) return Utilities.formatDate(x, sheetTz_(), 'yyyy-MM-dd');
   var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(x || '')); return m ? m[0] : '';
 }
 function dueEnd_(due) { return due ? new Date(due + 'T23:59:59+07:00').getTime() : 0; }   // hết ngày hạn (giờ VN)
 function assignedOfClass_(cls) {
   var cache = CacheService.getScriptCache(), k = 'asg2_' + cls, c = cache.get(k);
   if (c) return JSON.parse(c);
-  var r = readAssign_().filter(function (a) { return a.cls === cls; }).map(function (a) { return {set: a.set, due: a.due}; });
+  var r = readAssign_().filter(function (a) { return a.cls === cls; }).map(function (a) { return {set: a.set, due: a.due, users: a.users}; });
   cache.put(k, JSON.stringify(r), 60);
   return r;
 }
-/* Gộp bài được giao của nhiều lớp: {bộ: {cls, due}}. Bộ giao cho nhiều lớp → lấy lớp không hạn, nếu không thì hạn muộn nhất. */
-function assignedMap_(classes) {
-  var m = {};
+/* Gộp bài được giao của nhiều lớp: {bộ: {cls, due}}. Dòng giao có danh sách học sinh → chỉ những học sinh đó nhận; để trống = cả lớp.
+   Bộ giao cho nhiều lớp → lấy lớp không hạn, nếu không thì hạn muộn nhất. */
+function assignedMap_(classes, username) {
+  var m = {}, me = String(username || '').toLowerCase();
   clsList_(classes).forEach(function (cls) {
     assignedOfClass_(cls).forEach(function (a) {
+      if (a.users && a.users.length && a.users.indexOf(me) < 0) return;
       var cur = m[a.set];
       if (!cur || (cur.due && (!a.due || a.due > cur.due))) m[a.set] = {cls: cls, due: a.due};
     });
@@ -270,13 +272,15 @@ function canAssign_(me, cls) {
 
 
 /* ----- GÓP Ý / TRÒ CHUYỆN HỌC SINH ↔ GIÁO VIÊN (mỗi học sinh một cuộc cho mỗi trang bài) ----- */
-var SHEET_FB = 'Feedback', FB_HEADERS = ['Mã', 'Thời gian', 'Tài khoản HS', 'Họ tên HS', 'Lớp', 'Bộ bài', 'Trang', 'Tiêu đề', 'Người gửi', 'Vai trò', 'Nội dung', 'HS đã đọc', 'GV đã đọc'];
+var SHEET_FB = 'Feedback', FB_HEADERS = ['Mã', 'Thời gian', 'Tài khoản HS', 'Họ tên HS', 'Lớp', 'Bộ bài', 'Trang', 'Tiêu đề', 'Người gửi', 'Vai trò', 'Nội dung', 'HS đã đọc', 'GV đã đọc', 'Đường dẫn'];
 function truthy_(x) { return x === true || String(x).toUpperCase() === 'TRUE'; }
-function fmtT_(x) { return x instanceof Date ? Utilities.formatDate(x, 'Asia/Ho_Chi_Minh', 'dd/MM/yyyy HH:mm:ss') : String(x || ''); }
+function sheetTz_() { try { return ss_().getSpreadsheetTimeZone() || 'Asia/Ho_Chi_Minh'; } catch (e) { return 'Asia/Ho_Chi_Minh'; } }
+/* Sheets tự đổi chuỗi 'dd/MM/yyyy HH:mm:ss' thành ngày-giờ (theo múi giờ của Sheet) → định dạng lại đúng múi giờ đó để ra lại đúng chuỗi giờ VN đã ghi. */
+function fmtT_(x) { return x instanceof Date ? Utilities.formatDate(x, sheetTz_(), 'dd/MM/yyyy HH:mm:ss') : String(x || ''); }
 function fbRows_() {
   var sh = sheetOf_(SHEET_FB, FB_HEADERS), v = sh.getDataRange().getValues(), out = [];
   for (var i = 1; i < v.length; i++) if (v[i][0]) out.push({row: i + 1, id: v[i][0], time: fmtT_(v[i][1]), student: String(v[i][2]).toLowerCase(), name: v[i][3], cls: String(v[i][4] || ''), set: String(v[i][5]),
-    page: String(v[i][6]), title: v[i][7], from: String(v[i][8]), role: String(v[i][9]), text: String(v[i][10] || ''), rs: truthy_(v[i][11]), rt: truthy_(v[i][12])});
+    page: String(v[i][6]), title: v[i][7], from: String(v[i][8]), role: String(v[i][9]), text: String(v[i][10] || ''), rs: truthy_(v[i][11]), rt: truthy_(v[i][12]), path: String(v[i][13] || '')});
   return out;
 }
 function fbVisible_(me, r, mine) {   // GV thấy cuộc trò chuyện của học sinh cùng lớp mình phụ trách; admin thấy tất cả
@@ -405,7 +409,7 @@ var API = {
   },
   adm_classes: function (d) {
     var me = authUser_(d, ['admin', 'teacher']), cl = readClasses_();
-    var list = me.role === 'teacher' ? cl.filter(function (c) { return c.teacher === me.username; }) : cl;
+    var list = me.role === 'teacher' ? cl.filter(function (c) { return clsList_(c.teacher).indexOf(me.username) >= 0; }) : cl;
     var teachers = me.role === 'admin' ? readUsers_().filter(function (u) { return u.role === 'teacher'; }).map(pub_) : [];
     var asg = readAssign_(), cnt = {}; asg.forEach(function (a) { cnt[a.cls] = (cnt[a.cls] || 0) + 1; });
     return {classes: list.map(function (c) { return {id: c.id, name: c.name, grade: c.grade, teacher: c.teacher, note: c.note, sets: cnt[c.id] || 0}; }), teachers: teachers};
@@ -415,9 +419,21 @@ var API = {
     var c = d.cls || {}, id = String(c.id || '').trim();
     if (!id) throw new Error('Thiếu mã lớp.');
     var sh = sheetOf_(SHEET_CLASSES, CLASS_HEADERS), ex = readClasses_().filter(function (k) { return k.id === id; })[0];
-    var row = [id, c.name || id, c.grade || '', String(c.teacher || '').toLowerCase(), c.note || ''];
+    var row = [id, c.name || id, c.grade || '', clsList_(c.teacher).join(',').toLowerCase(), c.note || ''];
     if (ex) sh.getRange(ex.row, 1, 1, row.length).setValues([row]); else sh.appendRow(row);
     return {};
+  },
+  adm_teacher_classes: function (d) {   // đặt danh sách lớp phụ trách của một giáo viên (thêm/bớt tên GV ở từng lớp, giữ nguyên GV khác)
+    authUser_(d, ['admin']);
+    var t = findUser_(d.username); if (!t || t.role !== 'teacher') throw new Error('Không tìm thấy giáo viên.');
+    var want = clsList_(d.classes), sh = sheetOf_(SHEET_CLASSES, CLASS_HEADERS), n = 0;
+    readClasses_().forEach(function (c) {
+      var cur = clsList_(c.teacher), has = cur.indexOf(t.username) >= 0, need = want.indexOf(c.id) >= 0;
+      if (has === need) return;
+      var next = need ? cur.concat([t.username]) : cur.filter(function (x) { return x !== t.username; });
+      sh.getRange(c.row, 4).setValue(next.join(',')); n++;
+    });
+    return {changed: n};
   },
   adm_class_delete: function (d) {
     authUser_(d, ['admin']);
@@ -431,7 +447,8 @@ var API = {
     var me = authUser_(d, ['admin', 'teacher']), cls = String(d.cls || '');
     if (!canAssign_(me, cls)) throw new Error('Bạn không phụ trách lớp này.');
     return {sets: readAssign_().filter(function (a) { return a.cls === cls; }).map(function (a) { return a.set; }),
-            due: readAssign_().filter(function (a) { return a.cls === cls && a.due; }).reduce(function (o, a) { o[a.set] = a.due; return o; }, {})};
+            due: readAssign_().filter(function (a) { return a.cls === cls && a.due; }).reduce(function (o, a) { o[a.set] = a.due; return o; }, {}),
+            users: readAssign_().filter(function (a) { return a.cls === cls && a.users.length; }).reduce(function (o, a) { o[a.set] = a.users; return o; }, {})};
   },
   adm_assign_save: function (d) {
     var me = authUser_(d, ['admin', 'teacher']), cls = String(d.cls || ''), sets = d.sets || [];
@@ -439,11 +456,16 @@ var API = {
     var lock = LockService.getScriptLock(); lock.waitLock(20000);
     try {
       var sh = sheetOf_(SHEET_ASSIGN, ASSIGN_HEADERS), all = readAssign_();
-      sh.getRange(1, 5).setValue('Hạn'); sh.getRange(2, 5, Math.max(sh.getLastRow() - 1, 1), 1).setNumberFormat('@');   // cột Hạn dạng văn bản (tránh bị đổi thành ngày)
+      sh.getRange(1, 5).setValue('Hạn'); sh.getRange(1, 6).setValue('Học sinh'); sh.getRange(2, 5, Math.max(sh.getLastRow() - 1, 1), 2).setNumberFormat('@');   // cột Hạn dạng văn bản (tránh bị đổi thành ngày)
       for (var i = all.length - 1; i >= 0; i--) if (all[i].cls === cls) sh.deleteRow(all[i].row);
       var seen = {};
-      var dues = d.due || {};
-      sets.forEach(function (s) { s = String(s); if (s && !seen[s]) { seen[s] = 1; sh.appendRow([cls, s, me.username, tsVN_(), dueStr_(dues[s])]); } });
+      var dues = d.due || {}, onlyU = d.users || {}, inCls = readUsers_().filter(function (u) { return u.role === 'student' && clsList_(u.cls).indexOf(cls) >= 0; }).map(function (u) { return u.username; });
+      sets.forEach(function (s) {
+        s = String(s); if (!s || seen[s]) return; seen[s] = 1;
+        var us = clsList_(onlyU[s] || []).map(function (x) { return x.toLowerCase(); }).filter(function (x) { return inCls.indexOf(x) >= 0; });
+        if (us.length >= inCls.length) us = [];   // chọn đủ cả lớp = giao cả lớp
+        sh.appendRow([cls, s, me.username, tsVN_(), dueStr_(dues[s]), us.join(',')]);
+      });
       CacheService.getScriptCache().remove('asg2_' + cls);
     } finally { lock.releaseLock(); }
     return {count: Object.keys(seen).length};
@@ -451,11 +473,11 @@ var API = {
   fb_send: function (d) {
     var u = authUser_(d, ['student']), text = fbText_(d), set = String(d.set_id || ''), page = String(d.page_id || ''), cache = CacheService.getScriptCache(), rk = 'fbr_' + u.username;
     if (!set || !page) throw new Error('Thiếu thông tin bài.');
-    if (!assignedMap_(clsList_(u.cls))[set]) throw new Error('Bài này chưa được giao cho bạn.');
+    if (!assignedMap_(clsList_(u.cls), u.username)[set]) throw new Error('Bài này chưa được giao cho bạn.');
     var n = +cache.get(rk) || 0; if (n >= 20) throw new Error('Bạn gửi quá nhiều tin trong thời gian ngắn, hãy thử lại sau ít phút.');
     cache.put(rk, String(n + 1), 600);
     var lock = LockService.getScriptLock(); lock.waitLock(20000);
-    try { fbAppend_([Utilities.getUuid(), tsVN_(), u.username, u.name, clsList_(u.cls).join(','), set, page, String(d.title || '').slice(0, 120), u.username, 'student', text, true, false]); }
+    try { fbAppend_([Utilities.getUuid(), tsVN_(), u.username, u.name, clsList_(u.cls).join(','), set, page, String(d.title || '').slice(0, 120), u.username, 'student', text, true, false, /^WebBaiTap\/[\w\/.\-]+\.html$/.test(String(d.path || '')) ? d.path : '']); }
     finally { lock.releaseLock(); }
     cache.remove('fbu_' + u.username);
     return {msgs: fbRows_().filter(function (r) { return r.student === u.username && r.set === set && r.page === page; }).map(fbMsg_)};
@@ -468,12 +490,23 @@ var API = {
     if (un.length) { fbMark_(un, 12); CacheService.getScriptCache().remove('fbu_' + u.username); }
     return {msgs: rows.map(fbMsg_)};
   },
+  fb_mine: function (d) {   // học sinh: danh sách cuộc trò chuyện của mình
+    var u = authUser_(d, ['student']), th = {}, order = [];
+    fbRows_().forEach(function (r) {
+      if (r.student !== u.username) return;
+      var k = r.set + '|' + r.page, t = th[k];
+      if (!t) { t = th[k] = {set: r.set, page: r.page, title: r.title, path: r.path, count: 0, unread: 0}; order.push(k); }
+      t.count++; t.last = r.time; t.lastText = r.text.slice(0, 80); t.order = r.row;
+      if (r.role !== 'student' && !r.rs) t.unread++;
+    });
+    return {threads: order.map(function (k) { return th[k]; }).sort(function (a, b) { return b.order - a.order; })};
+  },
   fb_inbox: function (d) {
     var me = authUser_(d, ['admin', 'teacher']), mine = me.role === 'teacher' ? teacherClasses_(me.username) : null, th = {}, order = [];
     fbRows_().forEach(function (r) {
       if (!fbVisible_(me, r, mine)) return;
       var k = r.student + '|' + r.set + '|' + r.page, t = th[k];
-      if (!t) { t = th[k] = {student: r.student, name: r.name, cls: r.cls, set: r.set, page: r.page, title: r.title, count: 0, unread: 0}; order.push(k); }
+      if (!t) { t = th[k] = {student: r.student, name: r.name, cls: r.cls, set: r.set, page: r.page, title: r.title, path: r.path, count: 0, unread: 0}; order.push(k); }
       t.count++; t.last = r.time; t.lastText = r.text.slice(0, 80); t.lastRole = r.role; t.order = r.row;
       if (r.role === 'student' && !r.rt) t.unread++;
     });
@@ -494,7 +527,7 @@ var API = {
     var prev = fbRows_().filter(function (r) { return r.student === st.username && r.set === set && r.page === page; });
     if (!prev.length) throw new Error('Chưa có góp ý nào ở bài này.');
     var lock = LockService.getScriptLock(); lock.waitLock(20000);
-    try { fbAppend_([Utilities.getUuid(), tsVN_(), st.username, st.name, clsList_(st.cls).join(','), set, page, prev[0].title, me.username, me.role, text, false, true]); }
+    try { fbAppend_([Utilities.getUuid(), tsVN_(), st.username, st.name, clsList_(st.cls).join(','), set, page, prev[0].title, me.username, me.role, text, false, true, prev[0].path]); }
     finally { lock.releaseLock(); }
     var un = prev.filter(function (r) { return r.role === 'student' && !r.rt; }); if (un.length) fbMark_(un, 13);
     CacheService.getScriptCache().remove('fbu_' + me.username);
@@ -519,7 +552,7 @@ function resultRows_(me, d, onlyMe) {
     if (d.cls && cls !== d.cls) continue;
     if (d.username && user !== String(d.username).toLowerCase()) continue;
     if (d.set_id && String(r[col['Bộ bài']]) !== d.set_id) continue;
-    out.push({time: r[0], type: r[col['Loại']], name: r[col['Học sinh']], cls: cls, username: user, set_id: r[col['Bộ bài']], page_id: r[col['Trang']], mode: r[col['Chế độ']],
+    out.push({time: fmtT_(r[0]), type: r[col['Loại']], name: r[col['Học sinh']], cls: cls, username: user, set_id: r[col['Bộ bài']], page_id: r[col['Trang']], mode: r[col['Chế độ']],
       score: r[col['Điểm']], total: r[col['Tổng']], pct: r[col['%']], score10: r[col['Thang 10']], time_spent: r[col['Thời gian làm (s)']],
       tab: r[col['Chuyển tab']], blur: r[col['Mất focus']], fs: r[col['Thoát toàn màn hình']]});
   }

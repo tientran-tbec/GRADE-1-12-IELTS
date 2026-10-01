@@ -90,3 +90,10 @@ Mọi trang bài (luyện tập, kiểm tra, IELTS Reading/Listening/Writing/Spe
 **Phía giáo viên / admin:** trang Quản trị → tab **Góp ý** (hộp thư, chấm đỏ số tin chưa đọc, trả lời ngay). Giáo viên thấy góp ý của học sinh thuộc lớp mình phụ trách; admin thấy tất cả. Học sinh thấy chấm đỏ khi có trả lời, và liệt kê trong trang **Điểm của tôi → Góp ý của tôi**.
 
 **Dữ liệu:** tab Sheet `Feedback` (mỗi tin một dòng: thời gian, học sinh, lớp, bộ bài, trang, người gửi, nội dung, đã đọc…). API `fb_send`, `fb_list`, `fb_mine`, `fb_inbox`, `fb_thread`, `fb_reply` (trong `code.gs`). Giới hạn 1000 ký tự/tin, tối đa 20 tin / 10 phút / học sinh.
+
+
+## Giáo viên nhiều lớp, giao bài theo học sinh, bộ lọc lớp
+- **Giáo viên phụ trách nhiều lớp:** tab *Giáo viên* → nút **Lớp phụ trách** → tích các lớp. Một lớp cũng có thể có nhiều giáo viên (tab *Lớp* → Sửa → tích nhiều giáo viên).
+- **Giao bài theo học sinh:** tab *Giao bài* → tích bộ bài → bấm nút **👥 Cả lớp** cạnh bộ đó → tích những học sinh được giao. **Không tích ai (hoặc tích hết) = giao cho cả lớp.** Cùng một lớp có thể giao bộ A cho cả lớp, bộ B chỉ cho vài em.
+- **Bộ lọc tab Lớp:** theo khối (kể cả IELTS), giáo viên, tình trạng (chưa giao bài / chưa có học sinh / chưa có giáo viên) và ô tìm mã/tên lớp.
+- **Giờ hiển thị:** mọi thời gian trong trang quản trị hiện dạng `dd/MM/yyyy HH:mm:ss` giờ Việt Nam.

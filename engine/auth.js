@@ -34,6 +34,13 @@
     due: function (setId) { var s = A.get(); return s && s.user.due && s.user.due[setId] || ''; },
     overdue: function (setId) { var d = A.due(setId); return !!d && new Date(Date.now() + 7 * 3600000).toISOString().slice(0, 10) > d; },
     unread: 0,
+    /* Hiển thị thời gian: chuỗi ISO (…Z) → dd/MM/yyyy HH:mm:ss giờ VN; chuỗi khác giữ nguyên. */
+    t: function (x) {
+      if (x == null || x === '') return '';
+      var m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?Z$/.exec(String(x)); if (!m) return String(x);
+      var d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]) + 7 * 3600000), z = function (n) { return (n < 10 ? '0' : '') + n; };
+      return z(d.getUTCDate()) + '/' + z(d.getUTCMonth() + 1) + '/' + d.getUTCFullYear() + ' ' + z(d.getUTCHours()) + ':' + z(d.getUTCMinutes()) + ':' + z(d.getUTCSeconds());
+    },
     requireSet: function (setId) {
       if (!A.get() || A.allowed(setId)) return true;
       document.documentElement.style.visibility = 'hidden'; location.replace(ROOT + 'index.html?denied=1'); return false;

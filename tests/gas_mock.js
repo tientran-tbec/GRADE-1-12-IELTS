@@ -27,6 +27,7 @@ function loadGas(file, opts) {
     setName(n) { this.name = n; }
   }
   const ss = {
+    getSpreadsheetTimeZone: () => 'Asia/Ho_Chi_Minh',
     getSheetByName: n => sheets[n] || null,
     insertSheet: n => (sheets[n] = new Sheet(n)),
   };
@@ -49,7 +50,8 @@ function loadGas(file, opts) {
       base64DecodeWebSafe: s => toArr(Buffer.from(s.replace(/-/g, '+').replace(/_/g, '/'), 'base64')),
       getUuid: () => crypto.randomUUID(),
       newBlob: s => ({ getBytes: () => toArr(Buffer.from(typeof s === 'string' ? s : String(s), 'utf8')) }),
-      formatDate: (d) => d.toISOString(),
+      formatDate: (d, tz, pat) => { const o = {}; new Intl.DateTimeFormat('en-GB', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).formatToParts(new Date(d.getTime())).forEach(p => o[p.type] = p.value);
+        return String(pat).replace('yyyy', o.year).replace('MM', o.month).replace('dd', o.day).replace('HH', o.hour).replace('mm', o.minute).replace('ss', o.second); },
     },
   };
   // Blob từ byte array → getDataAsString
