@@ -1,0 +1,46 @@
+# -*- coding: utf-8 -*-
+"""Đáp án + giải thích (Lớp 3)."""
+
+ANS = {'t1.1': 'Touch',
+ 't1.10': "It's an eye.",
+ 't1.11': ['an'],
+ 't1.12': ['nose'],
+ 't1.13': ['ear'],
+ 't1.14': ['mouth'],
+ 't1.15': ['nose'],
+ 't1.16': ['Touch your ears.'],
+ 't1.17': ['Open your eyes.'],
+ 't1.18': ['Touch your hair.'],
+ 't1.19': ["What's this?"],
+ 't1.2': 'an',
+ 't1.20': {'blanks': [["It's an eye."], ["I'm fine, thanks."], ["My name's Mai."], ['Yes, it is.']]},
+ 't1.3': 'a',
+ 't1.4': 'ear',
+ 't1.5': 'eye',
+ 't1.6': 'ear',
+ 't1.7': 'touch',
+ 't1.8': 'mắt',
+ 't1.9': 'tai'}
+
+EXPLANATIONS = {'t1.1': 'Touch = sờ.',
+ 't1.10': "What's that? → It's an eye.",
+ 't1.11': 'ear bắt đầu bằng nguyên âm → an.',
+ 't1.12': 'nose = mũi',
+ 't1.13': 'ear = tai',
+ 't1.14': 'mouth = miệng',
+ 't1.15': 'nose',
+ 't1.16': 'Touch your ears.',
+ 't1.17': 'Open your eyes.',
+ 't1.18': 'Touch your hair.',
+ 't1.19': "What's this?",
+ 't1.2': 'an eye.',
+ 't1.20': 'Mỗi câu hỏi có một câu đáp tương ứng.',
+ 't1.3': 'a face.',
+ 't1.4': 'ear = tai.',
+ 't1.5': 'eye = mắt (👁️)',
+ 't1.6': 'ear = tai (👂)',
+ 't1.7': 'nose, mouth là bộ phận cơ thể; touch là "sờ".',
+ 't1.8': 'eye = mắt',
+ 't1.9': 'ear = tai'}
+
+GHI_CHU_RA_SOAT = []

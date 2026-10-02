@@ -225,3 +225,5 @@ body.testmode .wrap{-webkit-user-select:text;user-select:text}
 .ord.wrong .ord-ans{border:2px solid var(--bad);background:var(--bad-bg)}
 .say{font:inherit;font-size:1.05rem;padding:8px 16px;border-radius:999px;border:0;background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;font-weight:700;cursor:pointer;box-shadow:0 3px 0 #c2410c;margin:2px 6px 6px 0}
 .say:active{transform:translateY(2px);box-shadow:0 1px 0 #c2410c}
+.emo{display:inline-block;font-size:3.2rem;line-height:1.15}
+.stem .emo{margin-right:6px}
