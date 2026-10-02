@@ -16,7 +16,6 @@ PAGES_URL = 'https://tientran-tbec.github.io/GRADE-1-12-IELTS/'
 REGISTRY = [
     # --- Lớp 3 ---
     ('lop3-u1-luyentap', 'units/lop3_u1_luyentap.py', 'units/lop3_u1_luyentap_dapan.py', 'Lop3', 'Unit1', 'luyentap', 'assets/lop3_u1/luyentap', ''),
-    ('lop3-u1-luyentap', 'units/lop3_u1_luyentap.py', 'units/lop3_u1_luyentap_dapan.py', 'Lop3', 'Unit1', 'luyentap', 'assets/lop3_u1/luyentap', ''),
     ('lop3-u1-test01', 'units/lop3_u1_test01.py', 'units/lop3_u1_test01_dapan.py', 'Lop3', 'Unit1', 'test01', 'assets/lop3_u1/test01', ''),
     ('lop3-u1-test02', 'units/lop3_u1_test02.py', 'units/lop3_u1_test02_dapan.py', 'Lop3', 'Unit1', 'test02', 'assets/lop3_u1/test02', ''),
     ('lop3-u1-test03', 'units/lop3_u1_test03.py', 'units/lop3_u1_test03_dapan.py', 'Lop3', 'Unit1', 'test03', 'assets/lop3_u1/test03', ''),
@@ -492,8 +491,11 @@ def build_index(done):
              '<div class="bar"><h2 id="ttl">Tất cả bài học</h2><span id="cnt"></span></div>')
     icons = {'phat-am': '🔊', 'tu-vung': '🔤', 'tu-vung-ngu-phap': '🔤', 'ngu-phap': '🧩', 'nghe': '🎧', 'noi': '🗣️', 'doc': '📖', 'viet': '✍️', 'kiem-tra': '📝', 'phat-am': '🔊', 'loi-sai': '🔍', 'dien-tu': '🧩', 'doc-hieu': '📖', 'noi-giao-tiep': '🗣️'}
     tests = [x for x in done if x[0][5].startswith('test')]
-    for entry, S, pages in [x for x in done if not x[0][5].startswith('test')]:
+    cards = []   # (vị trí, html) — đề kiểm tra của Unit nào xếp ngay sau Unit đó
+    last_pos = {}
+    for pos, (entry, S, pages) in enumerate([x for x in done if not x[0][5].startswith('test')]):
         gdir, udir, slug = entry[3], entry[4], entry[5]
+        mark_o = len(o)
         g, u = gdir[3:], unum(udir)
         kind = 'test' if slug.startswith('test') else slug
         o.append('<section class="card setcard" data-g="%s" data-u="%s" data-k="%s" data-sid="%s"><div class="settitle"><span class="chip">Lớp %s · %s</span><h3>%s</h3></div><div class="tiles">'
@@ -504,6 +506,7 @@ def build_index(done):
             o.append('<a class="tile %s" data-m="%s" href="WebBaiTap/%s/%s/%s/%s.html"><span class="ic">%s</span><b>%s</b><small>%d câu%s</small></a>'
                      % ('t-test' if mode == 'test' else '', 'test' if mode == 'test' else 'prac', gdir, udir, slug, pid, icons.get(pid, '✏️'), html.escape(title), n, ' · có tính giờ' if mode == 'test' else ''))
         o.append('</div></section>')
+        cards.append((pos * 10, ''.join(o[mark_o:]))); del o[mark_o:]; last_pos[(gdir, udir)] = pos * 10
     groups = []   # các đề riêng gom theo (lớp, Unit/Mid-term) — mỗi nhóm một thẻ
     for x in tests:
         key = (x[0][3], x[0][4])
@@ -514,6 +517,7 @@ def build_index(done):
             groups.append((key, [x]))
     for (gdir, udir), tl in groups:
         g, u = gdir[3:], unum(udir)
+        mark_o = len(o)
         ttl = 'Đề kiểm tra Mid-term 1 (%d test)' % len(tl) if udir == 'MidTerm1' else 'Đề kiểm tra %s (%d đề)' % (ulabel(u), len(tl))
         o.append('<section class="card setcard" data-g="%s" data-u="%s" data-k="test"><div class="settitle"><span class="chip">Lớp %s · %s</span><h3>%s</h3></div><div class="tiles">' % (g, u, g, ulabel(u), ttl))
         for entry, S, pages in tl:
@@ -524,6 +528,9 @@ def build_index(done):
             o.append('<a class="tile t-test" data-m="test" data-sid="%s" href="WebBaiTap/%s/%s/%s/%s.html"><span class="ic">%s</span><b>%s</b><small>%d câu · %d phút%s</small></a>'
                      % (S['id'], entry[3], entry[4], entry[5], pid, '🎧' if P0.get('audio') else '📝', html.escape(num), n, P0.get('minutes', 0), ' · có nghe' if P0.get('audio') else ''))
         o.append('</div></section>')
+        cards.append((last_pos.get((gdir, udir), 10**6) + 5, ''.join(o[mark_o:]))); del o[mark_o:]
+    for _, h in sorted(cards, key=lambda c: c[0]):
+        o.append(h)
     o.extend(IELTS['cards'])
     o.append('<div class="empty" id="nobai" hidden>Chưa có bài nào được giao cho lớp của bạn. Hãy nhờ giáo viên giao bài.</div><div class="empty" id="denied" hidden>Bài đó chưa được giao cho lớp của bạn.</div><div class="empty" id="empty" hidden>Không có bộ bài phù hợp. Hãy bấm “Xoá bộ lọc”.</div>'
              '<div class="foot">Học sinh làm bài trên điện thoại hoặc máy tính · Kết quả ghi tự động về giáo viên</div></main></div>'
