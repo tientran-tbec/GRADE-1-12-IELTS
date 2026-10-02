@@ -1,68 +1,156 @@
-/* Ô góp ý: học sinh gửi ý kiến về bài đang làm cho giáo viên; giáo viên trả lời, hai bên xem lại cả cuộc trò chuyện.
-   Tự gắn vào MỌI trang bài (luyện tập, kiểm tra, IELTS) khi build. Chỉ hiện với tài khoản học sinh.
-   Cấu hình: window.GN_SET (mã bộ bài) hoặc window.GN_RD.set; tên trang lấy từ tên file. */
+/* Khung 💬 Hỏi · Góp ý (học sinh): tab "Giáo viên" (góp ý / hỏi giáo viên, xem lại cả cuộc trò chuyện) và tab "Trợ lý AI" (hỏi bài).
+   Tự gắn vào MỌI trang (bài luyện tập, kiểm tra, IELTS, trang chủ, điểm của tôi). Học sinh luôn có tab Giáo viên; tab Trợ lý AI chỉ hiện khi admin cấp quyền (giáo viên/admin được cấp thì chỉ có AI).
+   Trang không thuộc bộ bài nào → góp ý chung (set 'general'). Tin nhắn hiện ngay khi bấm Gửi, gửi ngầm phía sau. */
 (function () {
   var A = window.GNAuth; if (!A) return;
-  var s = A.get(); if (!s || s.user.role !== 'student') return;
-  var set = window.GN_SET || (window.GN_RD && window.GN_RD.set); if (!set) return;
-  var page = (window.GN_RD && window.GN_RD.page) || decodeURIComponent((location.pathname.split('/').pop() || 'trang').replace(/\.html$/, ''));
+  var s = A.get(); if (!s) return;
+  function canT() { var x = A.get(); return !!x && x.user.role === 'student'; }   /* nhắn giáo viên: chỉ học sinh */
+  function canA() { var x = A.get(); return !!x && (x.user.role === 'admin' || !!x.user.ai); }   /* trợ lý AI: chỉ khi được cấp quyền */
+  if (!canT() && !canA()) return;
+  var RD = window.GN_RD || {}, set = window.GN_SET || RD.set || 'general';
+  var page = RD.page || decodeURIComponent((location.pathname.split('/').pop() || 'trang').replace(/\.html$/, '')) || 'trang';
   var rootPath; try { rootPath = new URL(window.GN_ROOT || '', location.href).pathname; } catch (e) { rootPath = ''; }
   var path = location.pathname.indexOf(rootPath) === 0 ? location.pathname.slice(rootPath.length) : '';
-  var E = A.esc, open = false, timer = null;
+  var ROOT = window.GN_ROOT || '';
+  var E = A.esc, open = false, timer = null, tab = 't', submitted = false, pend = [], srv = [], seq = 0;
 
   var css = document.createElement('style');
-  css.textContent = '.gnfb-btn{position:fixed;right:0;top:38%;z-index:100000;font:600 13px/1 system-ui,sans-serif;background:#1d4ed8;color:#fff;border:0;border-radius:10px 0 0 10px;padding:12px 8px;cursor:pointer;box-shadow:-2px 2px 8px rgba(0,0,0,.25);writing-mode:vertical-rl;letter-spacing:.5px}' +
+  css.textContent = '.gnfb-btn{position:fixed;right:0;top:38%;z-index:100000;font:600 13px/1 system-ui,sans-serif;background:#1d4ed8;color:#fff;border:0;border-radius:10px 0 0 10px;padding:12px 8px;cursor:pointer;box-shadow:-2px 2px 8px rgba(0,0,0,.25);writing-mode:vertical-rl}' +
     '.gnfb-btn .dot{display:none;position:absolute;top:-6px;left:-6px;writing-mode:horizontal-tb;min-width:18px;height:18px;border-radius:9px;background:#e11d48;color:#fff;font-size:11px;line-height:18px;text-align:center;padding:0 4px}' +
     '.gnfb-btn.has .dot{display:block}' +
-    '.gnfb-box{position:fixed;right:40px;top:10vh;z-index:100001;width:min(340px,calc(100vw - 56px));max-height:76vh;display:none;flex-direction:column;background:#fff;color:#111;border:1px solid #cbd5e1;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.28);font:14px/1.4 system-ui,sans-serif}' +
-    '.gnfb-box.on{display:flex}.gnfb-h{padding:10px 12px;border-bottom:1px solid #e2e8f0;font-weight:600;display:flex;justify-content:space-between;gap:8px}' +
-    '.gnfb-h small{display:block;font-weight:400;color:#64748b}.gnfb-x{background:none;border:0;font-size:18px;cursor:pointer;color:#64748b}' +
+    '.gnfb-box{position:fixed;right:40px;top:8vh;z-index:100001;width:min(360px,calc(100vw - 56px));height:min(560px,80vh);display:none;flex-direction:column;background:#fff;color:#111;border:1px solid #cbd5e1;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.28);font:14px/1.45 system-ui,sans-serif}' +
+    '.gnfb-box.on{display:flex}.gnfb-h{padding:8px 12px;border-bottom:1px solid #e2e8f0;font-weight:600;display:flex;justify-content:space-between;gap:8px;align-items:center}' +
+    '.gnfb-x{background:none;border:0;font-size:18px;cursor:pointer;color:#64748b}' +
+    '.gnfb-tabs{display:flex;border-bottom:1px solid #e2e8f0}.gnfb-tabs button{flex:1;background:none;border:0;border-bottom:3px solid transparent;padding:8px 4px;font:600 13px system-ui;color:#64748b;cursor:pointer}.gnfb-tabs button.on{color:#1d4ed8;border-bottom-color:#1d4ed8}' +
+    '.gnfb-sub{padding:6px 12px;font-size:12px;color:#64748b;border-bottom:1px solid #f1f5f9}.gnfb-sub a{color:#1d4ed8}' +
     '.gnfb-l{flex:1;overflow:auto;padding:10px;display:flex;flex-direction:column;gap:8px;min-height:90px}' +
-    '.gnfb-m{max-width:85%;padding:7px 10px;border-radius:12px;white-space:pre-wrap;word-break:break-word}' +
-    '.gnfb-m.me{align-self:flex-end;background:#dbeafe}.gnfb-m.tc{align-self:flex-start;background:#f1f5f9}' +
-    '.gnfb-m small{display:block;color:#64748b;font-size:11px;margin-top:2px}.gnfb-e{color:#64748b;text-align:center;font-size:13px;padding:8px}' +
+    '.gnfb-m{max-width:88%;padding:7px 10px;border-radius:12px;white-space:pre-wrap;word-break:break-word}' +
+    '.gnfb-m.me{align-self:flex-end;background:#dbeafe}.gnfb-m.tc{align-self:flex-start;background:#f1f5f9}.gnfb-m.ai{align-self:flex-start;background:#ecfdf5;border:1px solid #bbf7d0}' +
+    '.gnfb-m.bad{background:#fee2e2}.gnfb-m small{display:block;color:#64748b;font-size:11px;margin-top:2px}.gnfb-m small a{color:#be123c;cursor:pointer;text-decoration:underline}.gnfb-e{color:#64748b;text-align:center;font-size:13px;padding:8px}' +
     '.gnfb-f{border-top:1px solid #e2e8f0;padding:8px;display:flex;flex-direction:column;gap:6px}' +
-    '.gnfb-f textarea{width:100%;box-sizing:border-box;height:62px;resize:none;border:1px solid #cbd5e1;border-radius:8px;padding:6px;font:inherit}' +
-    '.gnfb-f button{align-self:flex-end;background:#1d4ed8;color:#fff;border:0;border-radius:8px;padding:6px 14px;cursor:pointer;font:inherit}.gnfb-f button:disabled{opacity:.5}' +
+    '.gnfb-f textarea{width:100%;box-sizing:border-box;height:58px;resize:none;border:1px solid #cbd5e1;border-radius:8px;padding:6px;font:inherit;background:#fff;color:#111}' +
+    '.gnfb-row{display:flex;gap:6px;justify-content:space-between;align-items:center}.gnfb-row small{color:#64748b}' +
+    '.gnfb-f button,.gnfb-sel{background:#1d4ed8;color:#fff;border:0;border-radius:8px;padding:6px 14px;cursor:pointer;font:inherit}.gnfb-sel{background:#e2e8f0;color:#334155;padding:3px 8px;font-size:12px}.gnfb-f button:disabled{opacity:.5}' +
     '.gnfb-err{color:#be123c;font-size:12px}@media print{.gnfb-btn,.gnfb-box{display:none!important}}';
   document.head.appendChild(css);
 
-  var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'gnfb-btn'; btn.innerHTML = '💬 Góp ý<span class="dot"></span>';
+  var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'gnfb-btn'; btn.innerHTML = '💬 Hỏi · Góp ý<span class="dot"></span>';
   var box = document.createElement('div'); box.className = 'gnfb-box';
-  box.innerHTML = '<div class="gnfb-h"><div>Góp ý về bài này<small>Chỉ giáo viên của bạn thấy tin nhắn này.</small></div><button type="button" class="gnfb-x" aria-label="Đóng">×</button></div>' +
-    '<div class="gnfb-l"></div><div class="gnfb-f"><div class="gnfb-err"></div><textarea maxlength="1000" placeholder="Viết góp ý, báo lỗi đáp án hoặc đặt câu hỏi cho giáo viên…"></textarea><button type="button">Gửi</button></div>';
+  box.innerHTML = '<div class="gnfb-h"><span>Hỏi · Góp ý</span><button type="button" class="gnfb-x" aria-label="Đóng">×</button></div>' +
+    '<div class="gnfb-tabs"><button type="button" data-t="t" class="on">👩‍🏫 Giáo viên</button><button type="button" data-t="a">🤖 Trợ lý AI</button></div>' +
+    '<div class="gnfb-sub"></div><div class="gnfb-l"></div><div class="gnfb-f"><div class="gnfb-err"></div><textarea maxlength="1000"></textarea><div class="gnfb-row"><button type="button" class="gnfb-sel" hidden>Hỏi về đoạn đang bôi đen</button><small></small><button type="button" class="gnfb-go">Gửi</button></div></div>';
   document.body.appendChild(box); document.body.appendChild(btn);
-  var list = box.querySelector('.gnfb-l'), ta = box.querySelector('textarea'), send = box.querySelector('.gnfb-f button'), err = box.querySelector('.gnfb-err'), dot = btn.querySelector('.dot');
+  var $ = function (q) { return box.querySelector(q); };
+  var list = $('.gnfb-l'), ta = $('textarea'), send = $('.gnfb-go'), err = $('.gnfb-err'), sub = $('.gnfb-sub'), dot = btn.querySelector('.dot'), selBtn = $('.gnfb-sel'), hint = $('.gnfb-row small');
 
-  function render(msgs) {
-    if (!msgs.length) { list.innerHTML = '<div class="gnfb-e">Chưa có tin nhắn. Hãy gửi góp ý đầu tiên.</div>'; return; }
-    list.innerHTML = msgs.map(function (m) {
-      var me = m.role === 'student';
-      return '<div class="gnfb-m ' + (me ? 'me' : 'tc') + '">' + E(m.text) + '<small>' + (me ? 'Bạn' : E(m.name || 'Giáo viên')) + ' · ' + E(m.time) + '</small></div>';
+  /* ---------- tab Giáo viên ---------- */
+  function when(t) { return t || ''; }
+  function nowStr() { var d = new Date(Date.now() + 7 * 3600e3 - new Date().getTimezoneOffset() * 0 ); return d.toISOString().slice(8, 10) + '/' + d.toISOString().slice(5, 7) + '/' + d.toISOString().slice(0, 4) + ' ' + d.toISOString().slice(11, 19); }
+  function renderT() {
+    var all = srv.concat(pend);
+    if (!all.length) { list.innerHTML = '<div class="gnfb-e">Chưa có tin nhắn. Hãy gửi góp ý hoặc câu hỏi đầu tiên cho giáo viên.</div>'; return; }
+    list.innerHTML = all.map(function (m, i) {
+      var me = m.role === 'student', cls = me ? 'me' : 'tc', st = '';
+      if (m._p === 'sending') st = ' · ⏳ đang gửi…'; else if (m._p === 'fail') { cls += ' bad'; st = ' · <a data-retry="' + m._id + '">Chưa gửi được – thử lại</a>'; }
+      return '<div class="gnfb-m ' + cls + '">' + E(m.text) + '<small>' + (me ? 'Bạn' : E(m.name || 'Giáo viên')) + (m.time ? ' · ' + E(m.time) : '') + st + '</small></div>';
     }).join('');
     list.scrollTop = list.scrollHeight;
   }
   function ctx() { return { set_id: set, page_id: page }; }
-  function load() { return A.api('fb_list', ctx()).then(function (j) { render(j.msgs); setDot(0); }).catch(function () {}); }
+  function loadT() { return A.api('fb_list', ctx()).then(function (j) { srv = j.msgs || []; pend = pend.filter(function (p) { return p._p !== 'sending' || !srv.some(function (m) { return m.text === p.text && m.role === 'student'; }); }); if (tab === 't') renderT(); setDot(0); }).catch(function () {}); }
   function setDot(n) { dot.textContent = n > 9 ? '9+' : n; btn.classList.toggle('has', n > 0); }
+  function postT(p) {
+    p._p = 'sending'; renderT();
+    A.api('fb_send', { set_id: set, page_id: page, title: document.title, path: path, text: p.text, light: true }).then(function (j) {
+      pend = pend.filter(function (x) { return x !== p; }); if (j.msg) srv.push(j.msg); renderT();
+    }).catch(function (e) { p._p = 'fail'; p._why = e.message; renderT(); err.textContent = e.message || 'Không gửi được, hãy thử lại.'; });
+  }
+  function sendT() {
+    var t = ta.value.trim(); if (!t) return; err.textContent = ''; ta.value = '';
+    var p = { _id: ++seq, role: 'student', text: t, time: nowStr() }; pend.push(p); postT(p);
+  }
+  list.addEventListener('click', function (e) {
+    var a = e.target.closest('a[data-retry]'); if (!a) return; var id = +a.dataset.retry, p = pend.filter(function (x) { return x._id === id; })[0]; if (p) { err.textContent = ''; postT(p); }
+  });
+
+  /* ---------- tab Trợ lý AI ---------- */
+  var AK = 'gn_ai_' + set + '|' + page, hist = [], ai = { loaded: false, enabled: true, left: null, busy: false };
+  try { hist = JSON.parse(sessionStorage.getItem(AK) || '[]'); } catch (e) { hist = []; }
+  function saveH() { try { sessionStorage.setItem(AK, JSON.stringify(hist.slice(-20))); } catch (e) {} }
+  function fmt(t) { return E(t).replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>').replace(/`([^`\n]+)`/g, '<code>$1</code>').replace(/^[-*] /gm, '• '); }
+  function isLive() {
+    if (submitted) return false;
+    if (document.body.classList.contains('testmode')) return true;
+    if (RD.kind === 'full') return true;
+    return false;
+  }
+  document.addEventListener('quiz:submitted', function () { submitted = true; if (tab === 'a') renderA(); });
+  var rm = document.getElementById('resultModal');
+  if (rm && window.MutationObserver) new MutationObserver(function () { if (!rm.classList.contains('hidden') && rm.style.display !== 'none' && (RD.kind === 'full' || RD.kind)) { submitted = true; if (tab === 'a') renderA(); } }).observe(rm, { attributes: true, attributeFilter: ['class', 'style'] });
+  function renderA() {
+    var live = isLive();
+    sub.innerHTML = live ? '🔒 Đang làm bài kiểm tra: trợ lý AI tạm khoá. Nộp bài xong bạn có thể hỏi.' : (ai.enabled ? 'AI có thể sai – hãy kiểm tra lại. Giáo viên có thể xem lại câu hỏi.' + (ai.left != null ? ' · Còn <b>' + ai.left + '</b> lượt hôm nay' : '') : 'Trợ lý AI chưa được bật.');
+    var h = hist.map(function (m) { return '<div class="gnfb-m ' + (m.role === 'user' ? 'me' : (m.bad ? 'bad' : 'ai')) + '">' + fmt(m.text) + (m.role === 'ai' && !m.bad ? '<small>🤖 Trợ lý AI</small>' : '') + '</div>'; }).join('');
+    if (ai.busy) h += '<div class="gnfb-m ai">⏳ Trợ lý đang trả lời…</div>';
+    list.innerHTML = h || '<div class="gnfb-e">Hỏi mình về từ vựng, ngữ pháp, cách làm bài…<br>Ví dụ: “Giải thích thì hiện tại hoàn thành” hoặc bôi đen một câu rồi bấm “Hỏi về đoạn đang bôi đen”.</div>';
+    list.scrollTop = list.scrollHeight;
+    var off = live || !ai.enabled; ta.disabled = off; send.disabled = off || ai.busy;
+    ta.placeholder = off ? (live ? 'Trợ lý AI sẽ mở lại sau khi bạn nộp bài.' : 'Trợ lý AI chưa bật.') : 'Nhập câu hỏi (Ctrl+Enter để gửi)…';
+  }
+  function loadA() {
+    renderA();   /* hiện ngay cuộc trò chuyện đã có, cập nhật số lượt khi máy chủ trả lời */
+    if (ai.loaded) return;
+    A.api('ai_status').then(function (j) { ai.loaded = true; ai.enabled = !!j.enabled && j.allowed !== false; ai.left = j.left; renderA(); }).catch(function () { renderA(); });
+  }
+  function selText() { try { return String(window.getSelection() || '').replace(/\s+/g, ' ').trim().slice(0, 500); } catch (e) { return ''; } }
+  var lastSel = '';
+  document.addEventListener('selectionchange', function () { var t = selText(); if (t && !box.contains(document.activeElement)) lastSel = t; });
+  function sendA() {
+    var t = ta.value.trim(); if (!t || ai.busy || isLive()) return; err.textContent = ''; ta.value = '';
+    var ctxT = selBtn._ctx || ''; selBtn._ctx = ''; selBtn.hidden = !lastSel;
+    var past = hist.filter(function (m) { return !m.bad; }).slice(-8).map(function (m) { return { role: m.role, text: m.text }; });
+    hist.push({ role: 'user', text: t }); ai.busy = true; renderA();
+    A.api('ai_chat', { text: t, history: past, context: ctxT, set_id: set, page_id: page, live: isLive() }).then(function (j) {
+      hist.push({ role: 'ai', text: j.text }); ai.left = j.left;
+    }).catch(function (e) { hist.push({ role: 'ai', text: e.message || 'Không hỏi được, hãy thử lại.', bad: true }); })
+      .then(function () { ai.busy = false; saveH(); renderA(); });
+  }
+  selBtn.onclick = function () {
+    var t = lastSel || selText(); if (!t) return; selBtn._ctx = t; ta.value = ta.value || 'Giải thích giúp mình đoạn này.'; ta.focus();
+  };
+
+  /* ---------- chung ---------- */
+  function perm() {   /* ẩn/hiện tab theo quyền hiện tại */
+    var t = canT(), a = canA(), bt = box.querySelector('[data-t="t"]'), ba = box.querySelector('[data-t="a"]');
+    bt.hidden = !t; ba.hidden = !a; box.querySelector('.gnfb-tabs').style.display = (t && a) ? '' : 'none';
+    box.querySelector('.gnfb-h span').textContent = t ? (a ? 'Hỏi · Góp ý' : 'Góp ý cho giáo viên') : 'Trợ lý AI';
+    btn.firstChild.nodeValue = t ? (a ? '💬 Hỏi · Góp ý' : '💬 Góp ý') : '🤖 Trợ lý AI';
+  }
+  function setTab(t) {
+    perm(); if (t === 't' && !canT()) t = 'a'; if (t === 'a' && !canA()) t = 't';
+    tab = t; [].forEach.call(box.querySelectorAll('.gnfb-tabs button'), function (b) { b.classList.toggle('on', b.dataset.t === t); });
+    err.textContent = ''; selBtn.hidden = t !== 'a' || !lastSel; hint.textContent = '';
+    if (t === 't') {
+      sub.innerHTML = 'Chỉ giáo viên của bạn thấy tin nhắn này. <a href="' + ROOT + 'me.html#gopy">Xem mọi góp ý</a>';
+      ta.disabled = false; send.disabled = false; ta.placeholder = set === 'general' ? 'Viết góp ý hoặc câu hỏi cho giáo viên…' : 'Viết góp ý, báo lỗi đáp án hoặc đặt câu hỏi cho giáo viên…'; renderT(); loadT();
+    } else { loadA(); }
+  }
   function setOpen(v) {
     open = v; box.classList.toggle('on', v); clearInterval(timer);
-    if (v) { load(); timer = setInterval(load, 20000); setTimeout(function () { ta.focus(); }, 50); }
+    if (v) { setTab(tab); timer = setInterval(function () { if (tab === 't' && !document.hidden) loadT(); }, 20000); setTimeout(function () { if (!ta.disabled) ta.focus(); }, 50); }
   }
-  btn.onclick = function () { setOpen(!open); };
+  perm(); window.addEventListener('gn-user', function () { perm(); if (open) setTab(tab); });
+  btn.onclick = function () { perm(); lastSel = lastSel || selText(); setOpen(!open); };
   box.querySelector('.gnfb-x').onclick = function () { setOpen(false); };
-  send.onclick = function () {
-    var t = ta.value.trim(); if (!t) return; err.textContent = ''; send.disabled = true;
-    A.api('fb_send', { set_id: set, page_id: page, title: document.title, path: path, text: t }).then(function (j) { ta.value = ''; render(j.msgs); })
-      .catch(function (e) { err.textContent = e.message || 'Không gửi được, hãy thử lại.'; }).then(function () { send.disabled = false; });
-  };
+  box.querySelector('.gnfb-tabs').onclick = function (e) { var b = e.target.closest('button[data-t]'); if (b) { setTab(b.dataset.t); } };
+  send.onclick = function () { if (tab === 't') sendT(); else sendA(); };
   ta.addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); send.click(); } });
   ta.addEventListener('paste', function (e) { e.stopPropagation(); });
-  ['mousedown', 'mouseup', 'pointerdown', 'touchstart', 'touchend', 'dblclick', 'contextmenu', 'cut', 'dragstart', 'drop'].forEach(function (ev) { box.addEventListener(ev, function (e) { e.stopPropagation(); }); });   /* các bộ chặn / công cụ của trang không được can thiệp vào khung chat */
   box.addEventListener('copy', function (e) { e.stopPropagation(); });
-  // chấm đỏ: cuộc trò chuyện của trang này có tin trả lời chưa đọc?
-  A.api('fb_mine').then(function (j) {
-    var t = (j.threads || []).filter(function (x) { return x.set === set && x.page === page; })[0];
-    if (t && t.unread && !open) setDot(t.unread);
+  ['mousedown', 'mouseup', 'pointerdown', 'touchstart', 'touchend', 'dblclick', 'contextmenu', 'cut', 'dragstart', 'drop'].forEach(function (ev) { box.addEventListener(ev, function (e) { e.stopPropagation(); }); });   /* các bộ chặn / công cụ của trang không được can thiệp vào khung chat */
+  // chấm đỏ: tổng số tin trả lời chưa đọc của học sinh (mọi bài)
+  if (canT()) A.api('fb_mine').then(function (j) {
+    var n = (j.threads || []).reduce(function (a, x) { return a + (+x.unread || 0); }, 0);
+    if (n && !open) setDot(n);
   }).catch(function () {});
 })();

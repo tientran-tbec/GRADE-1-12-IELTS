@@ -3,6 +3,7 @@ const http = require('http'), path = require('path');
 const { loadGas } = require('./gas_mock');
 const g = loadGas(path.join(__dirname, '..', 'code.gs'));
 g.run("ADMIN_PASS='Admin@123'"); g.run('setupAdmin()');
+if (process.env.AI_FAKE) { g.props['GEMINI_API_KEY'] = 'gk-test'; g.setFetch((url, o) => { const p = JSON.parse(o.payload); const parts = p.contents[p.contents.length - 1].parts; const last = parts[parts.length - 1].text; return { getResponseCode: () => 200, getContentText: () => JSON.stringify({ candidates: [{ content: { parts: [{ text: 'AI trả lời: ' + last.slice(-40) }] } }], usageMetadata: { promptTokenCount: 10, candidatesTokenCount: 5 } }) }; }); }
 let delay = +process.env.DELAY_MS || 0;
 http.createServer((req, res) => {
   let b = ''; req.on('data', c => b += c);

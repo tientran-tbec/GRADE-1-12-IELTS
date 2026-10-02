@@ -16,7 +16,7 @@
   var A = window.GNAuth = {
     ROLE: ROLE,
     get: function () { var s = load(); return s && s.token && tokenExp(s.token) > Date.now() ? s : null; },
-    set: function (token, user) { ls(KEY, JSON.stringify({ token: token, user: user })); },
+    set: function (token, user) { ls(KEY, JSON.stringify({ token: token, user: user })); try { window.dispatchEvent(new CustomEvent('gn-user')); } catch (e) {} },
     clear: function () { ls(KEY, null); ls('gn_ping', null); try { Object.keys(localStorage).forEach(function (k) { if (k.indexOf('gn_adm_') === 0) localStorage.removeItem(k); }); } catch (e) {} },
     user: function () { var s = A.get(); return s ? s.user : null; },
     loginUrl: function (next) { return ROOT + 'login.html' + (next ? '?next=' + encodeURIComponent(next) : ''); },
@@ -78,7 +78,7 @@
       var links = '';
       if (u.role === 'admin' || u.role === 'teacher') links += '<a href="' + ROOT + 'admin.html">Quản trị</a>';
       var bell = u.role === 'student' ? ROOT + 'me.html#gopy' : ROOT + 'admin.html#gopy';
-      links += '<a class="gn-bell" href="' + bell + '" title="Góp ý / tin nhắn">💬<b class="gn-n"></b></a>';
+      links += '<a class="gn-bell" href="' + bell + '" title="Góp ý / tin nhắn">💬 Góp ý<b class="gn-n"></b></a>';
       links += '<a href="' + ROOT + 'me.html">Điểm của tôi</a><a href="' + ROOT + 'login.html?change=1">Đổi mật khẩu</a><a href="#" data-gn="out">Đăng xuất</a>';
       d.innerHTML = '<span class="gn-name">👤 ' + esc(u.name) + ' <small>' + (u.cls ? esc(u.cls) + ' · ' : '') + ROLE[u.role] + '</small></span><span class="gn-links">' + links + '</span>';
       d.querySelector('[data-gn=out]').onclick = function (e) { e.preventDefault(); A.logout(); };
@@ -103,7 +103,7 @@
         if (A._busy) return; A._busy = true;
         A.api('auth_ping').then(function (j) {
           A._busy = false;
-          var s = load(); if (!s) return; var sig = function (u) { return JSON.stringify(u.sets || null) + JSON.stringify(u.due || null) + u.cls + JSON.stringify(u.perms || null) + JSON.stringify(u.ranks || null); }, before = sig(s.user);
+          var s = load(); if (!s) return; var sig = function (u) { return JSON.stringify(u.sets || null) + JSON.stringify(u.due || null) + u.cls + JSON.stringify(u.perms || null) + JSON.stringify(u.ranks || null) + (u.ai ? 1 : 0); }, before = sig(s.user);
           A.set(s.token, j.user);
           A.unread = +j.unread || 0; A._bell(); try { window.dispatchEvent(new CustomEvent('gn-unread', { detail: A.unread })); } catch (e) {}
           ls('gn_ping', JSON.stringify({ u: j.user.username, t: Date.now(), n: A.unread }));

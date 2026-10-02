@@ -72,4 +72,4 @@ GNAuth.api('my_reminders').then(function(j){setTimeout(function(){GNAuth.unread&
     GNAuth.api('team_fb',{cls:$('ncls').value,text:v}).then(function(){$('nfbt').value='';$('nfbe').textContent='';$('nfbs').disabled=false;fbLoad()}).catch(function(e){$('nfbe').textContent=e.message;$('nfbs').disabled=false})};
   load();
 })();
-</script></body></html>
+</script><script src="engine/feedback.js"></script></body></html>

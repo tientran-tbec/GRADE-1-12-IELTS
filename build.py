@@ -474,7 +474,7 @@ def build_index(done):
     o.extend(IELTS['cards'])
     o.append('<div class="empty" id="nobai" hidden>Chưa có bài nào được giao cho lớp của bạn. Hãy nhờ giáo viên giao bài.</div><div class="empty" id="denied" hidden>Bài đó chưa được giao cho lớp của bạn.</div><div class="empty" id="empty" hidden>Không có bộ bài phù hợp. Hãy bấm “Xoá bộ lọc”.</div>'
              '<div class="foot">Học sinh làm bài trên điện thoại hoặc máy tính · Kết quả ghi tự động về giáo viên</div></main></div>'
-             '<script>GNAuth.chip("#chip");</script><script>%s</script><script>GNAuth.verify(function(){window.gnApply&&gnApply()});if(/denied=1/.test(location.search)){var d=document.getElementById("denied");if(d)d.hidden=false}</script></body></html>' % INDEX_JS)
+             '<script>GNAuth.chip("#chip");</script><script>%s</script><script>GNAuth.verify(function(){window.gnApply&&gnApply()});if(/denied=1/.test(location.search)){var d=document.getElementById("denied");if(d)d.hidden=false}</script><script src="engine/feedback.js?v=%s"></script></body></html>' % (INDEX_JS, BV))
     open(os.path.join(ROOT, 'index.html'), 'w', encoding='utf8').write(''.join(o))
     build_site_pages(done)
 
@@ -491,7 +491,7 @@ def build_site_pages(done=None):
     """site/*.html (đăng nhập, quản trị, điểm của tôi) → thư mục gốc, gắn link Apps Script."""
     pages = {e[0]: 'WebBaiTap/%s/%s/%s' % (e[3], e[4], e[5]) for e in REGISTRY}   # mã bộ bài -> thư mục trang (để xem lại bài làm)
     for n in ('login.html', 'admin.html', 'me.html', 'student.html'):
-        t = open(os.path.join(ROOT, 'site', n), encoding='utf8').read().replace('%PAGES%', json.dumps(pages)).replace('engine/review.js"', 'engine/review.js?v=' + BV + '"').replace('engine/auth.js"', 'engine/auth.js?v=' + BV + '"').replace('engine/app.css"', 'engine/app.css?v=' + BV + '"').replace('%GN_URL%', APPS_SCRIPT_URL).replace('%CATALOG%', json.dumps(catalog(done or []), ensure_ascii=False))
+        t = open(os.path.join(ROOT, 'site', n), encoding='utf8').read().replace('%PAGES%', json.dumps(pages)).replace('engine/review.js"', 'engine/review.js?v=' + BV + '"').replace('engine/auth.js"', 'engine/auth.js?v=' + BV + '"').replace('engine/feedback.js"', 'engine/feedback.js?v=' + BV + '"').replace('engine/app.css"', 'engine/app.css?v=' + BV + '"').replace('%GN_URL%', APPS_SCRIPT_URL).replace('%CATALOG%', json.dumps(catalog(done or []), ensure_ascii=False))
         open(os.path.join(ROOT, n), 'w', encoding='utf8').write(t)
 
 

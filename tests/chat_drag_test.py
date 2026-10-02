@@ -34,7 +34,7 @@ try:
         chk('chat gõ được khi có lớp phủ z-index 9999', p.input_value('.gnfb-box textarea') == 'xin chao co' and p.evaluate("(function(){var t=document.querySelector('.gnfb-box textarea').getBoundingClientRect();var e=document.elementFromPoint(t.left+10,t.top+10);return e.tagName==='TEXTAREA'})()"))
         p.evaluate("document.getElementById('fakeov').remove()")
         p.keyboard.press('Control+A'); p.keyboard.press('Control+C'); chk('chat: Ctrl+A / Ctrl+C không bị chặn khi đang làm bài', True)
-        p.click('.gnfb-box .gnfb-f button'); p.wait_for_function("document.querySelector('.gnfb-l').innerText.indexOf('xin chao co')>=0"); chk('gửi tin trong lúc làm bài', True)
+        p.click('.gnfb-go'); p.wait_for_function("document.querySelector('.gnfb-l').innerText.indexOf('xin chao co')>=0"); chk('gửi tin trong lúc làm bài', True)
         p.click('.gnfb-x')
         # 2) nộp bài, mở kết quả → chat vẫn gõ được
         p.click('#submit'); p.wait_for_selector('#resultModal', state='visible'); time.sleep(1)

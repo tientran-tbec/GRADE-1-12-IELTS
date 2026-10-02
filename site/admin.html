@@ -8,7 +8,7 @@
 
  <section id="p-students" hidden>
   <div class="bar"><select id="fcls"></select><input id="fq" type="search" placeholder="Tìm tên / tài khoản…" class="grow">
-   <button class="btn" id="addS">+ Thêm học sinh</button><button class="btn sec" id="impS">Nhập danh sách</button></div>
+   <button class="btn" id="addS">+ Thêm học sinh</button><button class="btn sec" id="impS">Nhập danh sách</button><button class="btn sec" id="aiGrant" title="Cấp quyền dùng trợ lý AI cho các bạn đang hiện trong danh sách">🤖 Cấp AI cho danh sách đang lọc</button><button class="btn sec" id="aiRevoke">Thu AI</button></div>
   <div class="tw"><table><thead><tr><th>Tài khoản</th><th>Họ tên</th><th>Lớp</th><th>Trạng thái</th><th>Thiết bị</th><th>Đăng nhập gần nhất</th><th></th></tr></thead><tbody id="tbS"></tbody></table></div>
  </section>
 
@@ -48,6 +48,27 @@
   <div class="bar"><select id="pcls"></select><button class="btn" id="pgo">Xem</button><button class="btn sec" id="pcsv">Tải CSV</button><span class="grow"></span><span id="pinfo" class="mut"></span></div>
   <div class="tw"><table><thead><tr><th>Học sinh</th><th>Lớp</th><th>Bài được giao</th><th>Đã nộp</th><th>Điểm TB (thang 10)</th><th>Lần nộp gần nhất</th></tr></thead><tbody id="tbP"></tbody></table></div>
   <p class="mut">“Đã nộp” đếm số trang bài khác nhau đã nộp (mỗi trang tính một lần, lấy lần nộp gần nhất). Dữ liệu tính trên tối đa 3000 kết quả mới nhất.</p>
+ </section>
+
+ <section id="p-ai" hidden>
+  <div class="card"><h3 style="margin-top:0">🤖 Trợ lý AI</h3>
+   <p class="mut" id="aiSt">Đang tải…</p>
+   <p class="mut">Chỉ tài khoản được <b>cấp quyền</b> mới thấy và dùng được trợ lý AI (cấp ở tab Học sinh / Giáo viên: nút “🤖 Cấp AI”). Tài khoản chưa được cấp chỉ gửi được góp ý cho giáo viên. Admin luôn dùng được.</p>
+   <div class="bar"><label style="margin:0;font-weight:400"><input type="checkbox" id="aiOn" style="display:inline;width:auto;margin-right:6px">Bật trợ lý AI</label>
+    <label style="margin:0;font-weight:400">Dịch vụ <select id="aiProv"><option value="gemini">Gemini (Google – có gói miễn phí)</option><option value="claude">Claude (Anthropic – trả phí)</option></select></label>
+    <label style="margin:0;font-weight:400">Số lượt hỏi / học sinh / ngày <input id="aiLim" type="number" min="1" max="500" style="width:90px"></label>
+    <label style="margin:0;font-weight:400">Mô hình Gemini <input id="aiModG" style="width:190px" placeholder="gemini-3.5-flash-lite"></label>
+    <label style="margin:0;font-weight:400">Mô hình Claude <input id="aiModC" style="width:170px" placeholder="claude-haiku-4-5"></label>
+    <button class="btn" id="aiSave">Lưu</button></div>
+   <details style="margin-top:8px" open><summary><b>Cài khoá Gemini miễn phí (làm 1 lần)</b></summary><ol class="mut" style="margin:6px 0 0 18px">
+    <li>Vào <b>aistudio.google.com</b> → đăng nhập Google → <b>Get API key</b> → Create API key (không cần thẻ).</li>
+    <li>Mở Apps Script của dự án → biểu tượng ⚙ <b>Project Settings</b> → kéo xuống <b>Script properties</b> → Add script property.</li>
+    <li>Property: <code>GEMINI_API_KEY</code> – Value: dán khoá vừa tạo → Save.</li>
+    <li>Quay lại trang này, bấm “Tải lại”: trạng thái sẽ báo “Đã có khoá”. Khoá không bao giờ hiện trên web.</li>
+    <li>Lưu ý: gói miễn phí có giới hạn số lượt/phút và /ngày (xem trong AI Studio) và Google có thể dùng nội dung hỏi để cải thiện sản phẩm – hãy dặn học sinh không nhập thông tin cá nhân. Hệ thống không gửi họ tên học sinh cho AI.</li></ol>
+    <p class="mut" style="margin-left:18px">Muốn dùng Claude thay thế: tạo khoá ở console.anthropic.com, thêm property <code>ANTHROPIC_API_KEY</code>, rồi chọn “Claude” ở ô Dịch vụ.</p></details></div>
+  <div class="card" style="margin-top:12px"><div class="bar"><b>Nhật ký hỏi AI</b><span class="grow"></span><span class="mut" id="aiInfo"></span><button class="btn sm sec" id="aiReload">Tải lại</button></div>
+   <div class="tw"><table><thead><tr><th>Thời gian</th><th>Học sinh</th><th>Lớp</th><th>Bài</th><th>Câu hỏi</th><th>Trả lời</th><th>Token</th></tr></thead><tbody id="tbAI"></tbody></table></div></div>
  </section>
 
  <section id="p-backup" hidden>
@@ -126,11 +147,11 @@ var _api=GNAuth.api;GNAuth.api=function(a){var w=/^adm_(user_save|user_reset|use
 function renderStudents(){
   var c=$('fcls').value,q=$('fq').value.trim().toLowerCase();
   var l=S.students.filter(function(u){return (!c||(u.classes||[]).indexOf(c)>=0)&&(!q||(u.name+' '+u.username).toLowerCase().indexOf(q)>=0)});
-  $('tbS').innerHTML=l.length?l.map(function(u){return '<tr><td class="cred">'+E(u.username)+'</td><td>'+(u.role==='student'?'<a href="student.html?u='+encodeURIComponent(u.username)+'" title="Mở trang quản lý học sinh">'+E(u.name)+'</a>':E(u.name))+'</td><td>'+classTags(u)+'</td><td>'+(u.active?'<span class="tag">Hoạt động</span>':'<span class="tag off">Đã khoá</span>')+'</td><td>'+devCell(u)+'</td><td>'+E(GNAuth.t(u.last)||'—')+'</td><td class="act">'+actBtns(u)+'</td></tr>'}).join(''):'<tr><td colspan="7">Chưa có học sinh.</td></tr>';
+  $('tbS').innerHTML=l.length?l.map(function(u){return '<tr><td class="cred">'+E(u.username)+'</td><td>'+(u.role==='student'?'<a href="student.html?u='+encodeURIComponent(u.username)+'" title="Mở trang quản lý học sinh">'+E(u.name)+'</a>':E(u.name))+'</td><td>'+classTags(u)+'</td><td>'+(u.active?'<span class="tag">Hoạt động</span>':'<span class="tag off">Đã khoá</span>')+(u.ai?' <span class="tag" title="Được dùng trợ lý AI">🤖 AI</span>':'')+'</td><td>'+devCell(u)+'</td><td>'+E(GNAuth.t(u.last)||'—')+'</td><td class="act">'+actBtns(u)+'</td></tr>'}).join(''):'<tr><td colspan="7">Chưa có học sinh.</td></tr>';
 }
 function classTags(u){return (u.classes||[]).map(function(c){var r=(u.ranks||{})[c];return E(c)+(r?' <span class="tag" title="'+E((u.perms||[]).map(function(k){return label(SP,k)}).join(', ')||'Chưa có quyền nào')+'">'+RANK[r]+'</span>':'')}).join(', ')}
 function devCell(u){return u.online?'<span class="tag" style="background:#e6f7ee;border-color:#1b9e5a;color:#1b9e5a">● Đang đăng nhập</span>':'<span class="tag">—</span>'}
-function actBtns(u){return (u.role==='teacher'?'<button class="btn sm sec" data-a="tcls" data-u="'+E(u.username)+'">Lớp phụ trách</button><button class="btn sm sec" data-a="tperm" data-u="'+E(u.username)+'">Quyền</button><button class="btn sm sec" data-a="tfull" data-u="'+E(u.username)+'">'+((u.perms||[]).indexOf('full')>=0?'Thu hồi toàn quyền':'⭐ Cấp toàn quyền')+'</button>':'')+(u.role==='student'?'<button class="btn sm sec" data-a="rank" data-u="'+E(u.username)+'">Chức vụ</button>':'')+'<button class="btn sm sec" data-a="edit" data-u="'+E(u.username)+'">Sửa</button><button class="btn sm sec" data-a="reset" data-u="'+E(u.username)+'">Đặt lại MK</button><button class="btn sm sec" data-a="kick" data-u="'+E(u.username)+'"'+(u.online?'':' disabled')+'>Đăng xuất thiết bị</button><button class="btn sm sec" data-a="tog" data-u="'+E(u.username)+'">'+(u.active?'Khoá':'Mở khoá')+'</button>'}
+function actBtns(u){return (u.role==='teacher'?'<button class="btn sm sec" data-a="tcls" data-u="'+E(u.username)+'">Lớp phụ trách</button><button class="btn sm sec" data-a="tperm" data-u="'+E(u.username)+'">Quyền</button><button class="btn sm sec" data-a="tfull" data-u="'+E(u.username)+'">'+((u.perms||[]).indexOf('full')>=0?'Thu hồi toàn quyền':'⭐ Cấp toàn quyền')+'</button>':'')+(u.role==='student'?'<button class="btn sm sec" data-a="rank" data-u="'+E(u.username)+'">Chức vụ</button>':'')+'<button class="btn sm sec" data-a="ai" data-u="'+E(u.username)+'">'+(u.ai?'Thu AI':'🤖 Cấp AI')+'</button><button class="btn sm sec" data-a="edit" data-u="'+E(u.username)+'">Sửa</button><button class="btn sm sec" data-a="reset" data-u="'+E(u.username)+'">Đặt lại MK</button><button class="btn sm sec" data-a="kick" data-u="'+E(u.username)+'"'+(u.online?'':' disabled')+'>Đăng xuất thiết bị</button><button class="btn sm sec" data-a="tog" data-u="'+E(u.username)+'">'+(u.active?'Khoá':'Mở khoá')+'</button>'}
 function userForm(role,u){
   var isS=role==='student',isNew=!u;
   openM('<h3>'+(isNew?'Thêm ':'Sửa ')+(isS?'học sinh':'giáo viên')+'</h3><form id="uf"><label>Họ và tên<input id="uname" value="'+E(u?u.name:'')+'" required></label>'+
@@ -174,6 +195,8 @@ function userAction(list,renderer,reload){
     else if(b.dataset.a==='tfull'){var on=(u.perms||[]).indexOf('full')<0;if(!confirm(on?'Cấp TOÀN QUYỀN cho '+u.name+'? Giáo viên này sẽ làm được mọi việc như quản trị viên (trừ tạo/sửa tài khoản admin).':'Thu hồi toàn quyền của '+u.name+'? (Giáo viên trở về quyền mặc định)'))return;
       var oldP=(u.perms||[]).slice();u.perms=on?['full','assign','viewall','fball','classes','anystudent']:[];renderTeachers();
       GNAuth.api('adm_teacher_perms',{username:u.username,perms:on?['full']:[]}).then(function(){msg(on?'Đã cấp toàn quyền cho '+u.name+'.':'Đã thu hồi toàn quyền của '+u.name+'.',1);return loadAll(true)}).then(renderTeachers).catch(function(e){u.perms=oldP;renderTeachers();fail(e)})}
+    else if(b.dataset.a==='ai'){var aon=!u.ai;u.ai=aon;renderer();
+      GNAuth.api('adm_user_ai',{usernames:[u.username],on:aon}).then(function(){msg(aon?'Đã cấp quyền dùng trợ lý AI cho '+u.name+'.':'Đã thu quyền AI của '+u.name+' (chỉ còn gửi góp ý).',1);loadAll(true).catch(function(){})}).catch(function(e){u.ai=!aon;renderer();fail(e)})}
     else if(b.dataset.a==='rank')rankForm(u);
     else if(b.dataset.a==='edit')userForm(u.role,u);
     else if(b.dataset.a==='reset'){if(!confirm('Đặt lại mật khẩu cho '+u.name+'?'))return;
@@ -188,6 +211,15 @@ function userAction(list,renderer,reload){
 $('tbS').onclick=userAction(function(){return S.students},renderStudents,loadStudents);
 $('addS').onclick=function(){if(!S.classes.length){msg('Chưa có lớp nào – hãy tạo lớp trước (tab Lớp).');return}userForm('student')};
 $('impS').onclick=function(){if(!S.classes.length){msg('Chưa có lớp nào – hãy tạo lớp trước (tab Lớp).');return}importForm()};
+function bulkAI(on){
+  var c=$('fcls').value,q=$('fq').value.trim().toLowerCase();
+  var l=S.students.filter(function(u){return (!c||(u.classes||[]).indexOf(c)>=0)&&(!q||(u.name+' '+u.username).toLowerCase().indexOf(q)>=0)&&!!u.ai!==on});
+  if(!l.length){msg(on?'Tất cả các bạn đang hiện đã có quyền AI.':'Không có bạn nào đang được dùng AI trong danh sách.');return}
+  if(!confirm((on?'Cấp quyền dùng trợ lý AI cho ':'Thu quyền AI của ')+l.length+' học sinh đang hiện trong danh sách?'))return;
+  l.forEach(function(u){u.ai=on});renderStudents();
+  GNAuth.api('adm_user_ai',{usernames:l.map(function(u){return u.username}),on:on}).then(function(j){msg((on?'Đã cấp AI cho ':'Đã thu AI của ')+j.changed+' học sinh.',1);loadAll(true).catch(function(){})}).catch(function(e){l.forEach(function(u){u.ai=!on});renderStudents();fail(e)});
+}
+$('aiGrant').onclick=function(){bulkAI(true)};$('aiRevoke').onclick=function(){bulkAI(false)};
 $('fcls').onchange=renderStudents;$('fq').oninput=renderStudents;
 
 /* ---------- giáo viên (admin) ---------- */
@@ -235,7 +267,7 @@ function rankForm(u){
 }
 function renderTeachers(){
   $('tbT').innerHTML=S.teachers.length?S.teachers.map(function(u){var cl=S.classes.filter(function(c){return hasT(c,u.username)}).map(function(c){return c.id}).join(', ');
-   return '<tr><td class="cred">'+E(u.username)+'</td><td>'+E(u.name)+'</td><td>'+E(cl||'—')+'</td><td>'+((u.perms||[]).length?(u.perms||[]).map(function(k){return '<span class="tag">'+E(label(TP,k))+'</span>'}).join(' '):'<span class="mut">mặc định</span>')+'</td><td>'+(u.active?'<span class="tag">Hoạt động</span>':'<span class="tag off">Đã khoá</span>')+'</td><td>'+devCell(u)+'</td><td>'+E(GNAuth.t(u.last)||'—')+'</td><td class="act">'+actBtns(u)+'</td></tr>'}).join(''):'<tr><td colspan="8">Chưa có giáo viên.</td></tr>';
+   return '<tr><td class="cred">'+E(u.username)+'</td><td>'+E(u.name)+'</td><td>'+E(cl||'—')+'</td><td>'+((u.perms||[]).length?(u.perms||[]).map(function(k){return '<span class="tag">'+E(label(TP,k))+'</span>'}).join(' '):'<span class="mut">mặc định</span>')+'</td><td>'+(u.active?'<span class="tag">Hoạt động</span>':'<span class="tag off">Đã khoá</span>')+(u.ai?' <span class="tag" title="Được dùng trợ lý AI">🤖 AI</span>':'')+'</td><td>'+devCell(u)+'</td><td>'+E(GNAuth.t(u.last)||'—')+'</td><td class="act">'+actBtns(u)+'</td></tr>'}).join(''):'<tr><td colspan="8">Chưa có giáo viên.</td></tr>';
 }
 $('tbT').onclick=userAction(function(){return S.teachers},renderTeachers,loadTeachers);
 $('addT').onclick=function(){userForm('teacher')};
@@ -412,6 +444,19 @@ $('pcsv').onclick=function(){dl('tien-do.csv',csv([['Học sinh','Lớp','Bài �
 $('cf').onsubmit=function(e){e.preventDefault();$('e2').textContent='';
   GNAuth.api('auth_change_password',{old_password:$('op').value,new_password:$('np').value}).then(function(){$('cf').reset();msg('Đã đổi mật khẩu.',1)}).catch(function(err){$('e2').textContent=err.server?err.message:'Không kết nối được máy chủ.'})};
 
+/* ---------- trợ lý AI (admin) ---------- */
+function loadAI(){
+  GNAuth.api('adm_ai_get',{limit:100}).then(function(j){
+    var pn=j.provider==='claude'?'Claude':'Gemini';
+    $('aiSt').innerHTML=(j.hasKey?'<b style="color:#1b9e5a">✔ Đã có khoá '+pn+'</b> · '+(j.enabled?'đang bật':'đang tắt')+' · tổng '+j.total+' lượt hỏi từ trước đến nay.':'<b style="color:#e11d48">✘ Chưa có khoá '+pn+'</b> – làm theo hướng dẫn bên dưới để cài (người được cấp quyền sẽ thấy “chưa được bật”).')+' <span class="mut">(Gemini: '+(j.hasGemini?'có khoá':'chưa có')+' · Claude: '+(j.hasClaude?'có khoá':'chưa có')+')</span>';
+    $('aiOn').checked=j.enabled;$('aiLim').value=j.limit;$('aiProv').value=j.provider;$('aiModG').value=j.modelGemini;$('aiModC').value=j.modelClaude;
+    $('tbAI').innerHTML=j.rows.length?j.rows.map(function(r){return '<tr><td>'+E(GNAuth.t(r.time))+'</td><td>'+E(r.name)+' <small class="mut">'+E(r.username)+'</small></td><td>'+E(r.cls)+'</td><td>'+E(r.set_id)+(r.page_id?' / '+E(r.page_id):'')+'</td><td style="max-width:260px;white-space:pre-wrap">'+E(r.q)+'</td><td style="max-width:320px;white-space:pre-wrap">'+E(r.a)+'</td><td>'+(+r.tin||0)+'/'+(+r.tout||0)+'</td></tr>'}).join(''):'<tr><td colspan="7">Chưa có lượt hỏi nào.</td></tr>';
+    $('aiInfo').textContent='Hiện '+j.rows.length+' lượt mới nhất.';
+  }).catch(fail)
+}
+$('aiSave').onclick=function(){GNAuth.api('adm_ai_save',{enabled:$('aiOn').checked,limit:+$('aiLim').value||15,provider:$('aiProv').value,modelGemini:$('aiModG').value.trim(),modelClaude:$('aiModC').value.trim()}).then(function(){msg('Đã lưu cài đặt trợ lý AI.',1);loadAI()}).catch(fail)};
+$('aiReload').onclick=loadAI;
+
 /* ---------- sao lưu / khôi phục / reset (admin) ---------- */
 var BKN={users:'Tài khoản (admin, giáo viên, học sinh)',classes:'Lớp học',assign:'Bài đã giao',results:'Kết quả nộp bài',practice:'Hoạt động luyện tập',log:'Nhật ký',feedback:'Góp ý',reminders:'Nhắc nhở'};
 var BKX=[['students','Tất cả học sinh (tài khoản)'],['teachers','Tất cả giáo viên (tài khoản)'],['sessions','Phiên đăng nhập (đăng xuất mọi người)'],['classes','Lớp học'],['assign','Bài đã giao'],['results','Kết quả nộp bài'],['practice','Hoạt động luyện tập'],['log','Nhật ký'],['feedback','Góp ý'],['reminders','Nhắc nhở']];
@@ -476,7 +521,7 @@ $('bkReset').onclick=function(){
 document.addEventListener('click',function(e){var b=e.target.closest('button[data-all],button[data-none]');if(!b)return;var id=b.dataset.all||b.dataset.none;[].forEach.call($(id).querySelectorAll('input'),function(c){c.checked=!!b.dataset.all})});
 
 /* ---------- tab ---------- */
-var TABS=[['students','Học sinh'],['teachers','Giáo viên',1],['classes','Lớp'],['assign','Giao bài'],['results','Kết quả'],['progress','Tiến độ'],['fb','Góp ý'],['backup','Sao lưu · Reset','admin'],['me','Tài khoản của tôi']].filter(function(t){return (!t[2]||(t[2]==='admin'?isAdmin:P('full')))&&(t[0]!=='assign'||P('assign'))});
+var TABS=[['students','Học sinh'],['teachers','Giáo viên',1],['classes','Lớp'],['assign','Giao bài'],['results','Kết quả'],['progress','Tiến độ'],['fb','Góp ý'],['ai','Trợ lý AI','admin'],['backup','Sao lưu · Reset','admin'],['me','Tài khoản của tôi']].filter(function(t){return (!t[2]||(t[2]==='admin'?isAdmin:P('full')))&&(t[0]!=='assign'||P('assign'))});
 $('tabs').innerHTML=TABS.map(function(t){return '<button data-t="'+t[0]+'">'+t[1]+(t[0]==='fb'?'<b class="gn-n" id="fbn"></b>':'')+'</button>'}).join('');
 function show(t){
   TABS.forEach(function(x){$('p-'+x[0]).hidden=x[0]!==t});
@@ -485,6 +530,7 @@ function show(t){
   if(t==='results'&&!S.rows.length)loadResults();
   if(t==='assign')loadAssign();
   if(t==='backup')loadBackupInfo();
+  if(t==='ai')loadAI();
   if(t==='progress'&&!PG.length)loadProgress();
   clearInterval(FB.timer);if(t==='fb'){loadInbox();FB.timer=setInterval(loadInbox,45000)}
   try{history.replaceState(null,'','#'+t)}catch(e){}

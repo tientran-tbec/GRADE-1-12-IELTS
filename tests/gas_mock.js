@@ -4,7 +4,7 @@ function loadGas(file, opts) {
   opts = opts || {};
   const sheets = {};
   const props = {}, cache = {};
-  let offset = 0;
+  let offset = 0, fetchImpl = null;
   const FDate = class extends Date { constructor(...a) { if (a.length) super(...a); else super(Date.now() + offset); } static now() { return Date.now() + offset; } };
   const nowMs = () => Date.now() + offset;
   class Range {
@@ -40,6 +40,7 @@ function loadGas(file, opts) {
     SpreadsheetApp: { openById: () => ss },
     PropertiesService: { getScriptProperties: () => ({ getProperty: k => props[k] || null, setProperty: (k, v) => { props[k] = v; } }) },
     CacheService: { getScriptCache: () => ({ get: k => (cache[k] && cache[k].exp > nowMs()) ? cache[k].v : null, put: (k, v, ttl) => { cache[k] = { v: String(v), exp: nowMs() + (ttl || 600) * 1000 }; }, remove: k => { delete cache[k]; } }) },
+    UrlFetchApp: { fetch: (url, o) => fetchImpl ? fetchImpl(url, o) : { getResponseCode: () => 500, getContentText: () => '{}' } },
     LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
     ContentService: { MimeType: { JSON: 'json' }, createTextOutput: t => ({ text: t, mime: 'text', setMimeType(m) { this.mime = m; return this; }, getContent() { return this.text; } }) },
     Utilities: {
@@ -63,7 +64,7 @@ function loadGas(file, opts) {
   vm.createContext(ctx);
   vm.runInContext(fs.readFileSync(file, 'utf8'), ctx, { filename: file });
   return {
-    ctx, sheets, props, advance(ms) { offset += ms; },
+    ctx, sheets, props, advance(ms) { offset += ms; }, setFetch(f) { fetchImpl = f; },
     post(obj) { const r = ctx.doPost({ postData: { contents: JSON.stringify(obj) } }); return r.text; },
     api(obj) { return JSON.parse(this.post(obj)); },
     run(code) { return vm.runInContext(code, ctx); },

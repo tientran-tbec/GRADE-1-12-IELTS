@@ -286,6 +286,64 @@ r = L('anlt', 'sai'); ok(!r.ok && /quá nhiều/.test(r.error), 'khoá sau 5 l�
   const bt = g.api({ action: 'adm_bootstrap', token: T }); ok(bt.ok && bt.tusers === null && bt.students.every(u => u.role === 'student'), 'bootstrap GV thường: không có danh sách giáo viên, chỉ HS của mình');
   ok(!g.api({ action: 'adm_bootstrap', token: 'x' }).ok, 'bootstrap cần đăng nhập');
 }
+// ---- trợ lý AI + góp ý chung/nhanh ----
+{
+  const cr = g.api({ action: 'adm_user_save', token: A, user: { name: 'Hs AI Thử', cls: '11A1', password: 'aitest123' } }); const sun = cr.user.username;
+  const lg0 = g.api({ action: 'auth_login', username: sun, password: 'aitest123', device: 'ai-dev' }); const S1 = lg0.token; ok(lg0.ok, 'AI: đăng nhập HS thử: ' + JSON.stringify(lg0).slice(0, 150));
+  ok(g.api({ action: 'ai_status', token: S1 }).enabled === false && g.api({ action: 'ai_status', token: S1 }).allowed === false, 'AI: chưa cấp quyền → ai_status không cho dùng');
+  ok(/chưa được giáo viên cấp quyền/.test(g.api({ action: 'ai_chat', token: S1, text: 'hi' }).error), 'AI: chưa cấp quyền → từ chối, chỉ góp ý');
+  ok(g.api({ action: 'auth_me', token: S1 }).user.ai === false, 'AI: user.ai=false khi chưa cấp');
+  ok(!g.api({ action: 'adm_user_ai', token: S1, usernames: [sun], on: true }).ok, 'AI: học sinh không tự cấp quyền');
+  const gr = g.api({ action: 'adm_user_ai', token: A, usernames: [sun, 'admin', 'khong-co'], on: true }); ok(gr.ok && gr.changed === 1, 'AI: admin cấp quyền (bỏ qua admin/không tồn tại): ' + JSON.stringify(gr));
+  ok(g.api({ action: 'auth_me', token: S1 }).user.ai === true, 'AI: sau khi cấp, user.ai=true (không cần đăng nhập lại)');
+  ok(g.api({ action: 'ai_status', token: S1 }).enabled === false && g.api({ action: 'ai_status', token: S1 }).allowed === true, 'AI: được cấp nhưng chưa có khoá → enabled=false');
+  ok(/chưa được cài đặt/.test(g.api({ action: 'ai_chat', token: S1, text: 'hi' }).error), 'AI: chưa có khoá → báo chưa cài đặt');
+  g.props['GEMINI_API_KEY'] = 'gk-test'; let calls = [];
+  g.setFetch((url, o) => { calls.push({ url, o }); return { getResponseCode: () => 200, getContentText: () => JSON.stringify({ candidates: [{ content: { parts: [{ text: 'Xin chào, đây là trả lời' }] } }], usageMetadata: { promptTokenCount: 12, candidatesTokenCount: 7 } }) }; });
+  let r = g.api({ action: 'ai_chat', token: S1, text: 'Giải thích thì hiện tại hoàn thành', set_id: 'lop10-u1-luyentap', page_id: 'p1', context: 'have been' });
+  ok(r.ok && r.text === 'Xin chào, đây là trả lời' && r.left === 14, 'AI: trả lời + còn 14 lượt (mặc định 15): ' + JSON.stringify(r));
+  const sent = JSON.parse(calls[0].o.payload);
+  ok(/generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-3\.5-flash-lite:generateContent/.test(calls[0].url) && calls[0].o.headers['x-goog-api-key'] === 'gk-test' && sent.contents[0].role === 'user' && /have been/.test(sent.contents[0].parts[0].text) && /lop10-u1-luyentap/.test(sent.systemInstruction.parts[0].text) && !/Em|Trần|Lê/.test(sent.systemInstruction.parts[0].text) && sent.generationConfig.maxOutputTokens === 700, 'AI: gọi đúng Gemini, khoá, ngữ cảnh; không gửi tên học sinh');
+  r = g.api({ action: 'ai_chat', token: S1, text: 'câu tiếp', history: [{ role: 'user', text: 'a' }, { role: 'ai', text: 'b' }, { role: 'user', text: 'c' }] }); const s2 = JSON.parse(calls[1].o.payload);
+  ok(r.ok && s2.contents.length === 3 && s2.contents[1].role === 'model' && s2.contents[0].role === 'user' && s2.contents[2].role === 'user', 'AI: ghép lịch sử hội thoại xen kẽ user/model');
+  ok(!g.api({ action: 'ai_chat', token: S1, text: 'x', live: true }).ok, 'AI: đang làm bài kiểm tra → bị khoá');
+  ok(!g.api({ action: 'ai_chat', token: S1, text: 'x'.repeat(900) }).ok && !g.api({ action: 'ai_chat', token: S1, text: '  ' }).ok, 'AI: câu hỏi rỗng / quá dài bị từ chối');
+  ok(g.api({ action: 'ai_chat', token: A, text: 'hi' }).ok, 'AI: admin luôn dùng được');
+  g.api({ action: 'adm_ai_save', token: A, limit: 3, enabled: true, provider: 'gemini', modelGemini: 'gemini-3.1-flash-lite' });
+  g.advance(61 * 1000); let last = g.api({ action: 'ai_chat', token: S1, text: 'lần 3' }); ok(last.ok && /gemini-3\.1-flash-lite/.test(calls[calls.length - 1].url), 'AI: lượt thứ 3 vẫn được, dùng mô hình đã đổi');
+  g.advance(61 * 1000); last = g.api({ action: 'ai_chat', token: S1, text: 'lần 4' }); ok(!last.ok && /hết 3 lượt/.test(last.error), 'AI: quá giới hạn ngày bị chặn: ' + last.error);
+  g.api({ action: 'adm_ai_save', token: A, limit: 50, enabled: false }); ok(/tắt/.test(g.api({ action: 'ai_chat', token: S1, text: 'x' }).error), 'AI: admin tắt → bị từ chối');
+  g.api({ action: 'adm_ai_save', token: A, limit: 50, enabled: true });
+  g.setFetch(() => ({ getResponseCode: () => 400, getContentText: () => '{"error":{"message":"API key not valid. Please pass a valid API key."}}' })); g.advance(61 * 1000);
+  ok(/Khoá API/.test(g.api({ action: 'ai_chat', token: S1, text: 'x' }).error), 'AI: khoá Gemini sai (400) → thông báo thân thiện');
+  g.setFetch(() => ({ getResponseCode: () => 429, getContentText: () => '{}' })); g.advance(61 * 1000);
+  ok(/bận|hết lượt miễn phí/.test(g.api({ action: 'ai_chat', token: S1, text: 'x' }).error), 'AI: 429 → báo bận / hết lượt miễn phí');
+  // chuyển sang Claude
+  g.props['ANTHROPIC_API_KEY'] = 'sk-test'; g.api({ action: 'adm_ai_save', token: A, limit: 50, enabled: true, provider: 'claude' }); calls = [];
+  g.setFetch((url, o) => { calls.push({ url, o }); return { getResponseCode: () => 200, getContentText: () => JSON.stringify({ content: [{ type: 'text', text: 'Claude đáp' }], usage: { input_tokens: 5, output_tokens: 3 } }) }; }); g.advance(61 * 1000);
+  r = g.api({ action: 'ai_chat', token: S1, text: 'dùng claude' }); ok(r.ok && r.text === 'Claude đáp' && calls[0].url === 'https://api.anthropic.com/v1/messages' && calls[0].o.headers['x-api-key'] === 'sk-test', 'AI: chuyển sang Claude vẫn chạy');
+  g.api({ action: 'adm_ai_save', token: A, limit: 50, enabled: true, provider: 'gemini' });
+  // thu quyền; giáo viên
+  g.api({ action: 'adm_user_ai', token: A, usernames: [sun], on: false }); g.advance(61 * 1000);
+  ok(/chưa được giáo viên cấp quyền/.test(g.api({ action: 'ai_chat', token: S1, text: 'x' }).error) && g.api({ action: 'auth_me', token: S1 }).user.ai === false, 'AI: thu quyền → bị từ chối ngay');
+  ok(!g.api({ action: 'ai_chat', token: T, text: 'hi' }).ok, 'AI: giáo viên chưa được cấp → từ chối');
+  const tn = g.api({ action: 'auth_me', token: T }).user.username; ok(!g.api({ action: 'adm_user_ai', token: T, usernames: [tn], on: true }).ok || g.api({ action: 'adm_user_ai', token: T, usernames: [tn], on: true }).changed === 0, 'AI: giáo viên thường không tự cấp cho mình');
+  ok(g.api({ action: 'adm_user_ai', token: A, usernames: [tn], on: true }).changed === 1, 'AI: admin cấp cho giáo viên'); g.advance(61 * 1000);
+  g.setFetch(() => ({ getResponseCode: () => 200, getContentText: () => JSON.stringify({ candidates: [{ content: { parts: [{ text: 'ok' }] } }] }) }));
+  ok(g.api({ action: 'ai_chat', token: T, text: 'hi' }).ok, 'AI: giáo viên được cấp dùng được');
+  g.api({ action: 'adm_user_ai', token: A, usernames: [tn], on: false });
+  g.api({ action: 'adm_user_ai', token: A, usernames: [sun], on: true });
+  g.setFetch(() => ({ getResponseCode: () => 400, getContentText: () => '{"error":{"message":"API key not valid"}}' })); g.advance(61 * 1000);
+  const lg = g.api({ action: 'adm_ai_get', token: A }); ok(lg.ok && lg.hasKey && lg.provider === 'gemini' && lg.hasGemini && lg.hasClaude && lg.total >= 3 && lg.rows[0].q && JSON.stringify(lg).indexOf('gk-test') < 0 && JSON.stringify(lg).indexOf('sk-test') < 0, 'AI: admin xem nhật ký + trạng thái 2 khoá, khoá không lộ');
+  ok(!g.api({ action: 'adm_ai_get', token: T }).ok, 'AI: giáo viên thường không xem được cài đặt / nhật ký');
+  ok(g.api({ action: 'adm_users', token: A, role: 'student' }).users.some(u => u.username === sun && u.ai === true), 'AI: danh sách học sinh trả về cờ ai');
+  // góp ý chung + gửi nhanh
+  const f = g.api({ action: 'fb_send', token: S1, set_id: 'general', page_id: 'index', title: 'Trang chủ', text: 'Cô ơi em có câu hỏi', light: true });
+  ok(f.ok && f.msg && f.msg.text === 'Cô ơi em có câu hỏi' && f.msg.role === 'student' && !f.msgs, 'góp ý chung (không gắn bài) + trả về gọn');
+  const f2 = g.api({ action: 'fb_send', token: S1, set_id: 'bo-bai-khong-ton-tai', page_id: 'x', text: 'abc' }); ok(!f2.ok, 'góp ý gắn bộ bài chưa giao vẫn bị chặn');
+  ok(g.api({ action: 'fb_list', token: S1, set_id: 'general', page_id: 'index' }).msgs.length === 1, 'fb_list đọc lại góp ý chung');
+  const inbox = g.api({ action: 'fb_inbox', token: A }); ok(inbox.ok && JSON.stringify(inbox).indexOf('general') >= 0, 'giáo viên/admin thấy góp ý chung trong hộp thư');
+}
 // ---- phân trang + lọc ngày kết quả ----
 {
   const all = g.api({ action: 'adm_results', token: A }); const n = all.rows.length; ok(n >= 3 && all.more === false, 'kết quả mặc định không còn "more"');

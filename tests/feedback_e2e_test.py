@@ -46,7 +46,7 @@ try:
         # góp ý trên trang luyện tập
         pg.goto(U('WebBaiTap/Lop11/Unit1/botro/doc.html')); pg.wait_for_selector('.gnfb-btn')
         chk('trang luyện tập có nút Góp ý', pg.is_visible('.gnfb-btn'))
-        pg.click('.gnfb-btn'); pg.fill('.gnfb-box textarea', 'Câu 5 em thấy có 2 đáp án đúng ạ'); pg.click('.gnfb-f button'); pg.wait_for_selector('.gnfb-m.me')
+        pg.click('.gnfb-btn'); pg.fill('.gnfb-box textarea', 'Câu 5 em thấy có 2 đáp án đúng ạ'); pg.click('.gnfb-go'); pg.wait_for_selector('.gnfb-m.me')
         chk('HS gửi góp ý, hiện trong khung chat', 'Câu 5' in pg.inner_text('.gnfb-l'))
         # trang kiểm tra IELTS Completion cũng có nút
         pg.goto(U('WebBaiTap/IELTS/Reading/TheoDang/Completion/Test1_Passage1_Completion.html')); pg.wait_for_selector('.gnfb-btn')
