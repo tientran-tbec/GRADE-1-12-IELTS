@@ -497,13 +497,23 @@ def build_index(done):
             o.append('<a class="tile %s" data-m="%s" href="WebBaiTap/%s/%s/%s/%s.html"><span class="ic">%s</span><b>%s</b><small>%d câu%s</small></a>'
                      % ('t-test' if mode == 'test' else '', 'test' if mode == 'test' else 'prac', gdir, udir, slug, pid, icons.get(pid, '✏️'), html.escape(title), n, ' · có tính giờ' if mode == 'test' else ''))
         o.append('</div></section>')
-    if tests:   # các Test riêng gom thành một thẻ
-        g, u = tests[0][0][3][3:], unum(tests[0][0][4])
-        o.append('<section class="card setcard" data-g="%s" data-u="%s" data-k="test"><div class="settitle"><span class="chip">Lớp %s · %s</span><h3>Đề kiểm tra Mid-term 1 (%d test)</h3></div><div class="tiles">' % (g, u, g, ulabel(u), len(tests)))
-        for entry, S, pages in tests:
+    groups = []   # các đề riêng gom theo (lớp, Unit/Mid-term) — mỗi nhóm một thẻ
+    for x in tests:
+        key = (x[0][3], x[0][4])
+        for gr in groups:
+            if gr[0] == key:
+                gr[1].append(x); break
+        else:
+            groups.append((key, [x]))
+    for (gdir, udir), tl in groups:
+        g, u = gdir[3:], unum(udir)
+        ttl = 'Đề kiểm tra Mid-term 1 (%d test)' % len(tl) if udir == 'MidTerm1' else 'Đề kiểm tra %s (%d đề)' % (ulabel(u), len(tl))
+        o.append('<section class="card setcard" data-g="%s" data-u="%s" data-k="test"><div class="settitle"><span class="chip">Lớp %s · %s</span><h3>%s</h3></div><div class="tiles">' % (g, u, g, ulabel(u), ttl))
+        for entry, S, pages in tl:
             pid, title, mode, n = pages[0]
             P0 = S['pages'][0]
             num = S['title'].split('–')[0].strip()
+            if udir != 'MidTerm1': num = 'Đề kiểm tra'
             o.append('<a class="tile t-test" data-m="test" data-sid="%s" href="WebBaiTap/%s/%s/%s/%s.html"><span class="ic">%s</span><b>%s</b><small>%d câu · %d phút%s</small></a>'
                      % (S['id'], entry[3], entry[4], entry[5], pid, '🎧' if P0.get('audio') else '📝', html.escape(num), n, P0.get('minutes', 0), ' · có nghe' if P0.get('audio') else ''))
         o.append('</div></section>')
