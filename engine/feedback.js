@@ -77,25 +77,34 @@
   var AK = 'gn_ai_' + set + '|' + page, hist = [], ai = { loaded: false, enabled: true, left: null, busy: false };
   try { hist = JSON.parse(sessionStorage.getItem(AK) || '[]'); } catch (e) { hist = []; }
   function saveH() { try { sessionStorage.setItem(AK, JSON.stringify(hist.slice(-20))); } catch (e) {} }
-  function fmt(t) { return E(t).replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>').replace(/`([^`\n]+)`/g, '<code>$1</code>').replace(/^[-*] /gm, '• '); }
-  function isLive() {
-    if (submitted) return false;
-    if (document.body.classList.contains('testmode')) return true;
-    if (RD.kind === 'full') return true;
-    return false;
+  function fmt(t) { return E(t).replace(/\$\\(?:right)?arrow\$/g, '→').replace(/\$\\leftarrow\$/g, '←').replace(/^#{1,4} ?/gm, '').replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>').replace(/`([^`\n]+)`/g, '<code>$1</code>').replace(/^[-*] /gm, '• '); }
+  /* Trang làm bài (có nút Nộp bài): AI chỉ mở SAU KHI nộp bài. Trang khác (trang chủ, điểm của tôi…): dùng được bình thường. */
+  function isQuiz() { return !!(document.getElementById('submit') || document.getElementById('submitBtn') || RD.kind || document.body.classList.contains('testmode')); }
+  function isLive() { return !submitted && isQuiz(); }
+  /* Đọc nội dung trang đang hiển thị (bài đọc + câu hỏi + đáp án/giải thích nếu đã hiện) để AI trả lời "câu 32" mà không cần bôi đen */
+  function pageText(q) {
+    var od = box.style.display, bd = btn.style.display, t = '';
+    box.style.display = 'none'; btn.style.display = 'none';
+    try { t = String(document.body.innerText || ''); } catch (e) {}
+    box.style.display = od; btn.style.display = bd;
+    t = t.replace(/[ \t ]+/g, ' ').replace(/\n\s*\n+/g, '\n').trim();
+    var MAX = 20000; if (t.length <= MAX) return t;
+    var head = t.slice(0, 13000), m = /(?:câu|cau|question|q)\s*(?:số\s*)?(\d{1,3})/i.exec(q || ''), tail = '';
+    if (m) { var re = new RegExp('(?:^|\\n)\\s*' + m[1] + '\\s*[.)]?\\s', 'g'), x, pos = -1; while ((x = re.exec(t))) { if (x.index > 13000) { pos = x.index; break; } } if (pos > 0) tail = '\n…\n' + t.slice(Math.max(13000, pos - 1500), pos + 5500); }
+    return head + (tail || '\n…\n' + t.slice(-(MAX - 13000)));
   }
   document.addEventListener('quiz:submitted', function () { submitted = true; if (tab === 'a') renderA(); });
   var rm = document.getElementById('resultModal');
   if (rm && window.MutationObserver) new MutationObserver(function () { if (!rm.classList.contains('hidden') && rm.style.display !== 'none' && (RD.kind === 'full' || RD.kind)) { submitted = true; if (tab === 'a') renderA(); } }).observe(rm, { attributes: true, attributeFilter: ['class', 'style'] });
   function renderA() {
     var live = isLive();
-    sub.innerHTML = live ? '🔒 Đang làm bài kiểm tra: trợ lý AI tạm khoá. Nộp bài xong bạn có thể hỏi.' : (ai.enabled ? 'AI có thể sai – hãy kiểm tra lại. Giáo viên có thể xem lại câu hỏi.' + (ai.left != null ? ' · Còn <b>' + ai.left + '</b> lượt hôm nay' : '') : 'Trợ lý AI chưa được bật.');
+    sub.innerHTML = live ? '🔒 Trợ lý AI chỉ mở sau khi bạn nộp bài. Hãy tự làm bài trước nhé!' : (ai.enabled ? 'AI có thể sai – hãy kiểm tra lại. Giáo viên có thể xem lại câu hỏi.' + (ai.left != null ? ' · Còn <b>' + ai.left + '</b> lượt hôm nay' : '') : 'Trợ lý AI chưa được bật.');
     var h = hist.map(function (m) { return '<div class="gnfb-m ' + (m.role === 'user' ? 'me' : (m.bad ? 'bad' : 'ai')) + '">' + fmt(m.text) + (m.role === 'ai' && !m.bad ? '<small>🤖 Trợ lý AI</small>' : '') + '</div>'; }).join('');
     if (ai.busy) h += '<div class="gnfb-m ai">⏳ Trợ lý đang trả lời…</div>';
-    list.innerHTML = h || '<div class="gnfb-e">Hỏi mình về từ vựng, ngữ pháp, cách làm bài…<br>Ví dụ: “Giải thích thì hiện tại hoàn thành” hoặc bôi đen một câu rồi bấm “Hỏi về đoạn đang bôi đen”.</div>';
+    list.innerHTML = h || '<div class="gnfb-e">Mình đọc được nội dung trang bài này.<br>Cứ hỏi, ví dụ: “Giải thích chi tiết câu 32 giúp mình”, “Vì sao câu 5 chọn B?”, “Giải thích thì hiện tại hoàn thành”.</div>';
     list.scrollTop = list.scrollHeight;
     var off = live || !ai.enabled; ta.disabled = off; send.disabled = off || ai.busy;
-    ta.placeholder = off ? (live ? 'Trợ lý AI sẽ mở lại sau khi bạn nộp bài.' : 'Trợ lý AI chưa bật.') : 'Nhập câu hỏi (Ctrl+Enter để gửi)…';
+    ta.placeholder = off ? (live ? 'AI mở sau khi bạn nộp bài.' : 'Trợ lý AI chưa bật.') : 'Nhập câu hỏi (Ctrl+Enter để gửi)…';
   }
   function loadA() {
     renderA();   /* hiện ngay cuộc trò chuyện đã có, cập nhật số lượt khi máy chủ trả lời */
@@ -110,7 +119,7 @@
     var ctxT = selBtn._ctx || ''; selBtn._ctx = ''; selBtn.hidden = !lastSel;
     var past = hist.filter(function (m) { return !m.bad; }).slice(-8).map(function (m) { return { role: m.role, text: m.text }; });
     hist.push({ role: 'user', text: t }); ai.busy = true; renderA();
-    A.api('ai_chat', { text: t, history: past, context: ctxT, set_id: set, page_id: page, live: isLive() }).then(function (j) {
+    A.api('ai_chat', { text: t, history: past, context: ctxT, page_text: pageText(t), set_id: set, page_id: page, live: isLive() }).then(function (j) {
       hist.push({ role: 'ai', text: j.text }); ai.left = j.left;
     }).catch(function (e) { hist.push({ role: 'ai', text: e.message || 'Không hỏi được, hãy thử lại.', bad: true }); })
       .then(function () { ai.busy = false; saveH(); renderA(); });

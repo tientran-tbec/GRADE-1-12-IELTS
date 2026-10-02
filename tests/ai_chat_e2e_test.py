@@ -21,7 +21,7 @@ try:
     LA = api({'action': 'auth_login', 'username': 'admin', 'password': 'Admin@123', 'device': 'a'}); A = LA['token']
     api({'action': 'adm_class_save', 'token': A, 'cls': {'id': 'AI', 'name': 'AI', 'grade': 10}})
     hs = api({'action': 'adm_user_save', 'token': A, 'user': {'name': 'Em Hỏi AI', 'classes': ['AI'], 'password': 'hs1234'}})['user']['username']
-    api({'action': 'adm_assign_save', 'token': A, 'cls': 'AI', 'sets': ['lop10-u1-luyentap']})
+    api({'action': 'adm_assign_save', 'token': A, 'cls': 'AI', 'sets': ['lop10-u1-luyentap', 'ielts-rd-test02']})
     LH = api({'action': 'auth_login', 'username': hs, 'password': 'hs1234', 'device': 'h'})
     # mật khẩu tạm → đổi để dùng được token
     api({'action': 'auth_change_password', 'token': LH['token'], 'old_password': 'hs1234', 'new_password': 'matkhau5'})
@@ -56,24 +56,39 @@ try:
         chk('được cấp quyền: hiện 2 tab (Giáo viên + Trợ lý AI)', p.is_visible('.gnfb-tabs') and p.is_visible('.gnfb-tabs button[data-t=a]') and p.is_visible('.gnfb-tabs button[data-t=t]'))
         # --- AI
         p.click('.gnfb-tabs button[data-t=a]'); p.wait_for_function("document.querySelector('.gnfb-sub').innerText.indexOf('Còn')>=0")
-        chk('tab AI hiện số lượt còn lại', 'Còn 15' in p.inner_text('.gnfb-sub'))
+        chk('tab AI hiện số lượt còn lại', 'Còn 50' in p.inner_text('.gnfb-sub'))
         setdelay(1200)
         p.click('.gnfb-box textarea'); p.keyboard.type('Giải thích thì hiện tại hoàn thành'); t0 = time.time(); p.click('.gnfb-go')
         p.wait_for_function("document.querySelector('.gnfb-l').innerText.indexOf('Giải thích thì')>=0"); chk('câu hỏi AI hiện ngay + báo đang trả lời (%.2fs)' % (time.time() - t0), time.time() - t0 < 0.5 and 'đang trả lời' in p.inner_text('.gnfb-l'))
         p.wait_for_function("document.querySelector('.gnfb-l').innerText.indexOf('AI trả lời')>=0", timeout=8000); setdelay(0)
-        chk('trợ lý AI trả lời + đếm lượt (còn 14)', 'Còn 14' in p.inner_text('.gnfb-sub') and 'Trợ lý AI' in p.inner_text('.gnfb-l'))
+        chk('trợ lý AI trả lời + đếm lượt (còn 49)', 'Còn 49' in p.inner_text('.gnfb-sub') and 'Trợ lý AI' in p.inner_text('.gnfb-l'))
         (p.evaluate("localStorage.removeItem('gn_ping')"), p.reload()); p.wait_for_selector('.gnfb-btn'); p.click('.gnfb-btn'); p.click('.gnfb-tabs button[data-t=a]'); time.sleep(0.5)
         chk('tải lại trang: cuộc trò chuyện AI còn nguyên', 'Giải thích thì' in p.inner_text('.gnfb-l'))
         # --- khoá khi đang làm kiểm tra, mở sau khi nộp
         p.goto(U('WebBaiTap/Lop10/Unit1/luyentap/kiem-tra-15.html')); p.wait_for_selector('.gnfb-btn')
         if p.locator('#startBtn').is_visible(): p.click('#startBtn'); time.sleep(1)
         p.click('.gnfb-btn'); p.click('.gnfb-tabs button[data-t=a]'); time.sleep(0.5)
-        p.wait_for_function("document.querySelector('.gnfb-sub').innerText.indexOf('khoá')>=0")
-        chk('đang làm kiểm tra: AI bị khoá', 'tạm khoá' in p.inner_text('.gnfb-sub') and p.is_disabled('.gnfb-box textarea'))
+        p.wait_for_function("document.querySelector('.gnfb-sub').innerText.indexOf('chỉ mở')>=0")
+        chk('đang làm kiểm tra: AI bị khoá', 'chỉ mở sau khi bạn nộp bài' in p.inner_text('.gnfb-sub') and p.is_disabled('.gnfb-box textarea'))
         p.click('.gnfb-x'); p.click('#submit'); p.wait_for_selector('#resultModal', state='visible'); time.sleep(1)
         p.click('.gnfb-btn'); p.click('.gnfb-tabs button[data-t=a]'); time.sleep(0.5)
-        p.wait_for_function("document.querySelector('.gnfb-sub').innerText.indexOf('khoá')<0")
+        p.wait_for_function("document.querySelector('.gnfb-sub').innerText.indexOf('chỉ mở')<0")
         chk('nộp bài xong: AI mở lại', not p.is_disabled('.gnfb-box textarea'))
+        p.click('.gnfb-box textarea'); p.keyboard.type('Giải thích chi tiết câu 1 giúp mình'); p.click('.gnfb-go')
+        p.wait_for_function("document.querySelector('.gnfb-l').innerText.indexOf('|ctx=')>=0", timeout=8000)
+        import re as _re
+        m_ = _re.search(r'\|ctx=(\d+)', p.inner_text('.gnfb-l')); chk('AI nhận được nội dung trang bài (ctx=%s ký tự)' % (m_.group(1) if m_ else '?'), m_ and int(m_.group(1)) > 1500)
+        p.goto(U('WebBaiTap/Lop10/Unit1/luyentap/' + os.listdir(os.path.join(ROOT, 'WebBaiTap/Lop10/Unit1/luyentap'))[0])); p.wait_for_selector('.gnfb-btn')
+        if p.locator('#submit').count():
+            p.click('.gnfb-btn'); p.click('.gnfb-tabs button[data-t=a]'); time.sleep(0.5)
+            chk('trang luyện tập chưa nộp: AI cũng khoá', p.is_disabled('.gnfb-box textarea'))
+        p.goto(U('WebBaiTap/IELTS/Reading/FullTest/Test2_Reading.html')); p.wait_for_selector('.gnfb-btn')
+        p.click('.gnfb-btn'); p.click('.gnfb-tabs button[data-t=a]'); time.sleep(0.5)
+        chk('IELTS chưa nộp bài: AI khoá', p.is_disabled('.gnfb-box textarea') and 'chỉ mở sau khi' in p.inner_text('.gnfb-sub'))
+        p.evaluate("document.getElementById('submitBtn').click()"); time.sleep(2)
+        p.evaluate("document.querySelectorAll('button').forEach(function(b){ if(/Nộp|Xác nhận|Đồng ý|OK/i.test(b.textContent) && b.offsetParent && b.id!=='submitBtn' && !b.closest('.gnfb-box')) b.click() })"); time.sleep(1.5)
+        (None if p.is_visible('.gnfb-box') else p.click('.gnfb-btn')); p.click('.gnfb-tabs button[data-t=a]'); time.sleep(0.6)
+        chk('IELTS nộp bài xong: AI mở', not p.is_disabled('.gnfb-box textarea'))
         # --- admin
         pa = newctx(LA); pa.goto(U('admin.html#ai')); pa.wait_for_selector('#tbAI tr'); time.sleep(0.8)
         chk('admin: tab Trợ lý AI báo đã có khoá + nhật ký có câu hỏi', 'Đã có khoá' in pa.inner_text('#aiSt') and 'Giải thích thì hiện tại hoàn thành' in pa.inner_text('#tbAI') and 'sk-test' not in pa.content())

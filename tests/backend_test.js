@@ -301,9 +301,9 @@ r = L('anlt', 'sai'); ok(!r.ok && /quá nhiều/.test(r.error), 'khoá sau 5 l�
   g.props['GEMINI_API_KEY'] = 'gk-test'; let calls = [];
   g.setFetch((url, o) => { calls.push({ url, o }); return { getResponseCode: () => 200, getContentText: () => JSON.stringify({ candidates: [{ content: { parts: [{ text: 'Xin chào, đây là trả lời' }] } }], usageMetadata: { promptTokenCount: 12, candidatesTokenCount: 7 } }) }; });
   let r = g.api({ action: 'ai_chat', token: S1, text: 'Giải thích thì hiện tại hoàn thành', set_id: 'lop10-u1-luyentap', page_id: 'p1', context: 'have been' });
-  ok(r.ok && r.text === 'Xin chào, đây là trả lời' && r.left === 14, 'AI: trả lời + còn 14 lượt (mặc định 15): ' + JSON.stringify(r));
+  ok(r.ok && r.text === 'Xin chào, đây là trả lời' && r.left === 49, 'AI: trả lời + còn 49 lượt (mặc định 50): ' + JSON.stringify(r));
   const sent = JSON.parse(calls[0].o.payload);
-  ok(/generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-3\.5-flash-lite:generateContent/.test(calls[0].url) && calls[0].o.headers['x-goog-api-key'] === 'gk-test' && sent.contents[0].role === 'user' && /have been/.test(sent.contents[0].parts[0].text) && /lop10-u1-luyentap/.test(sent.systemInstruction.parts[0].text) && !/Em|Trần|Lê/.test(sent.systemInstruction.parts[0].text) && sent.generationConfig.maxOutputTokens === 700, 'AI: gọi đúng Gemini, khoá, ngữ cảnh; không gửi tên học sinh');
+  ok(/generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-3\.8-flash:generateContent/.test(calls[0].url) && calls[0].o.headers['x-goog-api-key'] === 'gk-test' && sent.contents[0].role === 'user' && /have been/.test(sent.contents[0].parts[0].text) && /lop10-u1-luyentap/.test(sent.systemInstruction.parts[0].text) && !/Em|Trần|Lê/.test(sent.systemInstruction.parts[0].text) && sent.generationConfig.maxOutputTokens === 700, 'AI: gọi đúng Gemini, khoá, ngữ cảnh; không gửi tên học sinh');
   r = g.api({ action: 'ai_chat', token: S1, text: 'câu tiếp', history: [{ role: 'user', text: 'a' }, { role: 'ai', text: 'b' }, { role: 'user', text: 'c' }] }); const s2 = JSON.parse(calls[1].o.payload);
   ok(r.ok && s2.contents.length === 3 && s2.contents[1].role === 'model' && s2.contents[0].role === 'user' && s2.contents[2].role === 'user', 'AI: ghép lịch sử hội thoại xen kẽ user/model');
   ok(!g.api({ action: 'ai_chat', token: S1, text: 'x', live: true }).ok, 'AI: đang làm bài kiểm tra → bị khoá');
@@ -318,6 +318,18 @@ r = L('anlt', 'sai'); ok(!r.ok && /quá nhiều/.test(r.error), 'khoá sau 5 l�
   ok(/Khoá API/.test(g.api({ action: 'ai_chat', token: S1, text: 'x' }).error), 'AI: khoá Gemini sai (400) → thông báo thân thiện');
   g.setFetch(() => ({ getResponseCode: () => 429, getContentText: () => '{}' })); g.advance(61 * 1000);
   ok(/bận|hết lượt miễn phí/.test(g.api({ action: 'ai_chat', token: S1, text: 'x' }).error), 'AI: 429 → báo bận / hết lượt miễn phí');
+  // tự chuyển mô hình khi bận
+  g.api({ action: 'adm_ai_save', token: A, limit: 50, limitT: 100, enabled: true, provider: 'gemini', modelGemini: 'gemini-3.8-flash, gemini-3.7-flash,gemini-3.5-flash-lite' }); calls = []; g.advance(61 * 1000);
+  g.setFetch((url, o) => { calls.push(url); if (/gemini-3\.8-flash:/.test(url)) return { getResponseCode: () => 429, getContentText: () => '{"error":{"message":"quota"}}' }; if (/gemini-3\.7-flash:/.test(url)) return { getResponseCode: () => 503, getContentText: () => '{}' }; return { getResponseCode: () => 200, getContentText: () => JSON.stringify({ candidates: [{ content: { parts: [{ text: 'từ bản nhẹ' }] } }] }) }; });
+  r = g.api({ action: 'ai_chat', token: S1, text: 'bận thì sao' }); ok(r.ok && r.text === 'từ bản nhẹ' && r.model === 'gemini-3.5-flash-lite' && calls.length === 3, 'AI: 3.8 (429) → 3.7 (503) → 3.5-lite thành công: ' + JSON.stringify(r) + calls.length);
+  calls = []; g.advance(61 * 1000); r = g.api({ action: 'ai_chat', token: S1, text: 'lần sau' }); ok(r.ok && calls.length === 1 && /3\.5-flash-lite/.test(calls[0]), 'AI: mô hình vừa bận được bỏ qua 2 phút, gọi thẳng mô hình còn dùng được');
+  g.advance(130 * 1000); calls = []; r = g.api({ action: 'ai_chat', token: S1, text: 'sau 2 phút' }); ok(r.ok && /3\.8-flash:/.test(calls[0]), 'AI: sau 2 phút thử lại mô hình mạnh nhất');
+  g.setFetch(() => ({ getResponseCode: () => 429, getContentText: () => '{}' })); g.advance(130 * 1000);
+  ok(/bận|hết lượt/.test(g.api({ action: 'ai_chat', token: S1, text: 'tất cả bận' }).error), 'AI: tất cả mô hình bận → báo bận');
+  g.setFetch(() => ({ getResponseCode: () => 200, getContentText: () => JSON.stringify({ candidates: [{ content: { parts: [{ text: 'ok' }] } }] }) })); g.advance(130 * 1000);
+  ok(g.api({ action: 'adm_ai_get', token: A }).limitT === 100 && g.api({ action: 'ai_status', token: A }).limit === 0 && g.api({ action: 'ai_status', token: A }).left === null, 'AI: GV 100 lượt, admin không giới hạn');
+  g.api({ action: 'adm_ai_save', token: A, limit: 50, enabled: true, provider: 'gemini', modelGemini: 'gemini-3.8-flash' });
+  for (let k = 0; k < 8; k++) { g.advance(11 * 1000); if (!g.api({ action: 'ai_chat', token: A, text: 'admin ' + k }).ok) { ok(false, 'AI: admin hỏi nhiều lần phải được'); break; } }
   // chuyển sang Claude
   g.props['ANTHROPIC_API_KEY'] = 'sk-test'; g.api({ action: 'adm_ai_save', token: A, limit: 50, enabled: true, provider: 'claude' }); calls = [];
   g.setFetch((url, o) => { calls.push({ url, o }); return { getResponseCode: () => 200, getContentText: () => JSON.stringify({ content: [{ type: 'text', text: 'Claude đáp' }], usage: { input_tokens: 5, output_tokens: 3 } }) }; }); g.advance(61 * 1000);
