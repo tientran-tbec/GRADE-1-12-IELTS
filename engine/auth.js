@@ -17,7 +17,7 @@
     ROLE: ROLE,
     get: function () { var s = load(); return s && s.token && tokenExp(s.token) > Date.now() ? s : null; },
     set: function (token, user) { ls(KEY, JSON.stringify({ token: token, user: user })); },
-    clear: function () { ls(KEY, null); },
+    clear: function () { ls(KEY, null); ls('gn_ping', null); },
     user: function () { var s = A.get(); return s ? s.user : null; },
     loginUrl: function (next) { return ROOT + 'login.html' + (next ? '?next=' + encodeURIComponent(next) : ''); },
     logout: function () {
@@ -91,16 +91,27 @@
     /* Kiểm tra phiên với máy chủ (nền); phiên hỏng → đăng nhập lại. */
     verify: function (onUpdate) {
       if (!A.get() || !window.GN_URL) return;
+      var MIN = 120000, EVERY = 180000;   /* không hỏi máy chủ quá thường xuyên: chuyển trang liên tục vẫn chỉ hỏi ≤ 1 lần / 2 phút */
       var tick = function () {
         if (document.hidden && A._t) return;
+        var s0 = load(), now = Date.now(), c = null;
+        try { c = JSON.parse(ls('gn_ping') || 'null'); } catch (e) {}
+        if (c && s0 && s0.user.role === 'student' && c.u === s0.user.username && now - c.t < MIN) {   /* chỉ học sinh được giảm tần suất; giáo viên / admin luôn cập nhật quyền ngay khi mở trang */
+          A.unread = +c.n || 0; A._bell(); try { window.dispatchEvent(new CustomEvent('gn-unread', { detail: A.unread })); } catch (e) {}
+          return;
+        }
+        if (A._busy) return; A._busy = true;
         A.api('auth_ping').then(function (j) {
+          A._busy = false;
           var s = load(); if (!s) return; var sig = function (u) { return JSON.stringify(u.sets || null) + JSON.stringify(u.due || null) + u.cls + JSON.stringify(u.perms || null) + JSON.stringify(u.ranks || null); }, before = sig(s.user);
           A.set(s.token, j.user);
           A.unread = +j.unread || 0; A._bell(); try { window.dispatchEvent(new CustomEvent('gn-unread', { detail: A.unread })); } catch (e) {}
+          ls('gn_ping', JSON.stringify({ u: j.user.username, t: Date.now(), n: A.unread }));
           if (onUpdate && sig(j.user) !== before) onUpdate(j.user);
-        }).catch(function () {});
+        }).catch(function () { A._busy = false; });
       };
-      tick(); A._t = setInterval(tick, 60000);
+      A._tick = tick; A.refresh = function () { ls('gn_ping', null); tick(); };
+      tick(); A._t = setInterval(tick, EVERY);
       document.addEventListener('visibilitychange', function () { if (!document.hidden) tick(); });
     }
   };

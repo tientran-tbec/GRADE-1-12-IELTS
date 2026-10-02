@@ -131,3 +131,8 @@ Dữ liệu: Users có thêm cột **Quyền**, **Chức vụ** (tự thêm); ta
 - **Xoá kết quả** (admin hoặc giáo viên toàn quyền): tab Kết quả có ô chọn nhiều dòng + nút "Xóa đã chọn", và nút "Xóa" ở từng dòng.
 - **Trang quản lý học sinh**: ở tab Học sinh, bấm tên → `student.html`: sửa tên/lớp, chức vụ nhóm, đặt lại mật khẩu, đăng xuất thiết bị, khoá/mở khoá, xem bài đã giao, mọi lần nộp (xem bài, cảnh báo, xoá), hoạt động luyện tập.
 - Code.gs mới có thêm các hàm `adm_backup_info`, `adm_backup`, `adm_restore`, `adm_reset`, `adm_result_delete` — cần Deploy phiên bản mới.
+
+## Tăng tốc (đợt B)
+- Máy chủ lưu đệm danh sách tài khoản 5 phút (tự làm mới khi có sửa tài khoản) và chỉ mở file Sheet 1 lần mỗi lần gọi.
+- Học sinh: trình duyệt hỏi máy chủ tối đa 1 lần / 2 phút khi chuyển trang, và 3 phút/lần khi để trang mở. Giáo viên/admin luôn cập nhật quyền khi mở trang. Đăng xuất thiết bị khác có thể mất tới ~3 phút mới có hiệu lực ở máy bị đăng xuất. Trạng thái "đang đăng nhập" tính trong 7 phút.
+- Tab Kết quả: mặc định 7 ngày qua, tải 200 dòng, nút "Tải thêm"; có lọc Hôm nay / 7 ngày / 30 ngày / Tháng này / Mọi lúc. Tải CSV xuất tối đa 3000 dòng theo bộ lọc hiện tại.

@@ -24,14 +24,14 @@ GNAuth.api('my_results').then(function(j){
   var ks=Object.keys(by);if(ks.length){var avg=ks.reduce(function(a,k){return a+by[k]},0)/ks.length;document.getElementById('sum').hidden=false;
     document.getElementById('sumt').innerHTML='Đã nộp <b>'+ks.length+'</b> trang bài · điểm trung bình <b>'+(Math.round(avg*10)/10)+'</b>/10'}
 }).catch(function(e){document.getElementById('er').textContent=e.message;document.getElementById('tb').innerHTML=''});
-GNAuth.api('fb_mine').then(function(j){
+GNAuth.api('fb_mine').then(function(j){setTimeout(function(){GNAuth.unread&&GNAuth.refresh&&GNAuth.refresh()},800);
   var el=document.getElementById('fbl');
   el.innerHTML=j.threads.length?j.threads.map(function(t){return '<div style="padding:8px 0;border-top:1px solid var(--line)">'+(t.path?'<a href="'+E(t.path)+'"><b>'+E(t.title||t.page)+'</b></a>':'<b>'+E(t.title||t.page)+'</b>')+(t.unread?' <b style="background:#e11d48;color:#fff;border-radius:9px;padding:0 6px;font-size:11px">'+t.unread+' tin mới</b>':'')+'<br><small class="mut">'+E(t.lastText)+' · '+E(GNAuth.t(t.last))+'</small></div>'}).join(''):'Bạn chưa gửi góp ý nào.';
 }).catch(function(){document.getElementById('gopy').hidden=true});
 
 var CATT={};(window.GN_CATALOG||[]).forEach(function(x){CATT[x.id]=x.title});
 function sn(id){return CATT[id]||id}
-GNAuth.api('my_reminders').then(function(j){
+GNAuth.api('my_reminders').then(function(j){setTimeout(function(){GNAuth.unread&&GNAuth.refresh&&GNAuth.refresh()},800);
   if(!j.items.length)return;document.getElementById('nhac').hidden=false;
   document.getElementById('nhacl').innerHTML=j.items.map(function(r){return '<div style="padding:8px 0;border-top:1px solid var(--line)">'+(r.isNew?'<b style="background:#e11d48;color:#fff;border-radius:9px;padding:0 6px;font-size:11px">mới</b> ':'')+'<b>'+E(r.from)+'</b> ('+E(r.rank)+' lớp '+E(r.cls)+') nhắc bạn nộp bài'+(r.set?' <b>'+E(sn(r.set))+'</b>':'')+'.'+(r.note?'<br>“'+E(r.note)+'”':'')+'<br><small class="mut">'+E(GNAuth.t(r.time))+'</small></div>'}).join('');
   GNAuth.unread=0;GNAuth._bell();

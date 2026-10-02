@@ -30,9 +30,9 @@
  </section>
 
  <section id="p-results" hidden>
-  <div class="bar"><select id="rcls"></select><input id="rset" placeholder="Bộ bài (vd lop11-mt1-test01)" class="grow"><button class="btn" id="rgo">Xem</button><button class="btn sec" id="rcsv">Tải CSV</button><button class="btn sec" id="rdel" hidden style="color:#e11d48;border-color:#e11d48">🗑 Xóa đã chọn</button></div>
+  <div class="bar"><select id="rcls"></select><select id="rrange" style="width:auto"><option value="">Mọi lúc</option><option value="0">Hôm nay</option><option value="7" selected>7 ngày qua</option><option value="30">30 ngày qua</option><option value="m">Tháng này</option></select><input id="rset" placeholder="Bộ bài (vd lop11-mt1-test01)" class="grow"><button class="btn" id="rgo">Xem</button><button class="btn sec" id="rcsv">Tải CSV</button><button class="btn sec" id="rdel" hidden style="color:#e11d48;border-color:#e11d48">🗑 Xóa đã chọn</button></div>
   <div class="tw"><table><thead><tr><th id="thSel" hidden><input type="checkbox" id="rall" title="Chọn tất cả" style="width:auto"></th><th>Thời gian</th><th>Học sinh</th><th>Lớp</th><th>Bộ bài</th><th>Trang</th><th>Loại</th><th>Điểm</th><th>Thang 10</th><th>Phút</th><th>Cảnh báo</th><th></th></tr></thead><tbody id="tbR"></tbody></table></div>
-  <p class="mut" id="rinfo"></p>
+  <div class="bar"><button class="btn sec" id="rmore" hidden>Tải thêm 200 kết quả</button><span class="mut" id="rinfo"></span></div>
  </section>
 
  <section id="p-fb" hidden>
@@ -310,16 +310,29 @@ $('adueSet').onclick=function(){var v=$('adue').value;if(!v){msg('Hãy chọn ng
 $('adueClr').onclick=function(){Object.keys(picked).forEach(function(k){delete dues[k]});renderAssign()};
 
 /* ---------- kết quả ---------- */
+var RPAGE=200;
+function rangeQ(){
+  var v=$('rrange').value,vn=function(off){return new Date(Date.now()+7*3600e3-off*86400e3).toISOString().slice(0,10)},o={};
+  if(v==='m')o.from=vn(0).slice(0,8)+'01';else if(v!==''){o.from=vn(+v)}
+  return o
+}
+function rowHtml(r,i){var w=(+r.tab||0)+(+r.blur||0)+(+r.fs||0),who=r.username&&r.username!=='admin'&&r.name!=='Quản trị viên'?'<a href="student.html?u='+encodeURIComponent(r.username)+'" title="Mở trang quản lý học sinh">'+E(r.name)+'</a>':E(r.name);
+ return '<tr>'+(canDel?'<td><input type="checkbox" class="rsel" data-i="'+i+'" style="width:auto"></td>':'')+'<td>'+E(GNAuth.t(r.time))+'</td><td>'+who+' <small class="mut">'+E(r.username)+'</small></td><td>'+E(r.cls)+'</td><td>'+E(r.set_id)+'</td><td>'+E(r.page_id)+'</td><td>'+E(r.type)+'</td><td>'+E(r.score)+'/'+E(r.total)+'</td><td><b>'+E(r.score10)+'</b></td><td>'+Math.round((+r.time_spent||0)/60)+'</td><td>'+((w||r.hasEv)?'<button class="btn sm sec" data-i="'+i+'" style="color:#e11d48;border-color:#e11d48" title="Xem chi tiết vi phạm">⚠ '+(w||'xem')+' lần</button>':'')+'</td><td>'+(r.row?'<button class="btn sm sec" data-i="'+i+'" data-v="1">Xem bài</button>':'')+(canDel&&r.row?' <button class="btn sm sec" data-i="'+i+'" data-d="1" style="color:#e11d48;border-color:#e11d48">Xóa</button>':'')+'</td></tr>'}
+function resQuery(extra){return Object.assign({cls:$('rcls').value,set_id:$('rset').value.trim()},rangeQ(),extra||{})}
+function showRes(more){
+  $('tbR').innerHTML=S.rows.length?S.rows.map(rowHtml).join(''):'<tr><td colspan="12">Chưa có kết quả.</td></tr>';
+  $('rall').checked=false;selCount();
+  $('rmore').hidden=!more;$('rinfo').textContent=S.rows.length+' kết quả (mới nhất trước)'+(more?' – còn nữa, bấm "Tải thêm".':'.');
+}
 function loadResults(){
   $('rinfo').textContent='Đang tải…';
-  GNAuth.api('adm_results',{cls:$('rcls').value,set_id:$('rset').value.trim()}).then(function(j){
-    S.rows=j.rows;
-    $('tbR').innerHTML=j.rows.length?j.rows.map(function(r,i){var w=(+r.tab||0)+(+r.blur||0)+(+r.fs||0),who=r.username&&r.username!=='admin'&&r.name!=='Quản trị viên'?'<a href="student.html?u='+encodeURIComponent(r.username)+'" title="Mở trang tổng kết học sinh">'+E(r.name)+'</a>':E(r.name);
-     return '<tr>'+(canDel?'<td><input type="checkbox" class="rsel" data-i="'+i+'" style="width:auto"></td>':'')+'<td>'+E(GNAuth.t(r.time))+'</td><td>'+who+' <small class="mut">'+E(r.username)+'</small></td><td>'+E(r.cls)+'</td><td>'+E(r.set_id)+'</td><td>'+E(r.page_id)+'</td><td>'+E(r.type)+'</td><td>'+E(r.score)+'/'+E(r.total)+'</td><td><b>'+E(r.score10)+'</b></td><td>'+Math.round((+r.time_spent||0)/60)+'</td><td>'+((w||r.hasEv)?'<button class="btn sm sec" data-i="'+i+'" style="color:#e11d48;border-color:#e11d48" title="Xem chi tiết vi phạm">⚠ '+(w||'xem')+' lần</button>':'')+'</td><td>'+(r.row?'<button class="btn sm sec" data-i="'+i+'" data-v="1">Xem bài</button>':'')+(canDel&&r.row?' <button class="btn sm sec" data-i="'+i+'" data-d="1" style="color:#e11d48;border-color:#e11d48">Xóa</button>':'')+'</td></tr>'}).join(''):'<tr><td colspan="12">Chưa có kết quả.</td></tr>';
-    $('rall').checked=false;selCount();
-    $('rinfo').textContent=j.rows.length+' kết quả (mới nhất trước, tối đa 3000).';
-  }).catch(function(e){$('rinfo').textContent='';fail(e)});
+  GNAuth.api('adm_results',resQuery({limit:RPAGE,offset:0})).then(function(j){S.rows=j.rows;showRes(j.more)}).catch(function(e){$('rinfo').textContent='';fail(e)});
 }
+$('rmore').onclick=function(){
+  $('rmore').disabled=true;
+  GNAuth.api('adm_results',resQuery({limit:RPAGE,offset:S.rows.length})).then(function(j){S.rows=S.rows.concat(j.rows);showRes(j.more)}).catch(fail).then(function(){$('rmore').disabled=false})
+};
+$('rrange').onchange=loadResults;
 $('rgo').onclick=loadResults;
 var canDel=P('full');
 $('thSel').hidden=!canDel;$('rdel').hidden=!canDel;
@@ -335,7 +348,7 @@ $('tbR').onclick=function(e){var b=e.target.closest('button[data-i]');if(!b)retu
 $('tbR').onchange=function(e){if(e.target.classList.contains('rsel'))selCount()};
 $('rall').onchange=function(){[].forEach.call($('tbR').querySelectorAll('.rsel'),function(c){c.checked=$('rall').checked});selCount()};
 $('rdel').onclick=function(){delResults(selIdx())};
-$('rcsv').onclick=function(){dl('ket-qua.csv',csv([['Thời gian','Học sinh','Tài khoản','Lớp','Bộ bài','Trang','Loại','Điểm','Tổng','Thang 10','Giây','Chuyển tab','Mất focus','Thoát toàn màn hình']].concat(S.rows.map(function(r){return [GNAuth.t(r.time),r.name,r.username,r.cls,r.set_id,r.page_id,r.type,r.score,r.total,r.score10,r.time_spent,r.tab,r.blur,r.fs]}))))};
+$('rcsv').onclick=function(){msg('Đang chuẩn bị file CSV…',1);GNAuth.api('adm_results',resQuery({limit:3000,offset:0})).then(function(j){msg(j.more?'Chỉ xuất được 3000 kết quả mới nhất – hãy thu hẹp bộ lọc (khoảng thời gian / lớp) để xuất phần còn lại.':'Đã xuất '+j.rows.length+' kết quả.',!j.more);dl('ket-qua.csv',csv([['Thời gian','Học sinh','Tài khoản','Lớp','Bộ bài','Trang','Loại','Điểm','Tổng','Thang 10','Giây','Chuyển tab','Mất focus','Thoát toàn màn hình']].concat(j.rows.map(function(r){return [GNAuth.t(r.time),r.name,r.username,r.cls,r.set_id,r.page_id,r.type,r.score,r.total,r.score10,r.time_spent,r.tab,r.blur,r.fs]}))))}).catch(fail)};
 
 /* ---------- góp ý ---------- */
 var FB={cur:null,threads:[],timer:null};
@@ -353,7 +366,7 @@ function renderThread(t,msgs){
    '<textarea id="fbr" rows="3" maxlength="1000" placeholder="Trả lời học sinh…" style="margin-top:8px"></textarea><div class="row"><span class="err" id="fbe"></span><button class="btn" id="fbs">Gửi trả lời</button></div>';
   var m=$('fbm');m.scrollTop=m.scrollHeight;
   $('fbs').onclick=function(){var v=$('fbr').value.trim();if(!v)return;$('fbs').disabled=true;
-    GNAuth.api('fb_reply',{student:t.student,set_id:t.set,page_id:t.page,text:v}).then(function(j){renderThread(t,j.msgs);return loadInbox()}).catch(function(e){$('fbe').textContent=e.server?e.message:'Không gửi được.';$('fbs').disabled=false})};
+    GNAuth.api('fb_reply',{student:t.student,set_id:t.set,page_id:t.page,text:v}).then(function(j){renderThread(t,j.msgs);GNAuth.unread&&GNAuth.refresh&&GNAuth.refresh();return loadInbox()}).catch(function(e){$('fbe').textContent=e.server?e.message:'Không gửi được.';$('fbs').disabled=false})};
 }
 function openThread(t){FB.cur=t;
   GNAuth.api('fb_thread',{student:t.student,set_id:t.set,page_id:t.page}).then(function(j){renderThread(t,j.msgs);return loadInbox()}).catch(fail)}

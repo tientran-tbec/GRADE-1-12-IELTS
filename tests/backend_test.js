@@ -24,7 +24,7 @@ r = L('hoant', gvPw, 'gv-laptop'); ok(r.ok, 'cùng thiết bị đăng nhập l�
 ok(g.api({ action: 'auth_ping', token: T }).ok, 'ping');
 g.advance(150 * 1000); ok(g.api({ action: 'auth_ping', token: T }).ok, 'ping gia hạn'); g.advance(150 * 1000);
 r = L('hoant', gvPw, 'gv-phone'); ok(!r.ok, 'sau ping gia hạn vẫn còn online → chặn');
-g.advance(250 * 1000);   // không ping nữa → thiết bị kia coi như đã tắt
+g.advance(300 * 1000);   // không ping nữa → thiết bị kia coi như đã tắt
 r = L('hoant', gvPw, 'gv-phone'); ok(r.ok, 'quá hạn ping → đăng nhập thiết bị mới được'); const T2 = r.token;
 r = g.api({ action: 'auth_me', token: T }); ok(!r.ok && r.code === 'session', 'token thiết bị cũ mất hiệu lực: ' + JSON.stringify(r));
 ok(g.api({ action: 'auth_me', token: T2 }).ok, 'token thiết bị mới dùng được'); T = T2;
@@ -161,7 +161,7 @@ r = L('anlt', 'sai'); ok(!r.ok && /quá nhiều/.test(r.error), 'khoá sau 5 l�
 // ---- giờ hiển thị, GV nhiều lớp / lớp nhiều GV, giao bài theo học sinh ----
 {
   const uS = g.sheets['Users']; const hdr = uS.rows[0]; const ci = hdr.indexOf('Đăng nhập gần nhất');
-  const dRow = uS.rows.findIndex((r, i) => i > 0 && r[2] === 'student'); uS.rows[dRow][ci] = g.run('new Date(Date.UTC(2026, 9, 1, 11, 32, 19))');
+  const dRow = uS.rows.findIndex((r, i) => i > 0 && r[2] === 'student'); uS.rows[dRow][ci] = g.run('new Date(Date.UTC(2026, 9, 1, 11, 32, 19))'); g.run('bustUsers_()');
   const ul = g.api({ action: 'adm_users', token: A, role: 'student' }); ok(ul.users.some(u => u.last === '01/10/2026 18:32:19'), 'ngày-giờ dạng Date được định dạng lại dd/MM/yyyy HH:mm:ss (giờ VN): ' + JSON.stringify(ul.users.map(u => u.last)));
   // GV nhiều lớp
   ['Y1', 'Y2', 'Y3'].forEach(c => g.api({ action: 'adm_class_save', token: A, cls: { id: c, name: c, grade: 11 } }));
@@ -275,9 +275,21 @@ r = L('anlt', 'sai'); ok(!r.ok && /quá nhiều/.test(r.error), 'khoá sau 5 l�
   ok(g.api({ action: 'adm_student_summary', token: Q, username: a3.user.username }).ok, 'GV phụ trách xem được tổng kết HS');
   // migration: bảng Users cũ (12 cột) → GV hiện có giữ quyền giao bài
   const sh = g.sheets['Users']; const gv = sh.rows.find(r => r[0] === 'hoant'); const keep = gv[12]; const saveH = sh.rows[0].slice();
-  sh.rows.forEach(r => { r.length = Math.min(r.length, 12); });
+  sh.rows.forEach(r => { r.length = Math.min(r.length, 12); }); g.run('bustUsers_()');
   g.api({ action: 'adm_users', token: A, role: 'teacher' });
   ok(sh.rows.filter(r => r[2] === 'teacher').every(r => r[12] === 'assign'), 'bảng cũ chưa có cột Quyền: giáo viên giữ quyền giao bài');
+}
+// ---- phân trang + lọc ngày kết quả ----
+{
+  const all = g.api({ action: 'adm_results', token: A }); const n = all.rows.length; ok(n >= 3 && all.more === false, 'kết quả mặc định không còn "more"');
+  const p1 = g.api({ action: 'adm_results', token: A, limit: 2 }); ok(p1.rows.length === 2 && p1.more === true && p1.rows[0].row === all.rows[0].row, 'limit 2: còn nữa, đúng dòng mới nhất');
+  const p2 = g.api({ action: 'adm_results', token: A, limit: 2, offset: 2 }); ok(p2.rows[0].row === all.rows[2].row, 'offset 2: tiếp theo đúng dòng');
+  const pl = g.api({ action: 'adm_results', token: A, limit: n, offset: 0 }); ok(pl.more === false && pl.rows.length === n, 'limit đủ: hết');
+  const cl = g.api({ action: 'adm_results', token: A, limit: 2, cls: all.rows[0].cls }); ok(cl.rows.every(r => r.cls === all.rows[0].cls), 'lọc lớp + phân trang');
+  const nowD = g.run("Utilities.formatDate(new Date(), 'Asia/Ho_Chi_Minh', 'yyyy-MM-dd')");
+  const td = g.api({ action: 'adm_results', token: A, from: nowD, to: nowD }); ok(td.rows.length >= 1 && td.rows.length <= n && td.rows.every(r => all.rows.some(x => x.row === r.row)), 'lọc hôm nay: ' + td.rows.length + '/' + n + ' ' + nowD + ' ' + all.rows.map(r => r.time).join('|'));
+  ok(g.api({ action: 'adm_results', token: A, to: '2000-01-01' }).rows.length === 0, 'lọc đến năm 2000: trống');
+  ok(g.api({ action: 'adm_results', token: A, from: '2999-01-01' }).rows.length === 0, 'lọc từ năm 2999: trống');
 }
 // ---- sao lưu / khôi phục / reset / xoá kết quả ----
 {
