@@ -1,0 +1,46 @@
+# -*- coding: utf-8 -*-
+"""Đáp án + giải thích (Lớp 3)."""
+
+ANS = {'t1.1': 'name',
+ 't1.10': ['how old'],
+ 't1.11': ['My name is Mary.'],
+ 't1.12': ['Bill is seven years old.'],
+ 't1.13': ['Hello, my name is Nam.'],
+ 't1.14': {'blanks': [['cái gì'], ['của bạn'], ['của tôi'], ['tên']]},
+ 't1.15': ["What's your name?"],
+ 't1.16': "Hello, Bill. My name's Nam.",
+ 't1.17': "I'm fine, thanks.",
+ 't1.18': 'My',
+ 't1.19': ['five'],
+ 't1.2': 'what',
+ 't1.20': ['eight'],
+ 't1.3': 'name',
+ 't1.4': 'old',
+ 't1.5': 'seven',
+ 't1.6': ['name'],
+ 't1.7': ['are'],
+ 't1.8': ['years'],
+ 't1.9': ['your']}
+
+EXPLANATIONS = {'t1.1': 'name = tên.',
+ 't1.10': 'how old',
+ 't1.11': 'My name is Mary.',
+ 't1.12': 'Bill is seven years old.',
+ 't1.13': 'Hello, my name is Nam.',
+ 't1.14': 'what = cái gì; your = của bạn; my = của tôi; name = tên.',
+ 't1.15': "What's your name?",
+ 't1.16': 'Chào lại và nói tên.',
+ 't1.17': 'Hỏi thăm → khỏe.',
+ 't1.18': "My name's Mai.",
+ 't1.19': 'five',
+ 't1.2': 'what = cái gì.',
+ 't1.20': 'eight',
+ 't1.3': 'My name is Linda.',
+ 't1.4': 'ten years old.',
+ 't1.5': 'my, your = của; seven là số.',
+ 't1.6': "What's your name?",
+ 't1.7': 'How old are you?',
+ 't1.8': 'nine years old',
+ 't1.9': 'your'}
+
+GHI_CHU_RA_SOAT = []

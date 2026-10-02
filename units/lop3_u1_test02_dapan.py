@@ -1,0 +1,46 @@
+# -*- coding: utf-8 -*-
+"""Đáp án + giải thích (Lớp 3)."""
+
+ANS = {'t1.1': 'goodbye',
+ 't1.10': ['fine'],
+ 't1.11': ['Goodbye, Minh.'],
+ 't1.12': ["Hi, Mai. I'm Minh."],
+ 't1.13': ['Bye. See you later.'],
+ 't1.14': {'blanks': [['xin chào'], ['tạm biệt'], ['cảm ơn'], ['khỏe']]},
+ 't1.15': ['Thank you, Ben.'],
+ 't1.16': 'Thanks.',
+ 't1.17': "I'm",
+ 't1.18': 'are',
+ 't1.19': ['how'],
+ 't1.2': 'fine',
+ 't1.20': ['o'],
+ 't1.3': 'See',
+ 't1.4': "Hi, Nam. I'm Lan.",
+ 't1.5': 'thanks',
+ 't1.6': ['you'],
+ 't1.7': ["I'm"],
+ 't1.8': ['are'],
+ 't1.9': ['meet']}
+
+EXPLANATIONS = {'t1.1': 'goodbye = tạm biệt.',
+ 't1.10': 'fine',
+ 't1.11': 'Goodbye, Minh.',
+ 't1.12': "Hi, Mai. I'm Minh.",
+ 't1.13': 'Bye. See you later.',
+ 't1.14': 'hello = xin chào; goodbye = tạm biệt; thank you = cảm ơn; fine = khỏe.',
+ 't1.15': 'Thank you, Ben.',
+ 't1.16': 'Cảm ơn nhau.',
+ 't1.17': "Hello, I'm Linda.",
+ 't1.18': 'you → are.',
+ 't1.19': 'how',
+ 't1.2': 'fine = khỏe.',
+ 't1.20': 'goodbye',
+ 't1.3': 'See you later.',
+ 't1.4': 'Chào lại và giới thiệu.',
+ 't1.5': 'hi, hello = chào; thanks = cảm ơn.',
+ 't1.6': 'Thank you.',
+ 't1.7': "I'm fine.",
+ 't1.8': 'How are you?',
+ 't1.9': 'Nice to meet you.'}
+
+GHI_CHU_RA_SOAT = []

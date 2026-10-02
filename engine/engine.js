@@ -322,6 +322,17 @@
         if (ev.target.classList.contains('ord-clear') && !ev.target.disabled) { $$('.chip', ans).forEach(function (x) { bank.appendChild(x); }); sync(); }
       });
     });
+    document.addEventListener('click', function (ev) {   // 🔊 đọc to bằng giọng của trình duyệt
+      var s = ev.target.closest ? ev.target.closest('.say') : null;
+      if (!s || !window.speechSynthesis) return;
+      try {
+        window.speechSynthesis.cancel();
+        var u = new SpeechSynthesisUtterance(s.getAttribute('data-say')); u.lang = 'en-US'; u.rate = 0.8;
+        var vs = window.speechSynthesis.getVoices().filter(function (v) { return /^en/i.test(v.lang); });
+        if (vs.length) u.voice = vs[0];
+        window.speechSynthesis.speak(u);
+      } catch (x) {}
+    });
     var sub = $('#submit'); if (sub) sub.onclick = function () { submit(false); };
     var rs = $('#reset'); if (rs) rs.onclick = function () { if (window.confirm('Làm lại từ đầu? Kết quả hiện tại sẽ bị xoá.')) { try { sessionStorage.setItem('rs_' + Q.setId + Q.pageId, String(resetsGet() + 1)); } catch (e) {} if (state.started && !testMode) send(practicePayload('reset'), true); state.submitted = true; location.reload(); } };
     $$('textarea.blank.long').forEach(function (ta) {

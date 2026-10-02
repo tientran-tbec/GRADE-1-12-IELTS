@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-
 """Sinh dữ liệu Lớp 3 (Unit 1-2) -> units/lop3_uN_{luyentap,test01}.py + _dapan.py ; copy hình từ docx đã bung (/tmp/m1, /tmp/m2)."""
-import os, shutil, pprint, random
+import os, sys, shutil, pprint, random
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import gen_lop3_more as more
 R = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ANS, EXP = {}, {}
 
-def mcq(i, q, o, a, e, img=None, plain=True):
+def mcq(i, q, o, a, e, img=None, plain=True, say=None):
     ANS[i] = a; EXP[i] = e
     d = {'id': i, 't': 'mcq', 'q': q, 'o': o, 'plain': True}
+    if say: d['say'] = say
     if img: d['img'] = img
     return d
 
-def fill(i, q, a, e, hint=None, img=None):
+def fill(i, q, a, e, hint=None, img=None, say=None):
     ANS[i] = a if isinstance(a, dict) else (a if isinstance(a, list) else [a]); EXP[i] = e
     d = {'id': i, 't': 'fill', 'q': q}
+    if say: d['say'] = say
     if hint: d['hint'] = hint
     if img: d['img'] = img
     return d
@@ -98,30 +102,13 @@ def unit1():
             order('f.3', '', 'How are you?', 'Câu hỏi thăm sức khoẻ: How are you?', seed=2),
             order('f.4', '', 'Nice to meet you, too.', 'Đáp lại: Nice to meet you, too.', seed=7),
             order('f.5', '', 'Goodbye, Miss Hoa.', 'Goodbye, Miss Hoa. = Tạm biệt cô Hoa.', seed=4)]}]}
-    S = {'id': 'lop3-u1-luyentap', 'title': 'Unit 1 – Hello: Luyện tập', 'grade': 3, 'unit': 1, 'theory': theory, 'pages': [p1, p2]}
+    S = {'id': 'lop3-u1-luyentap', 'title': 'Unit 1 – Hello: Luyện tập', 'grade': 3, 'unit': 1, 'theory': theory, 'pages': [p1, p2] + more.u1_pages(sys.modules[__name__])}
     write('lop3_u1_luyentap', S)
-    # ---- test
-    it = []
-    it += [mcq('t1.1', '___, I\'m Nam.', ['Hello', 'Fine', 'Bye'], 'Hello', 'Giới thiệu bản thân bắt đầu bằng lời chào: Hello, I\'m Nam.'),
-           mcq('t1.2', '— How are you? — ___', ['Goodbye.', 'I\'m fine, thanks.', 'Hello.'], 'I\'m fine, thanks.', 'Hỏi thăm sức khoẻ → trả lời I\'m fine, thanks.'),
-           mcq('t1.3', '— Goodbye, Mr Loc. — ___', ['Bye.', 'Hi.', 'Fine.'], 'Bye.', 'Tạm biệt thì đáp lại Bye.'),
-           mcq('t1.4', '— Nice to meet you. — ___', ['Nice to meet you, too.', 'Bye.', 'How are you?'], 'Nice to meet you, too.', 'Đáp lại: Nice to meet you, too.'),
-           mcq('t1.5', 'Chọn từ khác loại:', ['bye', 'goodbye', 'hello'], 'hello', 'bye, goodbye là tạm biệt; hello là chào.')]
-    it += [fill('t1.6', 'Hello, I\'m Mai. Nice to meet {_}.', 'you', 'Nice to meet you.'),
-           fill('t1.7', 'How {_} you?', 'are', 'How are you?'),
-           fill('t1.8', 'I\'m {_}, thanks.', 'fine', 'I\'m fine, thanks.'),
-           fill('t1.9', 'Goodbye. See you {_}.', 'later', 'See you later. = Hẹn gặp lại.'),
-           fill('t1.10', 'eyb → {_}', 'bye', 'b-y-e = bye.')]
-    it += [order('t1.11', '', 'Hello, Miss Hoa.', 'Hello, Miss Hoa. = Xin chào cô Hoa.', seed=2),
-           order('t1.12', '', 'I\'m fine, thanks.', 'I\'m fine, thanks.', seed=6),
-           order('t1.13', '', 'How are you?', 'How are you?', seed=4),
-           match('t1.14', 'Nối:', ['How are you?', 'Goodbye!', 'Nice to meet you!', 'Hello!'], ['Hello!', 'Fine, thanks.', 'Nice to meet you, too!', 'Bye. See you later.'],
-                 ['Fine, thanks.', 'Bye. See you later.', 'Nice to meet you, too!', 'Hello!'], 'Mỗi câu nói có một câu đáp tương ứng.'),
-           order('t1.15', '', 'Goodbye, Miss Hoa.', 'Goodbye, Miss Hoa.', seed=3)]
-    T = {'id': 'lop3-u1-test01', 'title': 'Unit 1 – Hello: Kiểm tra', 'grade': 3, 'unit': 1, 'theory': '',
-         'pages': [{'id': 'kiem-tra', 'title': 'Làm bài', 'mode': 'test', 'minutes': 15, 'warn_at': 2, 'groups': [
-             {'id': 't1', 'instr': 'Làm 15 câu. Nộp bài để xem điểm và đáp án.', 'items': it}]}]}
-    write('lop3_u1_test01', T)
+    for k, specs in enumerate(more.u1_tests(sys.modules[__name__]), 1):
+        items = more.seq(sys.modules[__name__], specs)
+        T = {'id': 'lop3-u1-test%02d' % k, 'title': 'Unit 1 – Hello: Kiểm tra %d' % k, 'grade': 3, 'unit': 1, 'theory': '',
+             'pages': [{'id': 'kiem-tra', 'title': 'Làm bài', 'mode': 'test', 'minutes': 15, 'warn_at': 2, 'groups': [{'id': 't1', 'instr': 'Làm %d câu. Nộp bài để xem điểm và đáp án.' % len(items), 'items': items}]}]}
+        write('lop3_u1_test%02d' % k, T)
 
 # ===================================================== UNIT 2 · WHAT'S YOUR NAME?
 def unit2():
@@ -185,28 +172,13 @@ def unit2():
             mcq('h.3', '___, I am Linda.', ['Hello', 'Good-bye', 'Bye', 'See you'], 'Hello', 'Giới thiệu bản thân → Hello.'),
             mcq('h.4', 'Goodbye. See you ___.', ['soon', 'late', 'do', 'am'], 'soon', 'See you soon. = Hẹn sớm gặp lại.'),
             mcq('h.5', '___ her name?', ['Hello', 'Goodbye', 'What', "What's"], "What's", "What's her name? = Tên bạn ấy là gì?")]}]}
-    S = {'id': 'lop3-u2-luyentap', 'title': "Unit 2 – What's your name?: Luyện tập", 'grade': 3, 'unit': 2, 'theory': theory, 'pages': [p1, p2, p3]}
+    S = {'id': 'lop3-u2-luyentap', 'title': "Unit 2 – What's your name?: Luyện tập", 'grade': 3, 'unit': 2, 'theory': theory, 'pages': [p1, p2, p3] + more.u2_pages(sys.modules[__name__])}
     write('lop3_u2_luyentap', S)
-    it = [mcq('t1.1', "What's your ___?", ['name', 'fine', 'bye'], 'name', "What's your name? = Tên bạn là gì?"),
-          mcq('t1.2', "___ name's Nam. Nice to meet you.", ['My', 'You', 'How'], 'My', "My name's Nam. = Tên mình là Nam."),
-          mcq('t1.3', 'How do you ___ your name?', ['name', 'spell', 'hello'], 'spell', 'How do you spell your name? = Bạn đánh vần tên thế nào?'),
-          mcq('t1.4', '— Hello. I\'m Linda. — ___', ['Goodbye.', 'Hi, Linda. I\'m Mai.', 'Fine, thanks.'], 'Hi, Linda. I\'m Mai.', 'Được chào thì chào lại và giới thiệu mình.'),
-          mcq('t1.5', 'Chọn từ khác loại:', ['Peter', 'Linda', 'how'], 'how', 'Peter, Linda là tên người; how là từ để hỏi.'),
-          fill('t1.6', "What's {_} name?", 'your', "What's your name?"),
-          fill('t1.7', "{_} name's Tim.", 'My', "My name's Tim."),
-          fill('t1.8', 'How do you {_} your name?', 'spell', 'spell = đánh vần.'),
-          fill('t1.9', 'Nice to {_} you.', 'meet', 'Nice to meet you.'),
-          mcq('t1.10', 'How ___ you, Mai?', ['am', 'is', 'are'], 'are', 'you → are.'),
-          mcq('t1.11', '___ her name?', ['What', "What's", 'Hello'], "What's", "What's her name?"),
-          order('t1.12', '', "What's your name?", "What's your name?", seed=3),
-          order('t1.13', '', 'My name is Linda.', 'My name is Linda.', seed=2),
-          order('t1.14', '', 'How do you spell your name?', 'How do you spell your name?', seed=6),
-          match('t1.15', 'Nối:', ["What's your name?", 'How do you spell your name?', 'How are you?', 'Hello. I\'m Mary.'],
-                ["I'm fine, thank you.", 'Hi, Mary.', 'N-A-M.', "My name's Tony."], ["My name's Tony.", 'N-A-M.', "I'm fine, thank you.", 'Hi, Mary.'], 'Mỗi câu hỏi có một câu đáp tương ứng.')]
-    T = {'id': 'lop3-u2-test01', 'title': "Unit 2 – What's your name?: Kiểm tra", 'grade': 3, 'unit': 2, 'theory': '',
-         'pages': [{'id': 'kiem-tra', 'title': 'Làm bài', 'mode': 'test', 'minutes': 15, 'warn_at': 2, 'groups': [
-             {'id': 't1', 'instr': 'Làm 15 câu. Nộp bài để xem điểm và đáp án.', 'items': it}]}]}
-    write('lop3_u2_test01', T)
+    for k, specs in enumerate(more.u2_tests(sys.modules[__name__]), 1):
+        items = more.seq(sys.modules[__name__], specs)
+        T = {'id': 'lop3-u2-test%02d' % k, 'title': "Unit 2 – What's your name?: Kiểm tra %d" % k, 'grade': 3, 'unit': 2, 'theory': '',
+             'pages': [{'id': 'kiem-tra', 'title': 'Làm bài', 'mode': 'test', 'minutes': 15, 'warn_at': 2, 'groups': [{'id': 't1', 'instr': 'Làm %d câu. Nộp bài để xem điểm và đáp án.' % len(items), 'items': items}]}]}
+        write('lop3_u2_test%02d' % k, T)
 
 if __name__ == '__main__':
     unit1(); unit2(); print('ok')

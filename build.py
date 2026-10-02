@@ -16,9 +16,14 @@ PAGES_URL = 'https://tientran-tbec.github.io/GRADE-1-12-IELTS/'
 REGISTRY = [
     # --- Lớp 3 ---
     ('lop3-u1-luyentap', 'units/lop3_u1_luyentap.py', 'units/lop3_u1_luyentap_dapan.py', 'Lop3', 'Unit1', 'luyentap', 'assets/lop3_u1/luyentap', ''),
+    ('lop3-u1-luyentap', 'units/lop3_u1_luyentap.py', 'units/lop3_u1_luyentap_dapan.py', 'Lop3', 'Unit1', 'luyentap', 'assets/lop3_u1/luyentap', ''),
     ('lop3-u1-test01', 'units/lop3_u1_test01.py', 'units/lop3_u1_test01_dapan.py', 'Lop3', 'Unit1', 'test01', 'assets/lop3_u1/test01', ''),
+    ('lop3-u1-test02', 'units/lop3_u1_test02.py', 'units/lop3_u1_test02_dapan.py', 'Lop3', 'Unit1', 'test02', 'assets/lop3_u1/test02', ''),
+    ('lop3-u1-test03', 'units/lop3_u1_test03.py', 'units/lop3_u1_test03_dapan.py', 'Lop3', 'Unit1', 'test03', 'assets/lop3_u1/test03', ''),
     ('lop3-u2-luyentap', 'units/lop3_u2_luyentap.py', 'units/lop3_u2_luyentap_dapan.py', 'Lop3', 'Unit2', 'luyentap', 'assets/lop3_u2/luyentap', ''),
     ('lop3-u2-test01', 'units/lop3_u2_test01.py', 'units/lop3_u2_test01_dapan.py', 'Lop3', 'Unit2', 'test01', 'assets/lop3_u2/test01', ''),
+    ('lop3-u2-test02', 'units/lop3_u2_test02.py', 'units/lop3_u2_test02_dapan.py', 'Lop3', 'Unit2', 'test02', 'assets/lop3_u2/test02', ''),
+    ('lop3-u2-test03', 'units/lop3_u2_test03.py', 'units/lop3_u2_test03_dapan.py', 'Lop3', 'Unit2', 'test03', 'assets/lop3_u2/test03', ''),
     # --- Lớp 10 · Unit 1 ---
     ('lop10-u1-luyentap', 'units/lop10_u1_luyentap.py', 'units/lop10_u1_luyentap_dapan.py', 'Lop10', 'Unit1', 'luyentap', 'assets/lop10_u1/luyentap', 'audio/lop10_u1_luyentap_nghe.mp3'),
     ('lop10-u1-botro', 'units/lop10_u1_botro.py', 'units/lop10_u1_botro_dapan.py', 'Lop10', 'Unit1', 'botro', 'assets/lop10_u1/botro', 'audio/lop10_u1_botro_nghe.mp3'),
@@ -186,6 +191,8 @@ def qgroup_close():
 def render_item(it, num, test_mode, imgbase):
     t = it['t']
     body = ''
+    if it.get('say'):   # nút nghe: trình duyệt đọc to (không cần file mp3)
+        body += '<button type="button" class="say" data-say="%s">🔊 Nghe</button> ' % esc_attr(it['say'])
     if it.get('img'):
         body += '<img class="pic" src="%s/%s" alt="Hình minh hoạ câu %s">' % (imgbase, it['img'], num)
     if t == 'mcq':
@@ -513,7 +520,7 @@ def build_index(done):
             pid, title, mode, n = pages[0]
             P0 = S['pages'][0]
             num = S['title'].split('–')[0].strip()
-            if udir != 'MidTerm1': num = 'Đề kiểm tra'
+            if udir != 'MidTerm1': num = 'Đề ' + S['title'].split()[-1]
             o.append('<a class="tile t-test" data-m="test" data-sid="%s" href="WebBaiTap/%s/%s/%s/%s.html"><span class="ic">%s</span><b>%s</b><small>%d câu · %d phút%s</small></a>'
                      % (S['id'], entry[3], entry[4], entry[5], pid, '🎧' if P0.get('audio') else '📝', html.escape(num), n, P0.get('minutes', 0), ' · có nghe' if P0.get('audio') else ''))
         o.append('</div></section>')
