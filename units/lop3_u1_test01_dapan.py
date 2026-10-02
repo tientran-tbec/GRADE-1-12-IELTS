@@ -1,0 +1,36 @@
+# -*- coding: utf-8 -*-
+"""Đáp án + giải thích (Lớp 3)."""
+
+ANS = {'t1.1': 'Hello',
+ 't1.10': ['bye'],
+ 't1.11': ['Hello, Miss Hoa.'],
+ 't1.12': ["I'm fine, thanks."],
+ 't1.13': ['How are you?'],
+ 't1.14': {'blanks': [['Fine, thanks.'], ['Bye. See you later.'], ['Nice to meet you, too!'], ['Hello!']]},
+ 't1.15': ['Goodbye, Miss Hoa.'],
+ 't1.2': "I'm fine, thanks.",
+ 't1.3': 'Bye.',
+ 't1.4': 'Nice to meet you, too.',
+ 't1.5': 'hello',
+ 't1.6': ['you'],
+ 't1.7': ['are'],
+ 't1.8': ['fine'],
+ 't1.9': ['later']}
+
+EXPLANATIONS = {'t1.1': "Giới thiệu bản thân bắt đầu bằng lời chào: Hello, I'm Nam.",
+ 't1.10': 'b-y-e = bye.',
+ 't1.11': 'Hello, Miss Hoa. = Xin chào cô Hoa.',
+ 't1.12': "I'm fine, thanks.",
+ 't1.13': 'How are you?',
+ 't1.14': 'Mỗi câu nói có một câu đáp tương ứng.',
+ 't1.15': 'Goodbye, Miss Hoa.',
+ 't1.2': "Hỏi thăm sức khoẻ → trả lời I'm fine, thanks.",
+ 't1.3': 'Tạm biệt thì đáp lại Bye.',
+ 't1.4': 'Đáp lại: Nice to meet you, too.',
+ 't1.5': 'bye, goodbye là tạm biệt; hello là chào.',
+ 't1.6': 'Nice to meet you.',
+ 't1.7': 'How are you?',
+ 't1.8': "I'm fine, thanks.",
+ 't1.9': 'See you later. = Hẹn gặp lại.'}
+
+GHI_CHU_RA_SOAT = []

@@ -14,6 +14,11 @@ PAGES_URL = 'https://tientran-tbec.github.io/GRADE-1-12-IELTS/'
 
 # (id bộ, file dữ liệu, file đáp án, thư mục lớp, thư mục unit, slug thư mục, ảnh)
 REGISTRY = [
+    # --- Lớp 3 ---
+    ('lop3-u1-luyentap', 'units/lop3_u1_luyentap.py', 'units/lop3_u1_luyentap_dapan.py', 'Lop3', 'Unit1', 'luyentap', 'assets/lop3_u1/luyentap', ''),
+    ('lop3-u1-test01', 'units/lop3_u1_test01.py', 'units/lop3_u1_test01_dapan.py', 'Lop3', 'Unit1', 'test01', 'assets/lop3_u1/test01', ''),
+    ('lop3-u2-luyentap', 'units/lop3_u2_luyentap.py', 'units/lop3_u2_luyentap_dapan.py', 'Lop3', 'Unit2', 'luyentap', 'assets/lop3_u2/luyentap', ''),
+    ('lop3-u2-test01', 'units/lop3_u2_test01.py', 'units/lop3_u2_test01_dapan.py', 'Lop3', 'Unit2', 'test01', 'assets/lop3_u2/test01', ''),
     # --- Lớp 10 · Unit 1 ---
     ('lop10-u1-luyentap', 'units/lop10_u1_luyentap.py', 'units/lop10_u1_luyentap_dapan.py', 'Lop10', 'Unit1', 'luyentap', 'assets/lop10_u1/luyentap', 'audio/lop10_u1_luyentap_nghe.mp3'),
     ('lop10-u1-botro', 'units/lop10_u1_botro.py', 'units/lop10_u1_botro_dapan.py', 'Lop10', 'Unit1', 'botro', 'assets/lop10_u1/botro', 'audio/lop10_u1_botro_nghe.mp3'),
@@ -127,6 +132,31 @@ def text_item(it, test_mode):
     return '<div class="stem">%s %s%s</div>' % (s, extra, btn)
 
 
+def match_item(it, test_mode, imgbase):
+    """Nối: mỗi dòng bên trái có 1 ô chọn đáp án bên phải. ANS = {'blanks': [[đáp án 1], [đáp án 2], ...]}."""
+    rows = []
+    for i, L in enumerate(it['left']):
+        if isinstance(L, dict):
+            lab = ('<img class="mpic" src="%s/%s" alt="">' % (imgbase, L['img']) if L.get('img') else '') + html.escape(L.get('t', ''))
+        else:
+            lab = L
+        opts = '<option value="">— chọn —</option>' + ''.join('<option value="%s">%s</option>' % (esc_attr(o), html.escape(o)) for o in it['o'])
+        rows.append('<div class="mrow"><span class="ml">%s</span><span class="ma">→</span><select class="blank" data-id="%s" data-i="%d" aria-label="chọn %d">%s</select></div>'
+                    % (lab, esc_attr(it['id']), i, i + 1, opts))
+    btn = '' if test_mode else '<p><button class="btn sm chk" type="button">Kiểm tra</button></p>'
+    return ('<div class="stem">%s</div>' % it['q'] if it.get('q') else '') + '<div class="match">%s</div>%s' % (''.join(rows), btn)
+
+
+def order_item(it, test_mode):
+    """Bấm từ xếp câu. words = các từ (đã xáo sẵn); ANS = câu đúng (chuỗi hoặc list chấp nhận)."""
+    chips = ''.join('<button type="button" class="chip" data-w="%s">%s</button>' % (esc_attr(w), html.escape(w)) for w in it['words'])
+    btn = '' if test_mode else ' <button class="btn sm chk" type="button">Kiểm tra</button>'
+    return ('<div class="stem">%s</div>' % it['q'] if it.get('q') else '') + (
+        '<div class="ord"><div class="ord-ans" aria-label="câu của bạn"></div><div class="ord-bank">%s</div>'
+        '<input type="hidden" class="blank" data-id="%s" data-i="0"><button type="button" class="btn sm ghost ord-clear">Xoá hết</button>%s</div>'
+        % (chips, esc_attr(it['id']), btn))
+
+
 def open_item(it, test_mode):
     btn = '' if test_mode else '<p><button class="btn sm chk" type="button">Xem đáp án mẫu</button></p>'
     return '<textarea class="open" rows="9" placeholder="Viết câu trả lời của bạn tại đây…"></textarea>' + btn
@@ -166,8 +196,14 @@ def render_item(it, num, test_mode, imgbase):
         body += '<div class="stem">%s</div>' % it['q'] + tf_item(it)
     elif t == 'fill':
         body += text_item(it, test_mode)
+    elif t == 'match':
+        body += match_item(it, test_mode, imgbase)
+    elif t == 'order':
+        body += order_item(it, test_mode)
     elif t == 'open':
         body += '<div class="stem">%s</div>' % it['q'] + open_item(it, test_mode)
+    if t in ('match', 'order'):
+        t = 'fill'
     return ('<div class="q" data-id="%s" data-t="%s"><div class="qn">%s</div><div class="qb">%s<div class="exp" data-for="%s" hidden></div></div></div>'
             % (esc_attr(it['id']), t, num, body, esc_attr(it['id'])))
 
@@ -232,7 +268,7 @@ def build_quiz_page(S, P, ANS, EXP, slug, imgbase, audio_src):
             num = int(it['id'].split('.')[-1]) if test_mode else idx
             body.append(render_item(it, num, test_mode, imgbase))
             order.append(it['id'])
-            items_meta[it['id']] = {'t': it['t'], 'g': g['id']}
+            items_meta[it['id']] = {'t': 'fill' if it['t'] in ('match', 'order') else it['t'], 'g': g['id']}
         body.append(qgroup_close())
     body.append('</div>')
     # thanh dưới

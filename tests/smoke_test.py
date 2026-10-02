@@ -6,6 +6,7 @@ from playwright.sync_api import sync_playwright
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 pages = sorted(p for p in glob.glob(os.path.join(ROOT, 'WebBaiTap', '**', '*.html'), recursive=True) if not p.endswith('ly-thuyet.html'))
+if len(sys.argv) > 1: pages = [p for p in pages if sys.argv[1] in p]   # lọc: python smoke_test.py Lop3
 bad = 0
 with sync_playwright() as pw:
     br = pw.chromium.launch()
@@ -36,8 +37,19 @@ with sync_playwright() as pw:
                 inputs = pg.query_selector_all(sel + ' [class~=blank]')
                 for i, inp in enumerate(inputs):
                     if inp.is_disabled(): continue
+                    tg = inp.evaluate('e=>e.tagName+":"+e.type')
+                    if tg.startswith('SELECT'):
+                        inp.select_option(bl[i][0]); continue
+                    if tg == 'INPUT:hidden':   # bấm từ xếp câu: bấm đúng thứ tự từ của đáp án
+                        for w in bl[i][0].split():
+                            chips = pg.query_selector_all(sel + ' .ord-bank .chip')
+                            c = next(x for x in chips if x.get_attribute('data-w') == w)
+                            c.click()
+                        continue
                     inp.fill(bl[i][0])
                     if i == len(inputs) - 1: inp.press('Enter')
+                if inputs and (pg.query_selector(sel + ' button.chk') is not None) and info['mode'] != 'test':
+                    pg.eval_on_selector(sel + ' button.chk', 'e=>e.click()')
         if info['mode'] == 'test':
             pg.click('#submit')
         t = pg.evaluate('window.__quiz.tally()')

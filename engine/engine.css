@@ -204,3 +204,22 @@ body.testmode .wrap{-webkit-user-select:text;user-select:text}
 .tools{z-index:40}.bar{z-index:35}.audio{z-index:12}
 
 .gn-chip{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:.85rem;margin-top:8px;color:#fff}.gn-chip small{opacity:.85}.gn-chip a{color:#fff;margin-left:10px;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+
+/* ---- dạng nối & bấm từ xếp câu (lớp nhỏ) ---- */
+.match{display:grid;gap:10px;margin:8px 0}
+.mrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:1.1rem}
+.mrow .ml{flex:1 1 200px;display:flex;align-items:center;gap:10px}
+.mrow .mpic{height:64px;width:auto;border-radius:10px;border:1px solid var(--line)}
+.mrow .ma{color:var(--brand);font-weight:700}
+.mrow select.blank{font:inherit;padding:8px 10px;border:2px solid var(--brand);border-radius:10px;background:var(--card);color:inherit;min-width:150px}
+.mrow select.blank.right{border-color:var(--ok);background:var(--ok-bg)}
+.mrow select.blank.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.ord{margin:8px 0}
+.ord-ans{min-height:54px;padding:8px;border:2px dashed var(--brand);border-radius:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--brand-soft)}
+.ord-ans:empty::before{content:"Bấm các từ bên dưới để xếp câu";color:#888;font-size:.95rem}
+.ord-bank{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;min-height:44px}
+.chip{font:inherit;font-size:1.15rem;padding:8px 16px;border-radius:999px;border:2px solid var(--brand);background:var(--card);color:inherit;cursor:pointer;box-shadow:0 2px 0 var(--brand)}
+.chip:active{transform:translateY(1px)}
+.chip:disabled{cursor:default;opacity:.85}
+.ord.right .ord-ans{border:2px solid var(--ok);background:var(--ok-bg)}
+.ord.wrong .ord-ans{border:2px solid var(--bad);background:var(--bad-bg)}

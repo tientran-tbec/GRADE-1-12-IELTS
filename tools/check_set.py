@@ -33,6 +33,15 @@ for name in sys.argv[1:]:
                         elif not (isinstance(v, str) and len(v) == 1 and 'ABCDEFGHIJ'.find(v) in range(len(o))): err.append('%s: ANS %r ngoài %d phương án' % (i, v, len(o)))
                 elif it['t'] == 'tf' and x not in ('T', 'F'): err.append('%s: tf cần T/F' % i)
                 elif it['t'] == 'tfng' and x not in ('T', 'F', 'NG'): err.append('%s: tfng cần T/F/NG' % i)
+                elif it['t'] == 'match':
+                    bl = x['blanks'] if isinstance(x, dict) else x
+                    if len(bl) != len(it['left']): err.append('%s: match %d dòng nhưng ANS %d' % (i, len(it['left']), len(bl)))
+                    for z in bl:
+                        if not any(v in it['o'] for v in (z if isinstance(z, list) else [z])): err.append('%s: ANS %r không thuộc o' % (i, z))
+                elif it['t'] == 'order':
+                    ws = sorted(' '.join(it['words']).split()); xs = x if isinstance(x, list) else [x]
+                    for v in xs:
+                        if sorted(v.split()) != ws: err.append('%s: ANS %r không khớp words' % (i, v))
                 elif it['t'] == 'fill':
                     nb = len(re.findall(r'\{_\}', it['q']))
                     bl = x['blanks'] if isinstance(x, dict) else ([[x]] if isinstance(x, str) else [x])

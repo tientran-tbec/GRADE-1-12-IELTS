@@ -106,6 +106,7 @@
       $$('.blank', el).forEach(function (inp, i) {
         var g = norm(inp.value), good = bl[i] && bl[i].some(function (x) { return norm(x) === g; });
         inp.classList.remove('right', 'wrong'); inp.classList.add(good ? 'right' : 'wrong');
+        var po = inp.parentNode; if (po && po.classList.contains('ord')) { po.classList.remove('right', 'wrong'); po.classList.add(good ? 'right' : 'wrong'); }
       });
     }
     box.className = 'exp ' + (ok ? 'ok' : 'bad'); box.hidden = false;
@@ -113,7 +114,7 @@
     box.innerHTML = '<span class="ans">' + head + 'Đáp án: ' + esc(showAnsText(id)) + '</span>' + (exp ? '<div>' + exp + '</div>' : '');
   }
   function lock(id) {
-    $$('input,textarea,button.chk', qEl(id)).forEach(function (x) { x.disabled = true; });
+    $$('input,textarea,select,button.chk,button.chip,button.ord-clear', qEl(id)).forEach(function (x) { x.disabled = true; });
   }
 
   /* ---------- tổng hợp ---------- */
@@ -307,6 +308,18 @@
       }
       $$('input[type=radio]', el).forEach(function (r) {
         r.addEventListener('change', function () { $$('label.opt', el).forEach(function (l) { l.classList.toggle('sel', $('input', l).checked); }); });
+      });
+    });
+    $$('.ord').forEach(function (o) {   // dạng bấm từ xếp câu
+      var ans = $('.ord-ans', o), bank = $('.ord-bank', o), hid = $('input.blank', o);
+      function sync() {
+        hid.value = $$('.chip', ans).map(function (c) { return c.getAttribute('data-w'); }).join(' ');
+        hid.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      o.addEventListener('click', function (ev) {
+        var c = ev.target.closest ? ev.target.closest('.chip') : null;
+        if (c && !c.disabled) { (c.parentNode === bank ? ans : bank).appendChild(c); sync(); return; }
+        if (ev.target.classList.contains('ord-clear') && !ev.target.disabled) { $$('.chip', ans).forEach(function (x) { bank.appendChild(x); }); sync(); }
       });
     });
     var sub = $('#submit'); if (sub) sub.onclick = function () { submit(false); };
