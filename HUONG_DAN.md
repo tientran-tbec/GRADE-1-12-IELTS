@@ -121,3 +121,13 @@ Dữ liệu: Users có thêm cột **Quyền**, **Chức vụ** (tự thêm); ta
 - **Cảnh báo**: nút "⚠ n lần" hiện danh sách vi phạm kèm mốc phút:giây (chuyển tab, dán, copy, phím tắt...). Bài nộp trước bản cập nhật chỉ có số lần, không có chi tiết.
 - **Trang tổng kết**: bấm tên học sinh ở tab Kết quả → trang `student.html?u=<tài khoản>` gồm thông tin, bài được giao, mọi lần nộp, hoạt động luyện tập, tải CSV.
 - Sheet kết quả có thêm cột 19 "Sự kiện vi phạm" (tự tạo). Xem bài cần web chạy trên GitHub Pages (http/https).
+
+## Sao lưu, khôi phục, reset, xoá kết quả, trang quản lý học sinh
+
+- **Quản trị → tab "Sao lưu · Reset"** (chỉ admin):
+  1. *Sao lưu*: tích các phần (tài khoản, lớp, bài đã giao, kết quả, luyện tập, nhật ký, góp ý, nhắc nhở) → tải 1 file `.json`. File có mã băm mật khẩu, cất cẩn thận.
+  2. *Khôi phục*: chọn file → tích phần cần nạp → "Thay thế" (xoá dữ liệu hiện tại của phần đó rồi nạp lại) hoặc "Nối thêm". Khôi phục tài khoản luôn giữ admin hiện có.
+  3. *Reset*: tích phần cần xoá sạch (học sinh, giáo viên, phiên đăng nhập, lớp, bài giao, kết quả, luyện tập, nhật ký, góp ý, nhắc nhở), gõ `RESET` để xác nhận. Mặc định tự tải file sao lưu trước khi xoá. Tài khoản admin không bao giờ bị xoá.
+- **Xoá kết quả** (admin hoặc giáo viên toàn quyền): tab Kết quả có ô chọn nhiều dòng + nút "Xóa đã chọn", và nút "Xóa" ở từng dòng.
+- **Trang quản lý học sinh**: ở tab Học sinh, bấm tên → `student.html`: sửa tên/lớp, chức vụ nhóm, đặt lại mật khẩu, đăng xuất thiết bị, khoá/mở khoá, xem bài đã giao, mọi lần nộp (xem bài, cảnh báo, xoá), hoạt động luyện tập.
+- Code.gs mới có thêm các hàm `adm_backup_info`, `adm_backup`, `adm_restore`, `adm_reset`, `adm_result_delete` — cần Deploy phiên bản mới.

@@ -279,6 +279,36 @@ r = L('anlt', 'sai'); ok(!r.ok && /quá nhiều/.test(r.error), 'khoá sau 5 l�
   g.api({ action: 'adm_users', token: A, role: 'teacher' });
   ok(sh.rows.filter(r => r[2] === 'teacher').every(r => r[12] === 'assign'), 'bảng cũ chưa có cột Quyền: giáo viên giữ quyền giao bài');
 }
+// ---- sao lưu / khôi phục / reset / xoá kết quả ----
+{
+  const info = g.api({ action: 'adm_backup_info', token: A }); ok(info.ok && info.parts.users.rows >= 3 && info.parts.results.rows >= 2, 'backup_info: số dòng từng phần');
+  ok(!g.api({ action: 'adm_backup_info', token: T }).ok && !g.api({ action: 'adm_backup', token: T, part: 'users' }).ok, 'GV không sao lưu được');
+  const bu = g.api({ action: 'adm_backup', token: A, part: 'users' }), br = g.api({ action: 'adm_backup', token: A, part: 'results' });
+  ok(bu.ok && bu.headers[0] === 'Tài khoản' && bu.rows.length === info.parts.users.rows, 'backup users');
+  ok(br.ok && br.rows.length === info.parts.results.rows && br.headers.indexOf('Sự kiện vi phạm') >= 0, 'backup results có tiêu đề + dòng');
+  ok(!g.api({ action: 'adm_backup', token: A, part: 'xyz' }).ok, 'backup phần không tồn tại bị từ chối');
+  // xoá kết quả
+  const lst = g.api({ action: 'adm_results', token: A }).rows; const one = lst[0], nBefore = lst.length;
+  ok(!g.api({ action: 'adm_result_delete', token: T, items: [{ row: one.row, username: one.username, set_id: one.set_id, page_id: one.page_id }] }).ok, 'GV thường không xoá được kết quả');
+  const bad = g.api({ action: 'adm_result_delete', token: A, items: [{ row: one.row, username: 'khac', set_id: one.set_id, page_id: one.page_id }] }); ok(bad.deleted === 0 && bad.skipped === 1, 'xoá sai danh tính → bỏ qua');
+  const del = g.api({ action: 'adm_result_delete', token: A, items: [{ row: one.row, username: one.username, set_id: one.set_id, page_id: one.page_id }] });
+  ok(del.deleted === 1 && g.api({ action: 'adm_results', token: A }).rows.length === nBefore - 1, 'xoá 1 kết quả');
+  // reset kết quả + khôi phục từ bản sao lưu
+  ok(!g.api({ action: 'adm_reset', token: A, parts: ['results'] }).ok, 'reset thiếu xác nhận bị từ chối');
+  ok(!g.api({ action: 'adm_reset', token: T, parts: ['results'], confirm: 'RESET' }).ok, 'GV không reset được');
+  const rs = g.api({ action: 'adm_reset', token: A, parts: ['results', 'practice', 'feedback', 'reminders', 'log'], confirm: 'RESET' }); ok(rs.ok && rs.deleted.results === br.rows.length - 1, 'reset kết quả: ' + JSON.stringify(rs.deleted));
+  ok(g.api({ action: 'adm_results', token: A }).rows.length === 0 && g.sheets['Lop1-12_KetQua'].rows.length === 1, 'sau reset còn tiêu đề, không còn dòng');
+  const rr = g.api({ action: 'adm_restore', token: A, part: 'results', headers: br.headers, rows: br.rows }); ok(rr.ok && rr.restored === br.rows.length && g.api({ action: 'adm_results', token: A }).rows.length === br.rows.length, 'khôi phục kết quả từ sao lưu');
+  const rr2 = g.api({ action: 'adm_restore', token: A, part: 'results', headers: br.headers, rows: br.rows, mode: 'append' }); ok(rr2.ok && g.api({ action: 'adm_results', token: A }).rows.length === br.rows.length * 2, 'khôi phục kiểu nối thêm');
+  ok(!g.api({ action: 'adm_restore', token: A, part: 'users', headers: ['Sai'], rows: [] }).ok, 'file sao lưu sai định dạng bị từ chối');
+  // reset sessions / students
+  const nStu = g.sheets['Users'].rows.filter(r => r[2] === 'student').length; ok(nStu >= 1, 'có học sinh để reset');
+  const bu2 = g.api({ action: 'adm_backup', token: A, part: 'users' });
+  const rs2 = g.api({ action: 'adm_reset', token: A, parts: ['students'], confirm: 'RESET' }); ok(rs2.ok && rs2.deleted.students === nStu && !g.sheets['Users'].rows.some(r => r[2] === 'student') && g.sheets['Users'].rows.some(r => r[2] === 'admin'), 'reset học sinh: chỉ xoá học sinh');
+  const ru = g.api({ action: 'adm_restore', token: A, part: 'users', headers: bu2.headers, rows: bu2.rows.filter(r => r[2] !== 'admin') }); ok(ru.ok && ru.keptAdmins >= 1 && g.sheets['Users'].rows.some(r => r[2] === 'admin') && g.sheets['Users'].rows.filter(r => r[2] === 'student').length === nStu, 'khôi phục tài khoản: giữ admin hiện có, đủ học sinh');
+  ok(g.api({ action: 'adm_users', token: A }).ok, 'admin vẫn dùng được sau khôi phục');
+  ok(g.api({ action: 'adm_reset', token: A, parts: ['sessions'], confirm: 'RESET' }).ok, 'reset phiên đăng nhập');
+}
 // xoá lớp
 ok(!g.api({ action: 'adm_class_delete', token: A, id: '11A1' }).ok, 'không xoá lớp còn HS');
 ok(!JSON.stringify(g.sheets['Users'].rows).includes(hsPw) && !JSON.stringify(g.sheets['Users'].rows).includes('Admin@123'), 'Users không lưu mật khẩu rõ');

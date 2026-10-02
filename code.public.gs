@@ -689,6 +689,82 @@ var API = {
     var fbN = fbRows_().filter(function (r) { return r.student === u.username && r.role === 'student'; }).length;
     return {user: pub_(u), sets: Object.keys(m).map(function (k) { return {set_id: k, cls: m[k].cls, due: m[k].due}; }), results: rows, practice: Object.keys(practice).map(function (k) { delete practice[k].seenState; return practice[k]; }), feedback_count: fbN};
   },
+  adm_backup_info: function (d) {   // số dòng của từng phần dữ liệu
+    adminOnly_(d); var out = {};
+    Object.keys(BK_PARTS).forEach(function (k) { var sh = ss_().getSheetByName(BK_PARTS[k].sheet); out[k] = {name: BK_PARTS[k].name, rows: sh ? Math.max(0, sh.getLastRow() - 1) : 0}; });
+    return {parts: out};
+  },
+  adm_backup: function (d) {   // lấy dữ liệu MỘT phần (trình duyệt gọi lần lượt từng phần rồi gộp thành 1 file)
+    adminOnly_(d); var p = bkPart_(d.part), sh = ss_().getSheetByName(p.sheet);
+    if (!sh || sh.getLastRow() < 1) return {part: d.part, headers: p.headers || [], rows: []};
+    var v = sh.getDataRange().getValues(), start = Math.max(1, +d.from || 1), end = Math.min(v.length, start + (+d.max || 20000));
+    return {part: d.part, headers: v[0].map(String), rows: v.slice(start, end).map(function (r) { return r.map(cellOut_); }), total: v.length - 1, next: end < v.length ? end : 0};
+  },
+  adm_restore: function (d) {   // khôi phục MỘT phần: thay thế (replace) hoặc nối thêm (append)
+    var me = adminOnly_(d), p = bkPart_(d.part), hd = (d.headers || []).map(String), rows = d.rows || [], append = d.mode === 'append' || d.append === true;
+    if (!hd.length || !Array.isArray(rows)) throw new Error('File sao lưu không hợp lệ.');
+    if (p.headers && hd[0] !== p.headers[0]) throw new Error('File sao lưu của phần "' + p.name + '" không đúng định dạng.');
+    var lock = LockService.getScriptLock(); lock.waitLock(30000);
+    try {
+      var sh = ss_().getSheetByName(p.sheet) || ss_().insertSheet(p.sheet), w = hd.length, keepAdmins = [];
+      if (d.part === 'users' && !append) {
+        var ri = hd.indexOf('Vai trò'), hasAdmin = rows.some(function (r) { return String(r[ri]) === 'admin'; });
+        if (!hasAdmin) { var cur = readUsers_().filter(function (u) { return u.role === 'admin'; }); keepAdmins = cur.map(function (u) { return u.row; }); }
+      }
+      var keep = [];
+      if (keepAdmins.length) { var all = sh.getDataRange().getValues(); keepAdmins.forEach(function (rn) { keep.push(all[rn - 1]); }); }
+      if (!append) {
+        wipeData_(sh);
+        if (sh.getLastRow() === 0 || sh.getLastColumn() < w || true) { sh.getRange(1, 1, 1, w).setValues([hd]); sh.setFrozenRows(1); }
+      } else if (sh.getLastRow() === 0) { sh.getRange(1, 1, 1, w).setValues([hd]); sh.setFrozenRows(1); }
+      var out = keep.concat(rows).map(function (r) { var a = r.slice(0, w); while (a.length < w) a.push(''); return a; });
+      var at = Math.max(sh.getLastRow(), 1) + 1;
+      for (var i = 0; i < out.length; i += 2000) { var ch = out.slice(i, i + 2000); sh.getRange(at + i, 1, ch.length, w).setValues(ch); }
+      return {part: d.part, restored: out.length, keptAdmins: keep.length};
+    } finally { lock.releaseLock(); }
+  },
+  adm_reset: function (d) {   // xoá dữ liệu các phần được chọn (cần confirm = 'RESET')
+    var me = adminOnly_(d), parts = d.parts || [], res = {};
+    if (String(d.confirm) !== 'RESET') throw new Error('Thiếu xác nhận.');
+    if (!parts.length) throw new Error('Chưa chọn phần nào.');
+    var lock = LockService.getScriptLock(); lock.waitLock(30000);
+    try {
+      parts.forEach(function (k) {
+        if (k === 'students' || k === 'teachers') {
+          var role = k === 'students' ? 'student' : 'teacher', sh = sheetOf_(SHEET_USERS, USER_HEADERS), us = readUsers_().filter(function (u) { return u.role === role; });
+          us.map(function (u) { return u.row; }).sort(function (a, b) { return b - a; }).forEach(function (r) { deleteRowSafe_(sh, r); });
+          us.forEach(function (u) { CacheService.getScriptCache().remove('ping_' + u.username); });
+          res[k] = us.length;
+        } else if (k === 'sessions') {
+          var n = 0; readUsers_().forEach(function (u) { if (u.role !== 'admin' && (u.sid || u.dev)) { u.sid = ''; u.dev = ''; writeUser_(u, false); CacheService.getScriptCache().remove('ping_' + u.username); n++; } });
+          res[k] = n;
+        } else {
+          if (k === 'users') throw new Error('Dùng "học sinh" / "giáo viên" để xoá tài khoản.');
+          var p = bkPart_(k), s2 = ss_().getSheetByName(p.sheet); res[k] = s2 ? wipeData_(s2) : 0;
+        }
+      });
+    } finally { lock.releaseLock(); }
+    return {deleted: res};
+  },
+  adm_result_delete: function (d) {   // xoá một hay nhiều lần nộp (admin hoặc giáo viên toàn quyền)
+    var me = authUser_(d, ['admin', 'teacher']);
+    if (!has_(me, 'full')) throw new Error('Chỉ admin hoặc giáo viên toàn quyền được xoá kết quả.');
+    var sh = ss_().getSheetByName(GRADE_SHEET_RESULT), items = d.items || [];
+    if (!sh || !items.length) return {deleted: 0, skipped: items.length};
+    var h = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0], col = {}; h.forEach(function (x, i) { col[x] = i; });
+    var del = 0, skip = 0, lock = LockService.getScriptLock(); lock.waitLock(30000);
+    try {
+      var v = sh.getDataRange().getValues(), seen = {}, ok = [];
+      items.forEach(function (it) {
+        var r = +it.row, row = v[r - 1];
+        if (!(r >= 2) || !row || seen[r]) { skip++; return; }
+        if (String(row[col['Tài khoản']] || '').toLowerCase() !== String(it.username || '').toLowerCase() || String(row[col['Bộ bài']]) !== String(it.set_id) || String(row[col['Trang']]) !== String(it.page_id)) { skip++; return; }
+        seen[r] = 1; ok.push(r);
+      });
+      ok.sort(function (a, b) { return b - a; }).forEach(function (r) { deleteRowSafe_(sh, r); del++; });
+    } finally { lock.releaseLock(); }
+    return {deleted: del, skipped: skip};
+  },
   adm_results: function (d) { return {rows: resultRows_(authUser_(d, ['admin', 'teacher']), d)}; },
   my_results: function (d) { return {rows: resultRows_(authUser_(d), d, true)}; }
 };
@@ -713,6 +789,29 @@ function resultRows_(me, d, onlyMe) {
       tab: r[col['Chuyển tab']], blur: r[col['Mất focus']], fs: r[col['Thoát toàn màn hình']]});
   }
   return out;
+}
+
+/* ----- sao lưu / khôi phục / reset (chỉ admin) ----- */
+var BK_PARTS = {
+  users: {name: 'Tài khoản (admin, giáo viên, học sinh)', sheet: SHEET_USERS, headers: USER_HEADERS},
+  classes: {name: 'Lớp học', sheet: SHEET_CLASSES, headers: CLASS_HEADERS},
+  assign: {name: 'Bài đã giao', sheet: SHEET_ASSIGN, headers: ASSIGN_HEADERS},
+  results: {name: 'Kết quả nộp bài', sheet: GRADE_SHEET_RESULT},
+  practice: {name: 'Hoạt động luyện tập', sheet: GRADE_SHEET_PRACTICE},
+  log: {name: 'Nhật ký', sheet: GRADE_SHEET_LOG},
+  feedback: {name: 'Góp ý', sheet: SHEET_FB, headers: FB_HEADERS},
+  reminders: {name: 'Nhắc nhở', sheet: SHEET_REM, headers: REM_HEADERS}
+};
+function bkPart_(k) { var p = BK_PARTS[k]; if (!p) throw new Error('Phần dữ liệu không hợp lệ: ' + k); return p; }
+function adminOnly_(d) { var me = authUser_(d, ['admin']); return me; }
+function wipeData_(sh) {   // xoá mọi dòng dữ liệu, giữ dòng tiêu đề
+  var last = sh.getLastRow(), n = 0;
+  if (last > 1) { n = last - 1; sh.getRange(2, 1, n, Math.max(1, sh.getLastColumn())).clearContent(); }
+  return n;
+}
+function cellOut_(x) { return x instanceof Date ? fmtT_(x) : x; }
+function deleteRowSafe_(sh, r) {
+  try { sh.deleteRow(r); } catch (e) { sh.getRange(r, 1, 1, Math.max(1, sh.getLastColumn())).clearContent(); }
 }
 
 function handleApi(d) {
