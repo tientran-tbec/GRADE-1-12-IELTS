@@ -446,12 +446,18 @@ $('cf').onsubmit=function(e){e.preventDefault();$('e2').textContent='';
   GNAuth.api('auth_change_password',{old_password:$('op').value,new_password:$('np').value}).then(function(){$('cf').reset();msg('Đã đổi mật khẩu.',1)}).catch(function(err){$('e2').textContent=err.server?err.message:'Không kết nối được máy chủ.'})};
 
 /* ---------- trợ lý AI (admin) ---------- */
+function aiFmt(t){   /* gọn lại câu trả lời AI: bỏ dòng ---, gộp dòng trống, đoạn văn cách nhau nhỏ, gạch đầu dòng thành • */
+  t=String(t||'').replace(/\r/g,'').replace(/^\s*[-*_]{3,}\s*$/gm,'').replace(/^#{1,4} ?/gm,'').replace(/\$\\(?:right)?arrow\$/g,'→').replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
+  return t.split(/\n\n/).map(function(p){
+    p=E(p).replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>').replace(/^[ \t]*[-*] /gm,'• ').replace(/\n/g,'<br>');
+    return '<div style="margin:0 0 7px">'+p+'</div>'}).join('');
+}
 function loadAI(){
   GNAuth.api('adm_ai_get',{limit:100}).then(function(j){
     var pn=j.provider==='claude'?'Claude':'Gemini';
     $('aiSt').innerHTML=(j.hasKey?'<b style="color:#1b9e5a">✔ Đã có khoá '+pn+'</b> · '+(j.enabled?'đang bật':'đang tắt')+' · tổng '+j.total+' lượt hỏi từ trước đến nay.':'<b style="color:#e11d48">✘ Chưa có khoá '+pn+'</b> – làm theo hướng dẫn bên dưới để cài (người được cấp quyền sẽ thấy “chưa được bật”).')+' <span class="mut">(Gemini: '+(j.hasGemini?'có khoá':'chưa có')+' · Claude: '+(j.hasClaude?'có khoá':'chưa có')+')</span>';
     $('aiOn').checked=j.enabled;$('aiLim').value=j.limit;$('aiLimT').value=j.limitT;$('aiProv').value=j.provider;$('aiModG').value=j.modelGemini;$('aiModC').value=j.modelClaude;
-    $('tbAI').innerHTML=j.rows.length?j.rows.map(function(r){var sm='font-size:11px;word-break:break-word;overflow-wrap:anywhere';return '<tr style="vertical-align:top"><td style="'+sm+'">'+E(GNAuth.t(r.time))+'</td><td style="'+sm+'">'+E(r.name)+'<br><span class="mut">'+E(r.username)+'</span></td><td style="'+sm+'">'+E(r.cls)+'</td><td style="'+sm+'">'+E(r.set_id)+(r.page_id?'<br>'+E(r.page_id):'')+'</td><td style="white-space:pre-wrap;word-break:break-word">'+E(r.q)+'</td><td style="white-space:pre-wrap;word-break:break-word;line-height:1.5">'+E(r.a).replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>')+'</td><td style="'+sm+'">'+(+r.tin||0)+'/'+(+r.tout||0)+'</td><td style="'+sm+'">'+E((r.model||'').replace(/^gemini-/,''))+'</td></tr>'}).join(''):'<tr><td colspan="8">Chưa có lượt hỏi nào.</td></tr>';
+    $('tbAI').innerHTML=j.rows.length?j.rows.map(function(r){var sm='font-size:11px;word-break:break-word;overflow-wrap:anywhere';return '<tr style="vertical-align:top"><td style="'+sm+'">'+E(GNAuth.t(r.time))+'</td><td style="'+sm+'">'+E(r.name)+'<br><span class="mut">'+E(r.username)+'</span></td><td style="'+sm+'">'+E(r.cls)+'</td><td style="'+sm+'">'+E(r.set_id)+(r.page_id?'<br>'+E(r.page_id):'')+'</td><td style="white-space:pre-wrap;word-break:break-word">'+E(r.q)+'</td><td style="word-break:break-word;line-height:1.5">'+aiFmt(r.a)+'</td><td style="'+sm+'">'+(+r.tin||0)+'/'+(+r.tout||0)+'</td><td style="'+sm+'">'+E((r.model||'').replace(/^gemini-/,''))+'</td></tr>'}).join(''):'<tr><td colspan="8">Chưa có lượt hỏi nào.</td></tr>';
     $('aiInfo').textContent='Hiện '+j.rows.length+' lượt mới nhất.';
   }).catch(fail)
 }

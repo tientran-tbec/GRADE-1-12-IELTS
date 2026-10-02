@@ -77,7 +77,10 @@
   var AK = 'gn_ai_' + set + '|' + page, hist = [], ai = { loaded: false, enabled: true, left: null, busy: false };
   try { hist = JSON.parse(sessionStorage.getItem(AK) || '[]'); } catch (e) { hist = []; }
   function saveH() { try { sessionStorage.setItem(AK, JSON.stringify(hist.slice(-20))); } catch (e) {} }
-  function fmt(t) { return E(t).replace(/\$\\(?:right)?arrow\$/g, '→').replace(/\$\\leftarrow\$/g, '←').replace(/^#{1,4} ?/gm, '').replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>').replace(/`([^`\n]+)`/g, '<code>$1</code>').replace(/^[-*] /gm, '• '); }
+  function fmt(t) {   /* chat: bỏ dòng ---, gộp dòng trống, in đậm **, gạch đầu dòng → • */
+    t = String(t || '').replace(/\r/g, '').replace(/^\s*[-*_]{3,}\s*$/gm, '').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+    return E(t).replace(/\$\\(?:right)?arrow\$/g, '→').replace(/\$\\leftarrow\$/g, '←').replace(/^#{1,4} ?/gm, '').replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>').replace(/`([^`\n]+)`/g, '<code>$1</code>').replace(/^[ \t]*[-*] /gm, '• ').replace(/\n\n/g, '<div style="height:6px"></div>');
+  }
   /* Trang làm bài (có nút Nộp bài): AI chỉ mở SAU KHI nộp bài. Trang khác (trang chủ, điểm của tôi…): dùng được bình thường. */
   function isQuiz() { return !!(document.getElementById('submit') || document.getElementById('submitBtn') || RD.kind || document.body.classList.contains('testmode')); }
   function isLive() { return !submitted && isQuiz(); }
