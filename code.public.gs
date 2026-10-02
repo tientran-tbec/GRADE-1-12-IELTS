@@ -928,7 +928,7 @@ function aiCfg_() {
   var gm = aiProp_('AI_MODEL_GEMINI', AI_GEMINI_CHAIN), cm = aiProp_('AI_MODEL_CLAUDE', aiProp_('AI_MODEL', 'claude-haiku-4-5'));
   return {provider: prov, key: prov === 'claude' ? ck : gk, hasGemini: !!gk, hasClaude: !!ck, modelGemini: gm, modelClaude: cm, model: prov === 'claude' ? cm : gm.split(',')[0],
     models: prov === 'claude' ? [cm] : gm.split(',').map(function (x) { return x.trim(); }).filter(Boolean), limitT: +aiProp_('AI_LIMIT_TEACHER', '100') || 100,
-    enabled: aiProp_('AI_ENABLED', '1') !== '0', limit: +aiProp_('AI_LIMIT', '50') || 50, maxTokens: +aiProp_('AI_MAX_TOKENS', '700') || 700};
+    enabled: aiProp_('AI_ENABLED', '1') !== '0', limit: +aiProp_('AI_LIMIT', '50') || 50, maxTokens: +aiProp_('AI_MAX_TOKENS', '4096') || 4096};
 }
 var AI_SYSTEM = 'Bạn là trợ lý học tiếng Anh cho học sinh Việt Nam (lớp 1–12 và IELTS) của một giáo viên. Trả lời bằng tiếng Việt, ngắn gọn, dễ hiểu, thân thiện; ví dụ tiếng Anh giữ nguyên tiếng Anh. ' +
   'Giải thích từ vựng, ngữ pháp, cách làm bài. Học sinh chỉ được hỏi sau khi đã nộp bài, nên khi hỏi về một câu bài tập hãy giải thích đầy đủ: nêu đáp án đúng, chỉ ra và trích câu/đoạn trong bài làm căn cứ (với Yes/No/Not Given, True/False/Not Given: nói rõ vì sao là Yes, No hay Not Given), rồi giải thích vì sao các lựa chọn khác sai. Chỉ dùng văn bản thường, in đậm bằng **; KHÔNG dùng LaTeX hay ký hiệu $, dùng mũi tên → . ' +
@@ -973,13 +973,14 @@ function aiCall1_(cfg, system, msgs) {
   var txt, tin, tout;
   if (gem) {
     var c0 = (body.candidates || [])[0] || {};
-    txt = ((c0.content && c0.content.parts) || []).map(function (p) { return p.text || ''; }).join('').trim();
+    txt = ((c0.content && c0.content.parts) || []).map(function (p) { return p.thought ? '' : (p.text || ''); }).join('').trim();
+    if (txt && c0.finishReason === 'MAX_TOKENS') txt += '\n\n(…câu trả lời dài nên bị cắt. Hãy gõ "tiếp tục" để xem phần còn lại.)';
     tin = body.usageMetadata ? body.usageMetadata.promptTokenCount : 0; tout = body.usageMetadata ? body.usageMetadata.candidatesTokenCount : 0;
   } else {
     txt = (body.content || []).map(function (c) { return c.text || ''; }).join('').trim();
     tin = body.usage ? body.usage.input_tokens : 0; tout = body.usage ? body.usage.output_tokens : 0;
   }
-  if (!txt) throw new Error('Trợ lý AI không có câu trả lời, hãy hỏi lại.');
+  if (!txt) throw new Error(gem && ((body.candidates || [])[0] || {}).finishReason === 'MAX_TOKENS' ? 'Câu trả lời quá dài nên bị cắt, hãy hỏi ngắn hơn (ví dụ chỉ hỏi một câu).' : 'Trợ lý AI không có câu trả lời, hãy hỏi lại.');
   return {text: txt, tin: tin || 0, tout: tout || 0};
 }
 
