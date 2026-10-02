@@ -61,7 +61,7 @@
     <label style="margin:0;font-weight:400;flex:1 1 100%">Mô hình Gemini – thử từ trái sang phải, bận thì tự chuyển sang mô hình kế tiếp <input id="aiModG" style="width:100%" placeholder="gemini-3.8-flash,gemini-3.7-flash,…"></label>
     <label style="margin:0;font-weight:400">Mô hình Claude <input id="aiModC" style="width:170px" placeholder="claude-haiku-4-5"></label>
     <button class="btn" id="aiSave">Lưu</button></div>
-   <details style="margin-top:8px" open><summary><b>Cài khoá Gemini miễn phí (làm 1 lần)</b></summary><ol class="mut" style="margin:6px 0 0 18px">
+   <details style="margin-top:8px"><summary><b>Cài khoá Gemini miễn phí (làm 1 lần)</b></summary><ol class="mut" style="margin:6px 0 0 18px">
     <li>Vào <b>aistudio.google.com</b> → đăng nhập Google → <b>Get API key</b> → Create API key (không cần thẻ).</li>
     <li>Mở Apps Script của dự án → biểu tượng ⚙ <b>Project Settings</b> → kéo xuống <b>Script properties</b> → Add script property.</li>
     <li>Property: <code>GEMINI_API_KEY</code> – Value: dán khoá vừa tạo → Save.</li>
@@ -69,7 +69,7 @@
     <li>Lưu ý: gói miễn phí có giới hạn số lượt/phút và /ngày (xem trong AI Studio) và Google có thể dùng nội dung hỏi để cải thiện sản phẩm – hãy dặn học sinh không nhập thông tin cá nhân. Hệ thống không gửi họ tên học sinh cho AI.</li></ol>
     <p class="mut" style="margin-left:18px">Muốn dùng Claude thay thế: tạo khoá ở console.anthropic.com, thêm property <code>ANTHROPIC_API_KEY</code>, rồi chọn “Claude” ở ô Dịch vụ.</p></details></div>
   <div class="card" style="margin-top:12px"><div class="bar"><b>Nhật ký hỏi AI</b><span class="grow"></span><span class="mut" id="aiInfo"></span><button class="btn sm sec" id="aiReload">Tải lại</button></div>
-   <div class="tw"><table id="tabAI" style="table-layout:fixed;width:100%;min-width:900px;font-size:13px"><colgroup><col style="width:7%"><col style="width:8%"><col style="width:4%"><col style="width:8%"><col style="width:13%"><col style="width:52%"><col style="width:4%"><col style="width:4%"></colgroup><thead><tr><th>Thời gian</th><th>Học sinh</th><th>Lớp</th><th>Bài</th><th>Câu hỏi</th><th>Trả lời</th><th>Token</th><th>Mô hình</th></tr></thead><tbody id="tbAI"></tbody></table></div></div>
+   <div id="tbAI" style="margin-top:8px"></div></div>
  </section>
 
  <section id="p-backup" hidden>
@@ -457,7 +457,10 @@ function loadAI(){
     var pn=j.provider==='claude'?'Claude':'Gemini';
     $('aiSt').innerHTML=(j.hasKey?'<b style="color:#1b9e5a">✔ Đã có khoá '+pn+'</b> · '+(j.enabled?'đang bật':'đang tắt')+' · tổng '+j.total+' lượt hỏi từ trước đến nay.':'<b style="color:#e11d48">✘ Chưa có khoá '+pn+'</b> – làm theo hướng dẫn bên dưới để cài (người được cấp quyền sẽ thấy “chưa được bật”).')+' <span class="mut">(Gemini: '+(j.hasGemini?'có khoá':'chưa có')+' · Claude: '+(j.hasClaude?'có khoá':'chưa có')+')</span>';
     $('aiOn').checked=j.enabled;$('aiLim').value=j.limit;$('aiLimT').value=j.limitT;$('aiProv').value=j.provider;$('aiModG').value=j.modelGemini;$('aiModC').value=j.modelClaude;
-    $('tbAI').innerHTML=j.rows.length?j.rows.map(function(r){var sm='font-size:11px;word-break:break-word;overflow-wrap:anywhere';return '<tr style="vertical-align:top"><td style="'+sm+'">'+E(GNAuth.t(r.time))+'</td><td style="'+sm+'">'+E(r.name)+'<br><span class="mut">'+E(r.username)+'</span></td><td style="'+sm+'">'+E(r.cls)+'</td><td style="'+sm+'">'+E(r.set_id)+(r.page_id?'<br>'+E(r.page_id):'')+'</td><td style="white-space:pre-wrap;word-break:break-word">'+E(r.q)+'</td><td style="word-break:break-word;line-height:1.5">'+aiFmt(r.a)+'</td><td style="'+sm+'">'+(+r.tin||0)+'/'+(+r.tout||0)+'</td><td style="'+sm+'">'+E((r.model||'').replace(/^gemini-/,''))+'</td></tr>'}).join(''):'<tr><td colspan="8">Chưa có lượt hỏi nào.</td></tr>';
+    $('tbAI').innerHTML=j.rows.length?j.rows.map(function(r){return '<div style="border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 10px">'+
+ '<div class="mut" style="font-size:12px;margin-bottom:6px"><b style="color:inherit">'+E(r.name)+'</b> ('+E(r.username)+')'+(r.cls?' · lớp '+E(r.cls):'')+' · '+E(GNAuth.t(r.time))+(r.set_id?' · '+E(r.set_id)+(r.page_id?' / '+E(r.page_id):''):'')+' · '+(+r.tin||0)+'/'+(+r.tout||0)+' token'+(r.model?' · '+E(r.model):'')+'</div>'+
+ '<div style="background:#eef3ff;border-radius:8px;padding:7px 10px;margin-bottom:6px;white-space:pre-wrap;word-break:break-word"><b>Hỏi:</b> '+E(r.q)+'</div>'+
+ '<div style="line-height:1.55;word-break:break-word;overflow-wrap:anywhere"><div class="mut" style="font-size:12px;margin-bottom:3px"><b>Trả lời</b></div>'+aiFmt(r.a)+'</div></div>'}).join(''):'<p class="mut">Chưa có lượt hỏi nào.</p>';
     $('aiInfo').textContent='Hiện '+j.rows.length+' lượt mới nhất.';
   }).catch(fail)
 }

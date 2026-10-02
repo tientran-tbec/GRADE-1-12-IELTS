@@ -90,7 +90,7 @@ try:
         (None if p.is_visible('.gnfb-box') else p.click('.gnfb-btn')); p.click('.gnfb-tabs button[data-t=a]'); time.sleep(0.6)
         chk('IELTS nộp bài xong: AI mở', not p.is_disabled('.gnfb-box textarea'))
         # --- admin
-        pa = newctx(LA); pa.goto(U('admin.html#ai')); pa.wait_for_selector('#tbAI tr'); time.sleep(0.8)
+        pa = newctx(LA); pa.goto(U('admin.html#ai')); pa.wait_for_selector('#tbAI > div'); time.sleep(0.8)
         chk('admin: tab Trợ lý AI báo đã có khoá + nhật ký có câu hỏi', 'Đã có khoá' in pa.inner_text('#aiSt') and 'Giải thích thì hiện tại hoàn thành' in pa.inner_text('#tbAI') and 'sk-test' not in pa.content())
         pa.fill('#aiLim', '5'); pa.click('#aiSave'); pa.wait_for_function("document.querySelector('#msg').innerText.indexOf('Đã lưu')>=0")
         chk('admin lưu giới hạn 5 lượt', api({'action': 'adm_ai_get', 'token': A})['limit'] == 5)
