@@ -11,10 +11,10 @@
   var E = A.esc, open = false, timer = null;
 
   var css = document.createElement('style');
-  css.textContent = '.gnfb-btn{position:fixed;right:0;top:38%;z-index:9990;font:600 13px/1 system-ui,sans-serif;background:#1d4ed8;color:#fff;border:0;border-radius:10px 0 0 10px;padding:12px 8px;cursor:pointer;box-shadow:-2px 2px 8px rgba(0,0,0,.25);writing-mode:vertical-rl;letter-spacing:.5px}' +
+  css.textContent = '.gnfb-btn{position:fixed;right:0;top:38%;z-index:100000;font:600 13px/1 system-ui,sans-serif;background:#1d4ed8;color:#fff;border:0;border-radius:10px 0 0 10px;padding:12px 8px;cursor:pointer;box-shadow:-2px 2px 8px rgba(0,0,0,.25);writing-mode:vertical-rl;letter-spacing:.5px}' +
     '.gnfb-btn .dot{display:none;position:absolute;top:-6px;left:-6px;writing-mode:horizontal-tb;min-width:18px;height:18px;border-radius:9px;background:#e11d48;color:#fff;font-size:11px;line-height:18px;text-align:center;padding:0 4px}' +
     '.gnfb-btn.has .dot{display:block}' +
-    '.gnfb-box{position:fixed;right:40px;top:10vh;z-index:9991;width:min(340px,calc(100vw - 56px));max-height:76vh;display:none;flex-direction:column;background:#fff;color:#111;border:1px solid #cbd5e1;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.28);font:14px/1.4 system-ui,sans-serif}' +
+    '.gnfb-box{position:fixed;right:40px;top:10vh;z-index:100001;width:min(340px,calc(100vw - 56px));max-height:76vh;display:none;flex-direction:column;background:#fff;color:#111;border:1px solid #cbd5e1;border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.28);font:14px/1.4 system-ui,sans-serif}' +
     '.gnfb-box.on{display:flex}.gnfb-h{padding:10px 12px;border-bottom:1px solid #e2e8f0;font-weight:600;display:flex;justify-content:space-between;gap:8px}' +
     '.gnfb-h small{display:block;font-weight:400;color:#64748b}.gnfb-x{background:none;border:0;font-size:18px;cursor:pointer;color:#64748b}' +
     '.gnfb-l{flex:1;overflow:auto;padding:10px;display:flex;flex-direction:column;gap:8px;min-height:90px}' +
@@ -58,6 +58,7 @@
   };
   ta.addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); send.click(); } });
   ta.addEventListener('paste', function (e) { e.stopPropagation(); });
+  ['mousedown', 'mouseup', 'pointerdown', 'touchstart', 'touchend', 'dblclick', 'contextmenu', 'cut', 'dragstart', 'drop'].forEach(function (ev) { box.addEventListener(ev, function (e) { e.stopPropagation(); }); });   /* các bộ chặn / công cụ của trang không được can thiệp vào khung chat */
   box.addEventListener('copy', function (e) { e.stopPropagation(); });
   // chấm đỏ: cuộc trò chuyện của trang này có tin trả lời chưa đọc?
   A.api('fb_mine').then(function (j) {

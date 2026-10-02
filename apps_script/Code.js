@@ -783,6 +783,10 @@ var API = {
     } finally { lock.releaseLock(); }
     return {deleted: del, skipped: skip};
   },
+  adm_bootstrap: function (d) {   // gộp lớp + học sinh + giáo viên trong 1 lần gọi (trang quản trị mở nhanh)
+    var me = authUser_(d, ['admin', 'teacher']), c = API.adm_classes(d), st = API.adm_users({token: d.token, role: 'student'});
+    return {classes: c.classes, teachers: c.teachers, students: st.users, tusers: has_(me, 'full') ? API.adm_users({token: d.token, role: 'teacher'}).users : null};
+  },
   adm_results: function (d) { var rows = resultRows_(authUser_(d, ['admin', 'teacher']), d); return {rows: rows, more: !!rows.more}; },
   my_results: function (d) { return {rows: resultRows_(authUser_(d), d, true)}; }
 };

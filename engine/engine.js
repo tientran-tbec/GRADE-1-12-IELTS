@@ -364,6 +364,7 @@
       ['copy', 'cut', 'paste', 'dragstart', 'drop'].forEach(function (ev) { document.addEventListener(ev, function (e) { if (live()) { e.preventDefault(); logBad(ev); if (ev === 'paste') banner('Không được dán nội dung vào bài làm.'); } }); });
       document.addEventListener('keydown', function (e) {
         if (!live()) return;
+        if (e.target && e.target.closest && e.target.closest('.gnfb-box')) return;   /* khung góp ý: cho phép gõ / dán bình thường */
         var k = (e.key || '').toLowerCase(), c = e.ctrlKey || e.metaKey, bad = false;
         if (e.key === 'F12' || e.key === 'Escape') bad = true;
         if (c && !e.shiftKey && 'casupv'.indexOf(k) >= 0 && k.length === 1) bad = true;

@@ -279,6 +279,13 @@ r = L('anlt', 'sai'); ok(!r.ok && /quá nhiều/.test(r.error), 'khoá sau 5 l�
   g.api({ action: 'adm_users', token: A, role: 'teacher' });
   ok(sh.rows.filter(r => r[2] === 'teacher').every(r => r[12] === 'assign'), 'bảng cũ chưa có cột Quyền: giáo viên giữ quyền giao bài');
 }
+// ---- bootstrap trang quản trị ----
+{
+  const b = g.api({ action: 'adm_bootstrap', token: A }); ok(b.ok && Array.isArray(b.classes) && Array.isArray(b.students) && Array.isArray(b.tusers) && b.tusers.every(u => u.role === 'teacher'), 'bootstrap admin: lớp + học sinh + giáo viên: ' + JSON.stringify(b).slice(0, 120));
+  ok(b.students.length === g.api({ action: 'adm_users', token: A, role: 'student' }).users.length, 'bootstrap: đủ học sinh');
+  const bt = g.api({ action: 'adm_bootstrap', token: T }); ok(bt.ok && bt.tusers === null && bt.students.every(u => u.role === 'student'), 'bootstrap GV thường: không có danh sách giáo viên, chỉ HS của mình');
+  ok(!g.api({ action: 'adm_bootstrap', token: 'x' }).ok, 'bootstrap cần đăng nhập');
+}
 // ---- phân trang + lọc ngày kết quả ----
 {
   const all = g.api({ action: 'adm_results', token: A }); const n = all.rows.length; ok(n >= 3 && all.more === false, 'kết quả mặc định không còn "more"');

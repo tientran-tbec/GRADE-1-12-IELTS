@@ -17,7 +17,7 @@
     ROLE: ROLE,
     get: function () { var s = load(); return s && s.token && tokenExp(s.token) > Date.now() ? s : null; },
     set: function (token, user) { ls(KEY, JSON.stringify({ token: token, user: user })); },
-    clear: function () { ls(KEY, null); ls('gn_ping', null); },
+    clear: function () { ls(KEY, null); ls('gn_ping', null); try { Object.keys(localStorage).forEach(function (k) { if (k.indexOf('gn_adm_') === 0) localStorage.removeItem(k); }); } catch (e) {} },
     user: function () { var s = A.get(); return s ? s.user : null; },
     loginUrl: function (next) { return ROOT + 'login.html' + (next ? '?next=' + encodeURIComponent(next) : ''); },
     logout: function () {
@@ -117,4 +117,33 @@
   };
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   A.esc = esc;
+})();
+
+/* Khung tra từ / dịch (.dict-popup) kéo thả được: kéo ở dải trên cùng ("⠿ Kéo để di chuyển") hoặc phần viền khung.
+   Vị trí đã kéo được nhớ cho các lần dịch sau. Dùng chung cho mọi trang (bài luyện tập, kiểm tra, IELTS). */
+(function () {
+  var st = document.createElement('style');
+  st.textContent = '.dict-popup{touch-action:none;padding-top:22px!important}.dict-popup::before{content:"⠿  Kéo để di chuyển";position:absolute;left:0;right:30px;top:0;height:22px;line-height:22px;padding-left:12px;font-size:11px;opacity:.55;cursor:grab;user-select:none;-webkit-user-select:none}.dict-popup.gn-moving::before{cursor:grabbing}.dict-popup .dict-body{touch-action:pan-y}';
+  (document.head || document.documentElement).appendChild(st);
+  var pos = null, drag = null;
+  function clamp(el, x, y) { var w = el.offsetWidth, h = el.offsetHeight; return [Math.min(Math.max(4, x), Math.max(4, innerWidth - w - 4)), Math.min(Math.max(4, y), Math.max(4, innerHeight - Math.min(h, 60) - 4))]; }
+  function place(el, x, y) { var c = clamp(el, x, y); el.style.left = c[0] + 'px'; el.style.top = c[1] + 'px'; el.style.right = 'auto'; el.style.bottom = 'auto'; return c; }
+  document.addEventListener('pointerdown', function (e) {
+    var el = e.target && e.target.closest && e.target.closest('.dict-popup'); if (!el) return;
+    var r = el.getBoundingClientRect();
+    if (e.target !== el || e.button > 0) return;   /* chỉ kéo khi bấm vào dải trên / viền, không phải nút hay chữ */
+    drag = { el: el, dx: e.clientX - r.left, dy: e.clientY - r.top, id: e.pointerId };
+    el.classList.add('gn-moving'); try { el.setPointerCapture(e.pointerId); } catch (x) {}
+    e.preventDefault();
+  }, true);
+  document.addEventListener('pointermove', function (e) { if (drag && e.pointerId === drag.id) place(drag.el, e.clientX - drag.dx, e.clientY - drag.dy); });
+  function end(e) { if (!drag || e.pointerId !== drag.id) return; var r = drag.el.getBoundingClientRect(); pos = [r.left, r.top]; drag.el.classList.remove('gn-moving'); drag = null; }
+  document.addEventListener('pointerup', end); document.addEventListener('pointercancel', end);
+  function watch() {
+    new MutationObserver(function (list) {
+      if (!pos) return;
+      list.forEach(function (m) { [].forEach.call(m.addedNodes, function (n) { if (n.nodeType === 1 && n.classList.contains('dict-popup')) place(n, pos[0], pos[1]); }); });
+    }).observe(document.body, { childList: true });
+  }
+  if (document.body) watch(); else document.addEventListener('DOMContentLoaded', watch);
 })();

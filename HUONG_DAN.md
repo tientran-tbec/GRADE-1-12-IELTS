@@ -136,3 +136,8 @@ Dữ liệu: Users có thêm cột **Quyền**, **Chức vụ** (tự thêm); ta
 - Máy chủ lưu đệm danh sách tài khoản 5 phút (tự làm mới khi có sửa tài khoản) và chỉ mở file Sheet 1 lần mỗi lần gọi.
 - Học sinh: trình duyệt hỏi máy chủ tối đa 1 lần / 2 phút khi chuyển trang, và 3 phút/lần khi để trang mở. Giáo viên/admin luôn cập nhật quyền khi mở trang. Đăng xuất thiết bị khác có thể mất tới ~3 phút mới có hiệu lực ở máy bị đăng xuất. Trạng thái "đang đăng nhập" tính trong 7 phút.
 - Tab Kết quả: mặc định 7 ngày qua, tải 200 dòng, nút "Tải thêm"; có lọc Hôm nay / 7 ngày / 30 ngày / Tháng này / Mọi lúc. Tải CSV xuất tối đa 3000 dòng theo bộ lọc hiện tại.
+
+## Trang quản trị nhanh hơn, khung dịch kéo thả, sửa khung góp ý
+- Trang quản trị: mở lần đầu chỉ gọi máy chủ 1 lần (thay vì 3 lần nối tiếp); từ lần 2 hiện bảng ngay từ bản lưu trong trình duyệt rồi cập nhật ngầm. Tìm kiếm / lọc chạy tại chỗ. Khoá/mở khoá, cấp toàn quyền, xoá kết quả đổi giao diện ngay (lỗi thì tự hoàn lại). Có dải "⏳ Đang lưu…" khi đang ghi. Bản lưu tự xoá khi đăng xuất.
+- Khung dịch (tra từ) kéo thả được: giữ chuột ở dải trên cùng "⠿ Kéo để di chuyển" (hoặc viền khung) rồi kéo; lần dịch sau mở đúng chỗ đã kéo.
+- Khung 💬 Góp ý: nằm trên mọi lớp phủ (kể cả hộp thoại kết quả, trang IELTS), gõ / dán bình thường kể cả khi đang làm bài kiểm tra.
