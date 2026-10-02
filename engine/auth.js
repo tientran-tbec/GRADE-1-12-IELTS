@@ -94,10 +94,10 @@
       var tick = function () {
         if (document.hidden && A._t) return;
         A.api('auth_ping').then(function (j) {
-          var s = load(); if (!s) return; var before = JSON.stringify(s.user.sets || null) + JSON.stringify(s.user.due || null) + s.user.cls;
+          var s = load(); if (!s) return; var sig = function (u) { return JSON.stringify(u.sets || null) + JSON.stringify(u.due || null) + u.cls + JSON.stringify(u.perms || null) + JSON.stringify(u.ranks || null); }, before = sig(s.user);
           A.set(s.token, j.user);
           A.unread = +j.unread || 0; A._bell(); try { window.dispatchEvent(new CustomEvent('gn-unread', { detail: A.unread })); } catch (e) {}
-          if (onUpdate && (JSON.stringify(j.user.sets || null) + JSON.stringify(j.user.due || null) + j.user.cls) !== before) onUpdate(j.user);
+          if (onUpdate && sig(j.user) !== before) onUpdate(j.user);
         }).catch(function () {});
       };
       tick(); A._t = setInterval(tick, 60000);

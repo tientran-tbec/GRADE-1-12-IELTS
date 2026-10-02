@@ -1,0 +1,43 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tổng kết học sinh – GRADE 1-12-IELTS</title><link rel="stylesheet" href="engine/app.css">
+<script>window.GN_URL="%GN_URL%";window.GN_ROOT="";window.GN_CATALOG=%CATALOG%;window.GN_PAGES=%PAGES%;</script><script src="engine/auth.js"></script><script>GNAuth.require(['admin','teacher'])</script><script src="engine/review.js"></script></head><body>
+<div class="top"><h1>Tổng kết học sinh</h1><a href="admin.html#students">← Quản trị</a><a href="index.html">⌂ Trang bài tập</a><span id="chip"></span></div>
+<div class="wrapp">
+ <div id="msg" class="err"></div>
+ <style>.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}.sg .card{margin:0;text-align:center}.sg b{display:block;font-size:24px}.sg small{color:var(--mut,#667)}
+ .wn{cursor:pointer}</style>
+ <div class="card" id="head"><p class="mut">Đang tải…</p></div>
+ <div class="sg" id="stats"></div>
+ <div class="card"><b>Bài được giao</b><div class="tw"><table><thead><tr><th>Bộ bài</th><th>Lớp</th><th>Hạn nộp</th><th>Trạng thái</th></tr></thead><tbody id="tbA"></tbody></table></div></div>
+ <div class="card" style="margin-top:12px"><div class="bar"><b>Các lần nộp bài</b><span class="grow"></span><button class="btn sm sec" id="csv">Tải CSV</button></div><div class="tw"><table><thead><tr><th>Thời gian</th><th>Bộ bài</th><th>Trang</th><th>Loại</th><th>Điểm</th><th>Thang 10</th><th>Phút</th><th>Cảnh báo</th><th></th></tr></thead><tbody id="tbR"></tbody></table></div></div>
+ <div class="card" style="margin-top:12px"><b>Hoạt động luyện tập</b><p class="mut" style="margin:4px 0">Số lần vào trang, tổng thời gian ở trang và tiến độ lần vào gần nhất.</p><div class="tw"><table><thead><tr><th>Bộ bài</th><th>Trang</th><th>Số lần vào</th><th>Thời gian</th><th>Đã làm / Đúng / Tổng</th><th>Làm lại</th><th>Gần nhất</th></tr></thead><tbody id="tbP"></tbody></table></div></div>
+</div>
+<script>
+(function(){
+var E=GNAuth.esc,$=function(i){return document.getElementById(i)},u=(location.search.match(/[?&]u=([^&]+)/)||[])[1];u=u?decodeURIComponent(u):'';
+GNAuth.chip('#chip');GNAuth.verify();
+var CAT={};(window.GN_CATALOG||[]).forEach(function(x){CAT[x.id]=x.title});var sn=function(id){return CAT[id]||id};
+var RANK={T:'Trưởng nhóm',P:'Phó nhóm'},RES=[];
+function csv(rows){return '﻿'+rows.map(function(r){return r.map(function(c){c=String(c==null?'':c);return /[",\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c}).join(',')}).join('\r\n')}
+if(!u){$('head').innerHTML='<p class="err">Thiếu tài khoản học sinh.</p>';return}
+GNAuth.api('adm_student_summary',{username:u}).then(function(j){
+  var s=j.user,rows=j.results;RES=rows;
+  document.title='Tổng kết – '+s.name;
+  $('head').innerHTML='<div class="bar"><h2 style="margin:0">'+E(s.name)+'</h2><span class="cred">'+E(s.username)+'</span>'+(s.active?'<span class="tag">Hoạt động</span>':'<span class="tag off">Đã khoá</span>')+(s.online?'<span class="tag" style="background:#e6f7ee;border-color:#1b9e5a;color:#1b9e5a">● Đang đăng nhập</span>':'')+'</div>'+
+   '<p style="margin:6px 0">Lớp: '+(s.classes||[]).map(function(c){var r=(s.ranks||{})[c];return '<b>'+E(c)+'</b>'+(r?' <span class="tag">'+RANK[r]+'</span>':'')}).join(', ')+' &nbsp;·&nbsp; Tạo: '+E(GNAuth.t(s.created)||'—')+' &nbsp;·&nbsp; Đăng nhập gần nhất: '+E(GNAuth.t(s.last)||'—')+'</p>'+
+   (s.perms&&s.perms.length&&Object.keys(s.ranks||{}).length?'<p class="mut" style="margin:0">Quyền nhóm: '+s.perms.join(', ')+'</p>':'');
+  var by={},warn=0,secs=0;
+  rows.forEach(function(r){var w=(+r.tab||0)+(+r.blur||0)+(+r.fs||0);warn+=w;if(!/^ĐÃ NỘP/.test(r.type||''))return;secs+=+r.time_spent||0;var k=r.set_id+'|'+r.page_id;if(!(k in by))by[k]={s:+r.score10||0,set:r.set_id}});
+  var ks=Object.keys(by),avg=ks.length?ks.reduce(function(a,k){return a+by[k].s},0)/ks.length:null,doneSets={};ks.forEach(function(k){doneSets[by[k].set]=(doneSets[by[k].set]||0)+1});
+  var card=function(v,l){return '<div class="card"><b>'+v+'</b><small>'+l+'</small></div>'};
+  $('stats').innerHTML=card(j.sets.length,'bộ được giao')+card(ks.length,'trang đã nộp')+card(avg==null?'—':Math.round(avg*10)/10,'điểm TB (thang 10)')+card(Math.round(secs/60),'phút làm bài (đã nộp)')+card('<span style="color:'+(warn?'#e11d48':'inherit')+'">'+warn+'</span>','lần cảnh báo (tổng)')+card(j.feedback_count,'góp ý đã gửi');
+  $('tbA').innerHTML=j.sets.length?j.sets.map(function(a){var n=doneSets[a.set_id]||0,over=a.due&&new Date(Date.now()+7*3600000).toISOString().slice(0,10)>a.due;
+    return '<tr><td>'+E(sn(a.set_id))+'</td><td>'+E(a.cls)+'</td><td>'+(a.due?E(a.due.split('-').reverse().join('/')):'—')+(over?' <span class="tag off">hết hạn</span>':'')+'</td><td>'+(n?'<b>'+n+'</b> trang đã nộp':'<span class="tag off">chưa nộp</span>')+'</td></tr>'}).join(''):'<tr><td colspan="4">Chưa được giao bài nào.</td></tr>';
+  $('tbR').innerHTML=rows.length?rows.map(function(r,i){var w=(+r.tab||0)+(+r.blur||0)+(+r.fs||0),can=!!r.row;
+    return '<tr><td>'+E(GNAuth.t(r.time))+'</td><td>'+E(sn(r.set_id))+'</td><td>'+E(r.page_id)+'</td><td>'+E(r.type)+'</td><td>'+E(r.score)+'/'+E(r.total)+'</td><td><b>'+E(r.score10)+'</b></td><td>'+Math.round((+r.time_spent||0)/60)+'</td><td>'+((w||r.hasEv)?'<button class="btn sm sec wn" data-i="'+i+'" style="color:#e11d48;border-color:#e11d48">⚠ '+(w||'xem')+' lần</button>':'')+'</td><td>'+(can?'<button class="btn sm sec" data-i="'+i+'" data-v="1">Xem bài</button>':'')+'</td></tr>'}).join(''):'<tr><td colspan="9">Chưa nộp bài nào.</td></tr>';
+  $('tbP').innerHTML=j.practice.length?j.practice.sort(function(a,b){return a.last<b.last?1:-1}).map(function(p){return '<tr><td>'+E(sn(p.set_id))+'</td><td>'+E(p.page_id)+'</td><td>'+p.visits+'</td><td>'+Math.round(p.secs/60)+' phút</td><td>'+p.done+' / '+p.ok+' / '+p.total+'</td><td>'+p.resets+'</td><td>'+E(GNAuth.t(p.last))+'</td></tr>'}).join(''):'<tr><td colspan="7">Chưa có hoạt động luyện tập.</td></tr>';
+  $('csv').onclick=function(){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv([['Thời gian','Bộ bài','Trang','Loại','Điểm','Tổng','Thang 10','Giây','Chuyển tab','Mất focus','Thoát toàn màn hình']].concat(RES.map(function(r){return [GNAuth.t(r.time),r.set_id,r.page_id,r.type,r.score,r.total,r.score10,r.time_spent,r.tab,r.blur,r.fs]})))],{type:'text/csv;charset=utf-8'}));a.download='tong-ket-'+u+'.csv';document.body.appendChild(a);a.click();a.remove()};
+}).catch(function(e){$('head').innerHTML='<p class="err">'+E(e.server?e.message:'Không kết nối được máy chủ.')+'</p>'});
+$('tbR').onclick=function(e){var b=e.target.closest('button[data-i]');if(b)GNReview.open(RES[+b.dataset.i])};
+})();
+</script></body></html>

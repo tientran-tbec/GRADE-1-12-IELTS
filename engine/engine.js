@@ -359,15 +359,16 @@
       };
       document.addEventListener('fullscreenchange', onFs);
       document.addEventListener('webkitfullscreenchange', onFs);
-      document.addEventListener('contextmenu', function (e) { if (live()) e.preventDefault(); });
-      ['copy', 'cut', 'paste', 'dragstart', 'drop'].forEach(function (ev) { document.addEventListener(ev, function (e) { if (live()) { e.preventDefault(); if (ev === 'paste') banner('Không được dán nội dung vào bài làm.'); } }); });
+      var logN = {}, logBad = function (ev, x) { logN[ev] = (logN[ev] || 0) + 1; if (logN[ev] <= 10) log(ev, x); };   /* ghi các hành vi bị chặn (tối đa 10 lần mỗi loại) để giáo viên xem lại */
+      document.addEventListener('contextmenu', function (e) { if (live()) { e.preventDefault(); logBad('contextmenu'); } });
+      ['copy', 'cut', 'paste', 'dragstart', 'drop'].forEach(function (ev) { document.addEventListener(ev, function (e) { if (live()) { e.preventDefault(); logBad(ev); if (ev === 'paste') banner('Không được dán nội dung vào bài làm.'); } }); });
       document.addEventListener('keydown', function (e) {
         if (!live()) return;
         var k = (e.key || '').toLowerCase(), c = e.ctrlKey || e.metaKey, bad = false;
         if (e.key === 'F12' || e.key === 'Escape') bad = true;
         if (c && !e.shiftKey && 'casupv'.indexOf(k) >= 0 && k.length === 1) bad = true;
         if (c && e.shiftKey && 'ijck'.indexOf(k) >= 0 && k.length === 1) bad = true;
-        if (bad) { e.preventDefault(); e.stopPropagation(); }
+        if (bad) { e.preventDefault(); e.stopPropagation(); logBad('shortcut', (c ? 'Ctrl+' : '') + (e.shiftKey ? 'Shift+' : '') + (e.key || '')); }
       }, true);
       window.addEventListener('beforeunload', function (e) { if (live()) { e.preventDefault(); e.returnValue = ''; } });
     }

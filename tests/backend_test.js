@@ -55,6 +55,9 @@ ok(!g.api({ action: 'adm_user_save', token: T, user: { username: 'anhpd', name: 
 r = g.api({ action: 'adm_user_save', token: A, user: { username: 'anhpd', name: 'Phạm Đức Anh', cls: '10A1', active: true } }); ok(r.ok && r.user.cls === '10A1', 'admin chuyển lớp bất kỳ');
 ok(g.api({ action: 'adm_users', token: T }).users.every(u => ['11A1', '11A3'].includes(u.cls)), 'GV chỉ thấy HS lớp mình');
 // ---- giao bài ----
+ok(!g.api({ action: 'adm_assign_save', token: T, cls: '11A1', sets: ['x'] }).ok, 'GV chưa được cấp quyền giao bài → bị từ chối');
+ok(!g.api({ action: 'adm_teacher_perms', token: T, username: 'hoant', perms: ['assign'] }).ok, 'GV không tự cấp quyền cho mình');
+r = g.api({ action: 'adm_teacher_perms', token: A, username: 'hoant', perms: ['assign', 'bậy', 'assign'] }); ok(r.ok && r.perms.join() === 'assign', 'admin cấp quyền giao bài (lọc quyền lạ)');
 ok(!g.api({ action: 'adm_assign_save', token: T, cls: '10A1', sets: ['x'] }).ok, 'GV không giao bài cho lớp không phụ trách');
 ok(g.api({ action: 'adm_assign_save', token: T, cls: '11A1', sets: ['lop11-mt1-test01', 'lop11-u1-botro'] }).ok, 'GV giao bài cho 11A1');
 ok(g.api({ action: 'adm_assign_save', token: A, cls: '11A3', sets: ['lop11-u1-botro'] }).ok, 'admin giao bài 11A3');
@@ -80,7 +83,7 @@ let out = g.post({ action: 'grade_save_result', set_id: 'lop11-mt1-test01', page
 out = g.post({ action: 'grade_save_result', token: S2, set_id: 'lop11-mt1-test09', page_id: 'kiem-tra', mode: 'test', score: 5, total: 10 }); ok(/unauthorized/.test(out), 'bài chưa giao → từ chối: ' + out);
 out = g.post({ action: 'grade_save_result', token: S2, set_id: 'lop11-mt1-test01', page_id: 'kiem-tra', mode: 'test', score: 8, total: 10, pct: 80, score10: 8, student_name: 'GIẢ MẠO', student_class: 'XX', ts: '2026-10-01T07:00:00Z' }); ok(out === 'ok', 'bài đã giao → ghi: ' + out);
 const sh = g.sheets['Lop1-12_KetQua']; const row = sh.rows[1];
-ok(row[2] === 'Trần Văn An' && row[3] === '11A1' && row[row.length - 1] === hs.username, 'danh tính lấy từ token');
+ok(row[2] === 'Trần Văn An' && row[3] === '11A1' && row[17] === hs.username, 'danh tính lấy từ token');
 // lớp khác nhau
 out = g.post({ action: 'grade_practice', event: 'enter', token: S2, set_id: 'lop11-u2-botro', page_id: 'p', done: 0, total: 3 }); ok(out === 'ok', 'practice bài đã giao');
 // HS chuyển lớp → quyền theo lớp mới
@@ -168,6 +171,7 @@ r = L('anlt', 'sai'); ok(!r.ok && /quá nhiều/.test(r.error), 'khoá sau 5 l�
   let cl = g.api({ action: 'adm_classes', token: A }).classes; const y2 = cl.find(c => c.id === 'Y2');
   ok(y2.teacher.split(',').length === 2, 'lớp Y2 có 2 GV: ' + y2.teacher);
   ok(g.api({ action: 'adm_teacher_classes', token: A, username: t1.user.username, classes: ['Y1'] }).changed === 1 && g.api({ action: 'adm_classes', token: A }).classes.find(c => c.id === 'Y2').teacher === t2.user.username, 'bỏ Y2 khỏi GV 1, giữ GV 2');
+  g.api({ action: 'adm_teacher_perms', token: A, username: t1.user.username, perms: ['assign'] }); g.api({ action: 'adm_teacher_perms', token: A, username: t2.user.username, perms: ['assign'] });
   const L1 = L(t1.user.username, t1.password, 'g1').token, L2 = L(t2.user.username, t2.password, 'g2').token;
   ok(g.api({ action: 'adm_classes', token: L2 }).classes.map(c => c.id).sort().join() === 'Y2,Y3' && g.api({ action: 'adm_classes', token: L1 }).classes.map(c => c.id).join() === 'Y1', 'mỗi GV chỉ thấy lớp mình phụ trách');
   // giao bài theo học sinh
@@ -182,6 +186,98 @@ r = L('anlt', 'sai'); ok(!r.ok && /quá nhiều/.test(r.error), 'khoá sau 5 l�
   ok(/unauthorized/.test(g.post({ action: 'grade_save_result', token: S33, set_id: 'only12', page_id: 'p', mode: 'test', score: 1, total: 2 })), 'HS 3 nộp bộ không được giao → từ chối');
   ok(g.api({ action: 'adm_assign_save', token: L2, cls: 'Y2', sets: ['only12'], users: { only12: [h1.user.username, h2.user.username, h3.user.username] } }).ok && !Object.keys(g.api({ action: 'adm_assign_get', token: L2, cls: 'Y2' }).users).length, 'chọn đủ cả lớp = giao cả lớp');
   ok(!g.api({ action: 'adm_assign_save', token: L1, cls: 'Y2', sets: ['x'] }).ok, 'GV khác không giao bài lớp không phụ trách');
+}
+// ---- QUYỀN CẤP THÊM CHO GIÁO VIÊN + CHỨC VỤ HỌC SINH ----
+{
+  for (const id of ['P1', 'P2']) g.api({ action: 'adm_class_save', token: A, cls: { id, name: id, grade: 12 } });
+  const mk = (name, role, cls) => g.api({ action: 'adm_user_save', token: A, user: { name, role, classes: cls || [] } });
+  const tq = mk('Gv Quyen', 'teacher'), a1 = mk('Hs Truong', 'student', ['P1']), a2 = mk('Hs Pho', 'student', ['P1']), a3 = mk('Hs Thuong', 'student', ['P1']), b1 = mk('Hs Khac', 'student', ['P2']);
+  g.api({ action: 'adm_teacher_classes', token: A, username: tq.user.username, classes: ['P1'] });
+  const Q = L(tq.user.username, tq.password, 'q').token;
+  const TA = L(a1.user.username, a1.password, 'a1').token, TB = L(a2.user.username, a2.password, 'a2').token, TC = L(a3.user.username, a3.password, 'a3').token;
+  // mặc định: chỉ thấy lớp mình
+  ok(g.api({ action: 'adm_classes', token: Q }).classes.map(c => c.id).join() === 'P1', 'GV mặc định chỉ thấy lớp mình');
+  ok(!g.api({ action: 'adm_class_save', token: Q, cls: { id: 'ZZ', name: 'ZZ' } }).ok, 'GV chưa có quyền quản lý lớp → từ chối');
+  ok(!g.api({ action: 'adm_user_save', token: Q, user: { name: 'Ngoai Lop', role: 'student', classes: ['P2'] } }).ok, 'GV chưa có quyền tạo HS ngoài lớp → từ chối');
+  ok(g.api({ action: 'adm_results', token: Q, cls: 'P2' }).rows.length === 0, 'GV chưa có quyền xem lớp khác → không thấy kết quả');
+  // cấp quyền
+  ok(g.api({ action: 'adm_teacher_perms', token: A, username: tq.user.username, perms: ['classes', 'viewall', 'anystudent', 'fball'] }).ok, 'cấp quyền cho GV');
+  const q1 = g.api({ action: 'adm_classes', token: Q }); ok(q1.classes.map(c => c.id).includes('P2') && q1.teachers.length >= 1, 'GV có quyền thấy mọi lớp + danh sách GV');
+  ok(g.api({ action: 'adm_class_save', token: Q, cls: { id: 'P3', name: 'P3', grade: 12 } }).ok && g.api({ action: 'adm_class_delete', token: Q, id: 'P3' }).ok, 'GV có quyền quản lý lớp: tạo + xoá');
+  ok(g.api({ action: 'adm_user_save', token: Q, user: { name: 'Ngoai Lop', role: 'student', classes: ['P2'] } }).ok, 'GV có quyền: tạo HS lớp ngoài');
+  ok(g.api({ action: 'adm_users', token: Q }).users.some(u => u.cls === 'P2'), 'GV có quyền: thấy HS lớp khác');
+  ok(!g.api({ action: 'adm_user_save', token: Q, user: { name: 'Gv Moi', role: 'teacher' } }).ok || g.api({ action: 'adm_users', token: A, role: 'teacher' }).users.every(u => u.name !== 'Gv Moi'), 'GV không tạo được GV/admin');
+  ok(!g.api({ action: 'adm_assign_save', token: Q, cls: 'P1', sets: ['x'] }).ok, 'có quyền khác nhưng chưa có "giao bài" → vẫn từ chối');
+  ok(!g.api({ action: 'adm_teacher_perms', token: Q, username: tq.user.username, perms: ['assign'] }).ok, 'GV không tự nâng quyền');
+  // học sinh: chức vụ
+  ok(!g.api({ action: 'team_progress', token: TA, cls: 'P1' }).ok, 'HS thường không xem tiến độ lớp');
+  ok(!g.api({ action: 'adm_student_ranks', token: TA, username: a1.user.username, ranks: { P1: 'T' }, perms: ['tview'] }).ok, 'HS không tự phong chức');
+  r = g.api({ action: 'adm_student_ranks', token: A, username: a1.user.username, ranks: { P1: 'T', P2: 'T' }, perms: ['tview', 'tscores', 'tremind', 'tfb', 'bậy'] });
+  ok(r.ok && r.user.ranks.P1 === 'T' && !r.user.ranks.P2 && r.user.perms.join() === 'tview,tscores,tremind,tfb', 'admin phong trưởng nhóm (bỏ lớp HS không học, bỏ quyền lạ)');
+  ok(g.api({ action: 'adm_student_ranks', token: Q, username: a2.user.username, ranks: { P1: 'P' }, perms: ['tview', 'tremind'] }).ok, 'GV phong phó nhóm');
+  g.api({ action: 'adm_assign_save', token: A, cls: 'P1', sets: ['setP', 'setQ'] });
+  r = g.api({ action: 'auth_me', token: TA }); ok(r.user.ranks.P1 === 'T' && r.user.perms.includes('tremind'), 'HS nhận thông tin chức vụ + quyền');
+  // trưởng nhóm gửi điểm
+  g.post({ action: 'grade_save_result', token: TC, set_id: 'setP', page_id: 'p1', mode: 'test', score: 8, total: 10, pct: 80, score10: 8 });
+  r = g.api({ action: 'team_progress', token: TA, cls: 'P1' });
+  ok(r.ok && r.members.length === 3 && r.sets.length === 2, 'trưởng nhóm xem tiến độ cả lớp: ' + JSON.stringify(r).slice(0, 120));
+  const mc = r.members.find(m => m.username === a3.user.username); ok(mc.items.setP && mc.items.setP.n === 1 && mc.items.setP.avg === 8 && !mc.items.setQ, 'thấy HS3 đã nộp setP với điểm (trưởng nhóm có tscores)');
+  r = g.api({ action: 'team_progress', token: TB, cls: 'P1' }); ok(r.ok && r.members.find(m => m.username === a3.user.username).items.setP.avg === undefined, 'phó nhóm không có quyền xem điểm: chỉ thấy đã nộp');
+  ok(!g.api({ action: 'team_progress', token: TA, cls: 'P2' }).ok, 'không xem tiến độ lớp khác');
+  // nhắc nộp bài
+  r = g.api({ action: 'team_remind', token: TA, cls: 'P1', set_id: 'setQ', users: [a3.user.username, a2.user.username, b1.user.username, 'khongco', a1.user.username], note: 'Nộp bài trước thứ 6 nhé' });
+  ok(r.ok && r.sent === 2 && r.skipped === 2, 'nhắc 2 bạn cùng lớp, bỏ qua người lớp khác / không tồn tại / chính mình: ' + JSON.stringify(r));
+  r = g.api({ action: 'team_remind', token: TA, cls: 'P1', set_id: 'setQ', users: [a3.user.username] }); ok(r.ok && r.sent === 0 && r.skipped === 1, 'không nhắc lặp cùng bài trong 6 giờ');
+  ok(!g.api({ action: 'team_remind', token: TA, cls: 'P1', set_id: 'setLa', users: [a3.user.username] }).ok, 'không nhắc bộ chưa giao cho lớp');
+  ok(!g.api({ action: 'team_remind', token: TC, cls: 'P1', set_id: 'setQ', users: [a2.user.username] }).ok, 'HS thường không nhắc được');
+  ok(g.api({ action: 'auth_ping', token: TC }).unread >= 1, 'HS được nhắc thấy chấm đỏ');
+  r = g.api({ action: 'my_reminders', token: TC }); ok(r.ok && r.items.length === 1 && r.items[0].isNew && r.items[0].rank === 'Trưởng nhóm' && r.items[0].note === 'Nộp bài trước thứ 6 nhé', 'đọc lời nhắc');
+  ok(g.api({ action: 'auth_ping', token: TC }).unread === 0 && !g.api({ action: 'my_reminders', token: TC }).items[0].isNew, 'đọc xong hết chấm đỏ');
+  // góp ý thay nhóm
+  ok(!g.api({ action: 'team_fb', token: TB, cls: 'P1', text: 'hi' }).ok, 'phó nhóm không có quyền góp ý thay nhóm');
+  r = g.api({ action: 'team_fb', token: TA, cls: 'P1', text: 'Cả lớp đề nghị lùi hạn nộp ạ' }); ok(r.ok && r.msgs.length === 1, 'trưởng nhóm gửi góp ý thay nhóm');
+  const ib = g.api({ action: 'fb_inbox', token: Q }); const th = ib.threads.find(t => /^team:P1$/.test(t.set)); ok(th && th.unread === 1, 'GV (fball) thấy góp ý của nhóm');
+  r = g.api({ action: 'fb_reply', token: Q, student: a1.user.username, set_id: 'team:P1', page_id: 'nhom', text: 'Cô đồng ý, lùi 2 ngày' }); ok(r.ok && r.msgs.length === 2, 'GV trả lời góp ý nhóm');
+  r = g.api({ action: 'fb_list', token: TA, set_id: 'team:P1', page_id: 'nhom' }); ok(r.msgs.length === 2, 'trưởng nhóm đọc được trả lời');
+  // rút chức vụ → mất quyền
+  g.api({ action: 'adm_student_ranks', token: A, username: a1.user.username, ranks: {}, perms: ['tview'] });
+  ok(!g.api({ action: 'team_progress', token: TA, cls: 'P1' }).ok, 'gỡ chức vụ → mất quyền');
+  ok(g.api({ action: 'adm_users', token: A, role: 'student' }).users.find(u => u.username === a1.user.username).perms.length === 0, 'gỡ hết chức vụ → xoá quyền');
+  // ---- toàn quyền (ngang admin) ----
+  const tf = mk('Gv Full', 'teacher'); r = g.api({ action: 'adm_teacher_perms', token: A, username: tf.user.username, perms: ['full'] });
+  ok(r.ok && r.perms.length === 6, 'cấp toàn quyền = tích đủ 6 quyền');
+  const F = L(tf.user.username, tf.password, 'f').token;
+  ok(g.api({ action: 'adm_users', token: F, role: 'teacher' }).users.length >= 3 && g.api({ action: 'adm_users', token: F, role: 'teacher' }).users.every(u => u.role === 'teacher'), 'GV toàn quyền xem được danh sách giáo viên');
+  ok(g.api({ action: 'adm_users', token: F }).users.every(u => u.role !== 'admin'), 'GV toàn quyền không thấy tài khoản admin');
+  ok(g.api({ action: 'adm_class_save', token: F, cls: { id: 'FF', name: 'FF', grade: 9 } }).ok && g.api({ action: 'adm_teacher_classes', token: F, username: tq.user.username, classes: ['FF', 'P1'] }).ok, 'GV toàn quyền: tạo lớp + gán lớp cho GV khác');
+  ok(g.api({ action: 'adm_teacher_perms', token: F, username: tq.user.username, perms: ['assign'] }).ok, 'GV toàn quyền cấp quyền cho GV khác');
+  ok(g.api({ action: 'adm_assign_save', token: F, cls: 'P2', sets: ['setP'] }).ok, 'GV toàn quyền giao bài cho lớp bất kỳ');
+  r = g.api({ action: 'adm_user_save', token: F, user: { name: 'Gv Tao Boi Full', role: 'teacher' } }); ok(r.ok && r.user.role === 'teacher', 'GV toàn quyền tạo được giáo viên');
+  { const ra = g.api({ action: 'adm_user_save', token: F, user: { name: 'Admin Gia', role: 'admin' } }); ok(!ra.ok || ra.user.role !== 'admin', 'GV toàn quyền không tạo được admin'); }
+  ok(!g.api({ action: 'adm_user_reset', token: F, username: 'admin' }).ok && !g.api({ action: 'adm_user_kick', token: F, username: 'admin' }).ok, 'GV toàn quyền không đặt lại MK / đăng xuất admin');
+  ok(!g.api({ action: 'adm_teacher_perms', token: Q, username: tq.user.username, perms: ['full'] }).ok, 'GV thường không tự cấp toàn quyền');
+  // ---- xem lại bài làm + vi phạm + tổng kết học sinh ----
+  g.post({ action: 'grade_save_result', token: TC, set_id: 'setP', page_id: 'p9', mode: 'test', score: 3, total: 4, pct: 75, score10: 7.5, tab_switch: 2, blur: 1, fullscreen_exit: 0, answers: { 'a.1': 'B', 'a.2': ['x', 'y'] }, events: [{ ev: 'enter', t: 0 }, { ev: 'tab_hidden', t: 31 }, { ev: 'blur', t: 40 }, { ev: 'paste', t: 55 }, { ev: 'shortcut', t: 60, x: 'Ctrl+C' }, { ev: 'audio_play', t: 70 }] });
+  const lst = g.api({ action: 'adm_results', token: A, username: a3.user.username }).rows; const rw = lst.find(x => x.page_id === 'p9');
+  ok(rw && rw.row >= 2 && rw.hasEv === true, 'danh sách kết quả có số dòng + cờ có sự kiện vi phạm');
+  r = g.api({ action: 'adm_result_detail', token: A, row: rw.row });
+  ok(r.ok && r.answers['a.1'] === 'B' && r.events === 'tab_hidden:31;blur:40;paste:55;shortcut:60:Ctrl+C' && r.tab === 2, 'chi tiết bài nộp: câu trả lời + sự kiện (bỏ sự kiện không phải vi phạm): ' + JSON.stringify(r.events));
+  ok(g.api({ action: 'adm_result_detail', token: Q, row: rw.row }).ok, 'GV có quyền xem mọi lớp xem được bài nộp');
+  const outsider = mk('GV Ngoai', 'teacher'); const O = L(outsider.user.username, outsider.password, 'o').token;
+  ok(!g.api({ action: 'adm_result_detail', token: O, row: rw.row }).ok, 'GV không phụ trách lớp → không xem được bài nộp');
+  ok(!g.api({ action: 'adm_result_detail', token: TC, row: rw.row }).ok, 'HS không gọi được chi tiết bài nộp');
+  g.post({ action: 'grade_practice', token: TC, event: 'enter', set_id: 'setP', page_id: 'p1', done: 0, score: 0, total: 5 });
+  g.post({ action: 'grade_practice', token: TC, event: 'leave', set_id: 'setP', page_id: 'p1', done: 4, score: 3, total: 5, time_spent: 90 });
+  r = g.api({ action: 'adm_student_summary', token: A, username: a3.user.username });
+  ok(r.ok && r.user.username === a3.user.username && r.sets.length === 2 && r.results.length >= 2 && r.feedback_count === 0, 'tổng kết HS: thông tin + bài được giao + kết quả');
+  const pr = r.practice.find(x => x.page_id === 'p1'); ok(pr && pr.visits === 1 && pr.secs === 90 && pr.ok === 3 && pr.total === 5, 'tổng kết HS: hoạt động luyện tập: ' + JSON.stringify(r.practice));
+  ok(!g.api({ action: 'adm_student_summary', token: O, username: a3.user.username }).ok, 'GV ngoài lớp không xem tổng kết HS');
+  ok(g.api({ action: 'adm_student_summary', token: Q, username: a3.user.username }).ok, 'GV phụ trách xem được tổng kết HS');
+  // migration: bảng Users cũ (12 cột) → GV hiện có giữ quyền giao bài
+  const sh = g.sheets['Users']; const gv = sh.rows.find(r => r[0] === 'hoant'); const keep = gv[12]; const saveH = sh.rows[0].slice();
+  sh.rows.forEach(r => { r.length = Math.min(r.length, 12); });
+  g.api({ action: 'adm_users', token: A, role: 'teacher' });
+  ok(sh.rows.filter(r => r[2] === 'teacher').every(r => r[12] === 'assign'), 'bảng cũ chưa có cột Quyền: giáo viên giữ quyền giao bài');
 }
 // xoá lớp
 ok(!g.api({ action: 'adm_class_delete', token: A, id: '11A1' }).ok, 'không xoá lớp còn HS');

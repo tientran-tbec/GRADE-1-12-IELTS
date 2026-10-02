@@ -97,3 +97,27 @@ Mọi trang bài (luyện tập, kiểm tra, IELTS Reading/Listening/Writing/Spe
 - **Giao bài theo học sinh:** tab *Giao bài* → tích bộ bài → bấm nút **👥 Cả lớp** cạnh bộ đó → tích những học sinh được giao. **Không tích ai (hoặc tích hết) = giao cho cả lớp.** Cùng một lớp có thể giao bộ A cho cả lớp, bộ B chỉ cho vài em.
 - **Bộ lọc tab Lớp:** theo khối (kể cả IELTS), giáo viên, tình trạng (chưa giao bài / chưa có học sinh / chưa có giáo viên) và ô tìm mã/tên lớp.
 - **Giờ hiển thị:** mọi thời gian trong trang quản trị hiện dạng `dd/MM/yyyy HH:mm:ss` giờ Việt Nam.
+
+
+## Phân quyền thêm (giáo viên) và chức vụ học sinh (trưởng nhóm / phó nhóm)
+
+**Giáo viên** – Quản trị → tab *Giáo viên* → nút **Quyền** → tích các quyền cấp thêm:
+- **Giao bài**: giao/bỏ giao bộ bài, đặt hạn, giao theo từng học sinh (cho các lớp mình phụ trách). Giáo viên cũ giữ quyền này khi nâng cấp.
+- **Xem lớp khác (chỉ đọc)**: xem học sinh, kết quả, tiến độ của mọi lớp.
+- **Góp ý mọi lớp**: xem và trả lời góp ý ở mọi lớp.
+- **Quản lý lớp**: tạo, sửa, xoá lớp và gán giáo viên.
+- **Học sinh ngoài lớp mình**: thêm, sửa, đặt lại mật khẩu, khoá học sinh bất kỳ lớp nào.
+Không tích gì = giáo viên chỉ xem kết quả/góp ý và quản lý học sinh của lớp mình. Chỉ admin cấp được quyền.
+
+**Học sinh** – tab *Học sinh* → nút **Chức vụ** (admin hoặc giáo viên quản lý học sinh đó): chọn *Trưởng nhóm* / *Phó nhóm* cho từng lớp rồi tích quyền:
+- **Xem tiến độ cả lớp** (ai đã nộp bộ nào; không xem đáp án) · **Xem điểm từng bạn** · **Nhắc nộp bài** · **Góp ý thay nhóm**.
+Học sinh có chức vụ thấy khu **Nhóm của tôi** ở trang *Điểm của tôi*. Bạn được nhắc thấy chấm đỏ và thẻ **Nhắc nhở**. Mỗi bạn chỉ bị nhắc 1 lần cho mỗi bộ trong 6 giờ; mỗi người nhắc tối đa 8 lần/giờ. Góp ý của nhóm hiện trong hộp thư *Góp ý* của giáo viên (cuộc trò chuyện “Góp ý của nhóm – lớp …”).
+Dữ liệu: Users có thêm cột **Quyền**, **Chức vụ** (tự thêm); tab mới **Reminders**.
+
+## Toàn quyền, xem lại bài làm, trang tổng kết học sinh
+
+- **Cấp toàn quyền cho giáo viên**: Quản trị → tab Giáo viên → nút "⭐ Cấp toàn quyền" (thu hồi bằng "Thu hồi toàn quyền"). Giáo viên đó ngang admin, chỉ không được tạo/sửa/xem tài khoản admin.
+- **Xem lại bài làm**: tab Kết quả → nút "Xem bài" hiện từng câu: học sinh chọn gì, đáp án đúng, đúng/sai/bỏ trống (có lọc chỉ câu sai). Bài IELTS chỉ xem được dòng tóm tắt đã lưu.
+- **Cảnh báo**: nút "⚠ n lần" hiện danh sách vi phạm kèm mốc phút:giây (chuyển tab, dán, copy, phím tắt...). Bài nộp trước bản cập nhật chỉ có số lần, không có chi tiết.
+- **Trang tổng kết**: bấm tên học sinh ở tab Kết quả → trang `student.html?u=<tài khoản>` gồm thông tin, bài được giao, mọi lần nộp, hoạt động luyện tập, tải CSV.
+- Sheet kết quả có thêm cột 19 "Sự kiện vi phạm" (tự tạo). Xem bài cần web chạy trên GitHub Pages (http/https).

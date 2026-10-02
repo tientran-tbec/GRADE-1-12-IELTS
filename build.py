@@ -489,8 +489,9 @@ def catalog(done):
 
 def build_site_pages(done=None):
     """site/*.html (đăng nhập, quản trị, điểm của tôi) → thư mục gốc, gắn link Apps Script."""
-    for n in ('login.html', 'admin.html', 'me.html'):
-        t = open(os.path.join(ROOT, 'site', n), encoding='utf8').read().replace('engine/auth.js"', 'engine/auth.js?v=' + BV + '"').replace('engine/app.css"', 'engine/app.css?v=' + BV + '"').replace('%GN_URL%', APPS_SCRIPT_URL).replace('%CATALOG%', json.dumps(catalog(done or []), ensure_ascii=False))
+    pages = {e[0]: 'WebBaiTap/%s/%s/%s' % (e[3], e[4], e[5]) for e in REGISTRY}   # mã bộ bài -> thư mục trang (để xem lại bài làm)
+    for n in ('login.html', 'admin.html', 'me.html', 'student.html'):
+        t = open(os.path.join(ROOT, 'site', n), encoding='utf8').read().replace('%PAGES%', json.dumps(pages)).replace('engine/review.js"', 'engine/review.js?v=' + BV + '"').replace('engine/auth.js"', 'engine/auth.js?v=' + BV + '"').replace('engine/app.css"', 'engine/app.css?v=' + BV + '"').replace('%GN_URL%', APPS_SCRIPT_URL).replace('%CATALOG%', json.dumps(catalog(done or []), ensure_ascii=False))
         open(os.path.join(ROOT, n), 'w', encoding='utf8').write(t)
 
 

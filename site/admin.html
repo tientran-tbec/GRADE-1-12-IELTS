@@ -1,6 +1,6 @@
 <!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Quản trị – GRADE 1-12-IELTS</title><link rel="stylesheet" href="engine/app.css">
-<script>window.GN_URL="%GN_URL%";window.GN_ROOT="";window.GN_CATALOG=%CATALOG%;</script><script src="engine/auth.js"></script><script>GNAuth.require(['admin','teacher'])</script></head><body>
+<script>window.GN_URL="%GN_URL%";window.GN_ROOT="";window.GN_CATALOG=%CATALOG%;window.GN_PAGES=%PAGES%;</script><script src="engine/auth.js"></script><script>GNAuth.require(['admin','teacher'])</script><script src="engine/review.js"></script></head><body>
 <div class="top"><h1>Quản trị · <span id="role"></span></h1><a href="index.html">⌂ Trang bài tập</a><span id="chip"></span></div>
 <div class="wrapp">
  <div class="tabs" id="tabs"></div>
@@ -14,7 +14,7 @@
 
  <section id="p-teachers" hidden>
   <div class="bar"><span class="grow"></span><button class="btn" id="addT">+ Thêm giáo viên</button></div>
-  <div class="tw"><table><thead><tr><th>Tài khoản</th><th>Họ tên</th><th>Lớp phụ trách</th><th>Trạng thái</th><th>Thiết bị</th><th>Đăng nhập gần nhất</th><th></th></tr></thead><tbody id="tbT"></tbody></table></div>
+  <div class="tw"><table><thead><tr><th>Tài khoản</th><th>Họ tên</th><th>Lớp phụ trách</th><th>Quyền cấp thêm</th><th>Trạng thái</th><th>Thiết bị</th><th>Đăng nhập gần nhất</th><th></th></tr></thead><tbody id="tbT"></tbody></table></div>
  </section>
 
  <section id="p-classes" hidden>
@@ -31,7 +31,7 @@
 
  <section id="p-results" hidden>
   <div class="bar"><select id="rcls"></select><input id="rset" placeholder="Bộ bài (vd lop11-mt1-test01)" class="grow"><button class="btn" id="rgo">Xem</button><button class="btn sec" id="rcsv">Tải CSV</button></div>
-  <div class="tw"><table><thead><tr><th>Thời gian</th><th>Học sinh</th><th>Lớp</th><th>Bộ bài</th><th>Trang</th><th>Loại</th><th>Điểm</th><th>Thang 10</th><th>Phút</th><th>Cảnh báo</th></tr></thead><tbody id="tbR"></tbody></table></div>
+  <div class="tw"><table><thead><tr><th>Thời gian</th><th>Học sinh</th><th>Lớp</th><th>Bộ bài</th><th>Trang</th><th>Loại</th><th>Điểm</th><th>Thang 10</th><th>Phút</th><th>Cảnh báo</th><th></th></tr></thead><tbody id="tbR"></tbody></table></div>
   <p class="mut" id="rinfo"></p>
  </section>
 
@@ -60,9 +60,14 @@
 <script>
 (function(){
 var E=GNAuth.esc, me=GNAuth.user(), isAdmin=me.role==='admin';
+var P=function(k){return isAdmin||(me.perms||[]).indexOf(k)>=0};   /* quyền cấp thêm */
+var TP=[['full','⭐ Toàn quyền (ngang admin)','Làm được mọi việc như quản trị viên: quản lý giáo viên, phân quyền, mọi lớp, mọi học sinh, giao bài, góp ý. Chỉ không tạo/sửa được tài khoản admin.'],['assign','Giao bài','Giao / bỏ giao bộ bài, đặt hạn nộp, giao theo từng học sinh (cho các lớp mình phụ trách)'],['viewall','Xem lớp khác (chỉ đọc)','Xem danh sách học sinh, kết quả và tiến độ của mọi lớp'],['fball','Góp ý mọi lớp','Xem và trả lời góp ý của học sinh ở mọi lớp'],['classes','Quản lý lớp','Tạo, sửa, xoá lớp và gán giáo viên phụ trách'],['anystudent','Học sinh ngoài lớp mình','Thêm, sửa, đặt lại mật khẩu, khoá học sinh ở bất kỳ lớp nào']];
+var SP=[['tview','Xem tiến độ cả lớp','Xem bạn nào đã nộp bộ nào (không xem đáp án)'],['tscores','Xem điểm từng bạn','Hiện thêm điểm trung bình (thang 10) của từng bạn'],['tremind','Nhắc nộp bài','Gửi lời nhắc tới các bạn chưa nộp bài'],['tfb','Góp ý thay nhóm','Gửi ý kiến chung của cả nhóm cho giáo viên']];
+var RANK={T:'Trưởng nhóm',P:'Phó nhóm'},RDEF={T:['tview','tscores','tremind','tfb'],P:['tview','tremind']};
+function label(list,k){var x=list.filter(function(a){return a[0]===k})[0];return x?x[1]:k}
 var $=function(i){return document.getElementById(i)};
 var S={students:[],teachers:[],classes:[],rows:[]};
-$('role').textContent=GNAuth.ROLE[me.role];GNAuth.chip('#chip');GNAuth.verify();
+$('role').textContent=GNAuth.ROLE[me.role];GNAuth.chip('#chip');GNAuth.verify(function(){location.reload()});   /* quyền thay đổi → tải lại để cập nhật giao diện */
 
 /* ---------- tiện ích ---------- */
 function msg(t,ok){var m=$('msg');m.textContent=t||'';m.className=ok?'okm':'err';if(t&&ok)setTimeout(function(){if(m.textContent===t)m.textContent=''},4000)}
@@ -88,16 +93,17 @@ function credsModal(title,list){ /* list: [{username,name,cls,password}] */
 /* ---------- tải dữ liệu ---------- */
 function loadClasses(){return GNAuth.api('adm_classes').then(function(j){S.classes=j.classes;S.teachers=j.teachers||[]})}
 function loadStudents(){return GNAuth.api('adm_users',{role:'student'}).then(function(j){S.students=j.users})}
-function loadTeachers(){return isAdmin?GNAuth.api('adm_users',{role:'teacher'}).then(function(j){S.teachers=j.users}):Promise.resolve()}
+function loadTeachers(){return P('full')?GNAuth.api('adm_users',{role:'teacher'}).then(function(j){S.teachers=j.users}):Promise.resolve()}
 
 /* ---------- học sinh ---------- */
 function renderStudents(){
   var c=$('fcls').value,q=$('fq').value.trim().toLowerCase();
   var l=S.students.filter(function(u){return (!c||(u.classes||[]).indexOf(c)>=0)&&(!q||(u.name+' '+u.username).toLowerCase().indexOf(q)>=0)});
-  $('tbS').innerHTML=l.length?l.map(function(u){return '<tr><td class="cred">'+E(u.username)+'</td><td>'+E(u.name)+'</td><td>'+E((u.classes||[]).join(', '))+'</td><td>'+(u.active?'<span class="tag">Hoạt động</span>':'<span class="tag off">Đã khoá</span>')+'</td><td>'+devCell(u)+'</td><td>'+E(GNAuth.t(u.last)||'—')+'</td><td class="act">'+actBtns(u)+'</td></tr>'}).join(''):'<tr><td colspan="7">Chưa có học sinh.</td></tr>';
+  $('tbS').innerHTML=l.length?l.map(function(u){return '<tr><td class="cred">'+E(u.username)+'</td><td>'+E(u.name)+'</td><td>'+classTags(u)+'</td><td>'+(u.active?'<span class="tag">Hoạt động</span>':'<span class="tag off">Đã khoá</span>')+'</td><td>'+devCell(u)+'</td><td>'+E(GNAuth.t(u.last)||'—')+'</td><td class="act">'+actBtns(u)+'</td></tr>'}).join(''):'<tr><td colspan="7">Chưa có học sinh.</td></tr>';
 }
+function classTags(u){return (u.classes||[]).map(function(c){var r=(u.ranks||{})[c];return E(c)+(r?' <span class="tag" title="'+E((u.perms||[]).map(function(k){return label(SP,k)}).join(', ')||'Chưa có quyền nào')+'">'+RANK[r]+'</span>':'')}).join(', ')}
 function devCell(u){return u.online?'<span class="tag" style="background:#e6f7ee;border-color:#1b9e5a;color:#1b9e5a">● Đang đăng nhập</span>':'<span class="tag">—</span>'}
-function actBtns(u){return (u.role==='teacher'?'<button class="btn sm sec" data-a="tcls" data-u="'+E(u.username)+'">Lớp phụ trách</button>':'')+'<button class="btn sm sec" data-a="edit" data-u="'+E(u.username)+'">Sửa</button><button class="btn sm sec" data-a="reset" data-u="'+E(u.username)+'">Đặt lại MK</button><button class="btn sm sec" data-a="kick" data-u="'+E(u.username)+'"'+(u.online?'':' disabled')+'>Đăng xuất thiết bị</button><button class="btn sm sec" data-a="tog" data-u="'+E(u.username)+'">'+(u.active?'Khoá':'Mở khoá')+'</button>'}
+function actBtns(u){return (u.role==='teacher'?'<button class="btn sm sec" data-a="tcls" data-u="'+E(u.username)+'">Lớp phụ trách</button><button class="btn sm sec" data-a="tperm" data-u="'+E(u.username)+'">Quyền</button><button class="btn sm sec" data-a="tfull" data-u="'+E(u.username)+'">'+((u.perms||[]).indexOf('full')>=0?'Thu hồi toàn quyền':'⭐ Cấp toàn quyền')+'</button>':'')+(u.role==='student'?'<button class="btn sm sec" data-a="rank" data-u="'+E(u.username)+'">Chức vụ</button>':'')+'<button class="btn sm sec" data-a="edit" data-u="'+E(u.username)+'">Sửa</button><button class="btn sm sec" data-a="reset" data-u="'+E(u.username)+'">Đặt lại MK</button><button class="btn sm sec" data-a="kick" data-u="'+E(u.username)+'"'+(u.online?'':' disabled')+'>Đăng xuất thiết bị</button><button class="btn sm sec" data-a="tog" data-u="'+E(u.username)+'">'+(u.active?'Khoá':'Mở khoá')+'</button>'}
 function userForm(role,u){
   var isS=role==='student',isNew=!u;
   openM('<h3>'+(isNew?'Thêm ':'Sửa ')+(isS?'học sinh':'giáo viên')+'</h3><form id="uf"><label>Họ và tên<input id="uname" value="'+E(u?u.name:'')+'" required></label>'+
@@ -137,6 +143,10 @@ function userAction(list,renderer,reload){
   return function(e){var b=e.target.closest('button[data-a]');if(!b)return;
     var u=list().filter(function(x){return x.username===b.dataset.u})[0];if(!u)return;
     if(b.dataset.a==='tcls')teacherClassesForm(u);
+    else if(b.dataset.a==='tperm')teacherPermForm(u);
+    else if(b.dataset.a==='tfull'){var on=(u.perms||[]).indexOf('full')<0;if(!confirm(on?'Cấp TOÀN QUYỀN cho '+u.name+'? Giáo viên này sẽ làm được mọi việc như quản trị viên (trừ tạo/sửa tài khoản admin).':'Thu hồi toàn quyền của '+u.name+'? (Giáo viên trở về quyền mặc định)'))return;
+      GNAuth.api('adm_teacher_perms',{username:u.username,perms:on?['full']:[]}).then(loadTeachers).then(renderTeachers).then(function(){msg(on?'Đã cấp toàn quyền cho '+u.name+'.':'Đã thu hồi toàn quyền của '+u.name+'.',1)}).catch(fail)}
+    else if(b.dataset.a==='rank')rankForm(u);
     else if(b.dataset.a==='edit')userForm(u.role,u);
     else if(b.dataset.a==='reset'){if(!confirm('Đặt lại mật khẩu cho '+u.name+'?'))return;
       GNAuth.api('adm_user_reset',{username:u.username}).then(function(j){credsModal('Mật khẩu mới',[{username:u.username,name:u.name,cls:u.cls,password:j.password}])}).catch(fail)}
@@ -168,9 +178,35 @@ function teacherClassesForm(u){
     GNAuth.api('adm_teacher_classes',{username:u.username,classes:cl}).then(function(){closeM();return loadClasses()}).then(function(){return loadTeachers()}).then(function(){renderTeachers();renderClasses();fillClassSelects();msg('Đã lưu lớp phụ trách của '+u.name+' ('+cl.length+' lớp).',1)}).catch(function(err){$('tce').textContent=err.server?err.message:'Không kết nối được máy chủ.'});
   };
 }
+function permBoxes(list,cur){return list.map(function(x){return '<label style="display:block;margin:0 0 8px;font-weight:400;cursor:pointer;border:1px solid var(--line);border-radius:10px;padding:8px 10px"><input type="checkbox" style="display:inline;width:auto;margin-right:8px" value="'+E(x[0])+'"'+(cur.indexOf(x[0])>=0?' checked':'')+'><b>'+E(x[1])+'</b><br><small class="mut">'+E(x[2])+'</small></label>'}).join('')}
+function ticked(box){return [].map.call(box.querySelectorAll('input:checked'),function(i){return i.value})}
+function teacherPermForm(u){
+  openM('<h3>Quyền cấp thêm cho '+E(u.name)+'</h3><p class="mut">Mặc định giáo viên chỉ xem kết quả, góp ý và quản lý học sinh trong các lớp mình phụ trách. Tích để cấp thêm:</p><div id="tpl">'+permBoxes(TP,u.perms||[])+'</div>'+
+   '<div class="err" id="tpe"></div><div class="row"><button type="button" class="btn sec" id="tpx">Huỷ</button><button class="btn" id="tps">Lưu quyền</button></div>');
+  $('tpx').onclick=closeM;
+  $('tpl').onchange=function(e){var i=e.target,all=[].slice.call($('tpl').querySelectorAll('input'));
+    if(i.value==='full'){all.forEach(function(x){x.checked=i.checked})}else if(!i.checked){all[0].checked=false}else if(all.slice(1).every(function(x){return x.checked}))all[0].checked=true};
+  $('tps').onclick=function(){var l=ticked($('tpl'));
+    GNAuth.api('adm_teacher_perms',{username:u.username,perms:l}).then(function(){closeM();return loadTeachers()}).then(function(){renderTeachers();msg('Đã lưu quyền của '+u.name+'.',1)}).catch(function(err){$('tpe').textContent=err.server?err.message:'Không kết nối được máy chủ.'})};
+}
+function rankForm(u){
+  var cls=u.classes||[],own=function(c){return isAdmin||P('anystudent')||S.classes.some(function(k){return k.id===c&&hasT(k,me.username)})};
+  openM('<h3>Chức vụ của '+E(u.name)+'</h3><p class="mut">Trưởng nhóm / phó nhóm được đặt riêng cho từng lớp. Chọn chức vụ rồi tích các quyền cấp thêm.</p>'+
+   cls.map(function(c){var r=(u.ranks||{})[c]||'';return '<label style="display:flex;gap:8px;align-items:center;font-weight:400"><span style="min-width:90px"><b>'+E(c)+'</b></span><select data-rc="'+E(c)+'"'+(own(c)?'':' disabled')+'><option value="">Học sinh thường</option><option value="T"'+(r==='T'?' selected':'')+'>Trưởng nhóm</option><option value="P"'+(r==='P'?' selected':'')+'>Phó nhóm</option></select></label>'}).join('')+
+   '<div id="rpl" style="margin-top:10px">'+permBoxes(SP,u.perms||[])+'</div><p class="mut">Quyền áp dụng cho các lớp mà học sinh này giữ chức vụ. Chọn chức vụ lần đầu sẽ tự tích quyền gợi ý (trưởng nhóm: cả 4; phó nhóm: xem tiến độ + nhắc nộp bài).</p>'+
+   '<div class="err" id="rpe"></div><div class="row"><button type="button" class="btn sec" id="rpx">Huỷ</button><button class="btn" id="rps">Lưu</button></div>');
+  $('rpx').onclick=closeM;
+  var sels=function(){return [].slice.call($('mbox').querySelectorAll('select[data-rc]'))};
+  sels().forEach(function(sl){sl.onchange=function(){
+    if(ticked($('rpl')).length)return;
+    var best=sels().some(function(x){return x.value==='T'})?'T':(sels().some(function(x){return x.value==='P'})?'P':'');
+    (RDEF[best]||[]).forEach(function(k){var i=$('rpl').querySelector('input[value="'+k+'"]');if(i)i.checked=true})}});
+  $('rps').onclick=function(){var ranks={};sels().forEach(function(sl){if(sl.value)ranks[sl.dataset.rc]=sl.value});
+    GNAuth.api('adm_student_ranks',{username:u.username,ranks:ranks,perms:ticked($('rpl'))}).then(function(){closeM();return loadStudents()}).then(function(){renderStudents();msg('Đã lưu chức vụ của '+u.name+'.',1)}).catch(function(err){$('rpe').textContent=err.server?err.message:'Không kết nối được máy chủ.'})};
+}
 function renderTeachers(){
   $('tbT').innerHTML=S.teachers.length?S.teachers.map(function(u){var cl=S.classes.filter(function(c){return hasT(c,u.username)}).map(function(c){return c.id}).join(', ');
-   return '<tr><td class="cred">'+E(u.username)+'</td><td>'+E(u.name)+'</td><td>'+E(cl||'—')+'</td><td>'+(u.active?'<span class="tag">Hoạt động</span>':'<span class="tag off">Đã khoá</span>')+'</td><td>'+devCell(u)+'</td><td>'+E(GNAuth.t(u.last)||'—')+'</td><td class="act">'+actBtns(u)+'</td></tr>'}).join(''):'<tr><td colspan="7">Chưa có giáo viên.</td></tr>';
+   return '<tr><td class="cred">'+E(u.username)+'</td><td>'+E(u.name)+'</td><td>'+E(cl||'—')+'</td><td>'+((u.perms||[]).length?(u.perms||[]).map(function(k){return '<span class="tag">'+E(label(TP,k))+'</span>'}).join(' '):'<span class="mut">mặc định</span>')+'</td><td>'+(u.active?'<span class="tag">Hoạt động</span>':'<span class="tag off">Đã khoá</span>')+'</td><td>'+devCell(u)+'</td><td>'+E(GNAuth.t(u.last)||'—')+'</td><td class="act">'+actBtns(u)+'</td></tr>'}).join(''):'<tr><td colspan="8">Chưa có giáo viên.</td></tr>';
 }
 $('tbT').onclick=userAction(function(){return S.teachers},renderTeachers,loadTeachers);
 $('addT').onclick=function(){userForm('teacher')};
@@ -182,7 +218,7 @@ function fillClassFilters(){
   var gl=Object.keys(gs).sort(function(a,b){return gradeKey(a)-gradeKey(b)||a.localeCompare(b)});
   $('cfg').innerHTML='<option value="">Tất cả khối</option>'+gl.map(function(x){return '<option value="'+E(x)+'"'+(x===g?' selected':'')+'>'+(x===''?'(chưa ghi khối)':/^\d+$/.test(x)?'Khối '+E(x):E(x))+'</option>'}).join('');
   $('cft').innerHTML='<option value="">Tất cả giáo viên</option><option value="__none"'+(t==='__none'?' selected':'')+'>— chưa có giáo viên —</option>'+S.teachers.map(function(u){return '<option value="'+E(u.username)+'"'+(u.username===t?' selected':'')+'>'+E(u.name)+'</option>'}).join('');
-  $('cft').hidden=!isAdmin;
+  $('cft').hidden=!(P('full')||P('classes')||P('viewall'));
 }
 function renderClasses(){
   var cnt={};S.students.forEach(function(s){(s.classes||[]).forEach(function(c){cnt[c]=(cnt[c]||0)+1})});
@@ -193,8 +229,8 @@ function renderClasses(){
     if(fs==='noasg'&&c.sets)return false;if(fs==='nostu'&&cnt[c.id])return false;if(fs==='noteacher'&&c.teacher)return false;
     if(fq&&(c.id+' '+c.name).toLowerCase().indexOf(fq)<0)return false;return true});
   $('cfc').textContent=list.length+'/'+S.classes.length+' lớp';
-  $('tbC').innerHTML=list.length?list.map(function(c){return '<tr><td><b>'+E(c.id)+'</b></td><td>'+E(c.name)+'</td><td>'+E(c.grade)+'</td><td>'+E(teacherNames(c.teacher))+'</td><td>'+(cnt[c.id]||0)+'</td><td>'+(c.sets?c.sets+' bộ':'<span class="tag off">chưa giao</span>')+'</td><td class="act"><button class="btn sm sec" data-a="asg" data-c="'+E(c.id)+'">Giao bài</button>'+
-   (isAdmin?'<button class="btn sm sec" data-a="edit" data-c="'+E(c.id)+'">Sửa</button><button class="btn sm sec" data-a="del" data-c="'+E(c.id)+'">Xoá</button>':'')+'</td></tr>'}).join(''):'<tr><td colspan="7">'+(S.classes.length?'Không có lớp nào khớp bộ lọc.':'Chưa có lớp.')+'</td></tr>';
+  $('tbC').innerHTML=list.length?list.map(function(c){return '<tr><td><b>'+E(c.id)+'</b></td><td>'+E(c.name)+'</td><td>'+E(c.grade)+'</td><td>'+E(teacherNames(c.teacher))+'</td><td>'+(cnt[c.id]||0)+'</td><td>'+(c.sets?c.sets+' bộ':'<span class="tag off">chưa giao</span>')+'</td><td class="act">'+(P('assign')&&(isAdmin||hasT(c,me.username))?'<button class="btn sm sec" data-a="asg" data-c="'+E(c.id)+'">Giao bài</button>':'')+
+   (P('classes')?'<button class="btn sm sec" data-a="edit" data-c="'+E(c.id)+'">Sửa</button><button class="btn sm sec" data-a="del" data-c="'+E(c.id)+'">Xoá</button>':'')+'</td></tr>'}).join(''):'<tr><td colspan="7">'+(S.classes.length?'Không có lớp nào khớp bộ lọc.':'Chưa có lớp.')+'</td></tr>';
 }
 ['cfg','cft','cfs'].forEach(function(i){$(i).onchange=renderClasses});$('cfq').oninput=renderClasses;
 function classForm(c){
@@ -207,7 +243,7 @@ function classForm(c){
     GNAuth.api('adm_class_save',{cls:{id:$('cid').value.trim(),name:$('cnm').value.trim(),grade:$('cgr').value,teacher:[].map.call($('ctc').querySelectorAll('input:checked'),function(i){return i.value}).join(',')}}).then(function(){closeM();return loadClasses()}).then(function(){renderClasses();fillClassSelects();msg('Đã lưu lớp.',1)}).catch(function(err){$('ce').textContent=err.server?err.message:'Không kết nối được máy chủ.'});
   };
 }
-$('addC').onclick=function(){classForm()};
+$('addC').onclick=function(){classForm()};$('addC').hidden=!P('classes');
 $('tbC').onclick=function(e){var b=e.target.closest('button[data-c]');if(!b)return;var c=S.classes.filter(function(x){return x.id===b.dataset.c})[0];
   if(b.dataset.a==='asg'){show('assign');$('acls').value=c.id;loadAssign();return}
   if(b.dataset.a==='edit')classForm(c);
@@ -265,12 +301,13 @@ function loadResults(){
   $('rinfo').textContent='Đang tải…';
   GNAuth.api('adm_results',{cls:$('rcls').value,set_id:$('rset').value.trim()}).then(function(j){
     S.rows=j.rows;
-    $('tbR').innerHTML=j.rows.length?j.rows.map(function(r){var w=(+r.tab||0)+(+r.blur||0)+(+r.fs||0);
-     return '<tr><td>'+E(GNAuth.t(r.time))+'</td><td>'+E(r.name)+' <small class="mut">'+E(r.username)+'</small></td><td>'+E(r.cls)+'</td><td>'+E(r.set_id)+'</td><td>'+E(r.page_id)+'</td><td>'+E(r.type)+'</td><td>'+E(r.score)+'/'+E(r.total)+'</td><td><b>'+E(r.score10)+'</b></td><td>'+Math.round((+r.time_spent||0)/60)+'</td><td>'+(w?'<span class="tag off">'+w+' lần</span>':'')+'</td></tr>'}).join(''):'<tr><td colspan="10">Chưa có kết quả.</td></tr>';
+    $('tbR').innerHTML=j.rows.length?j.rows.map(function(r,i){var w=(+r.tab||0)+(+r.blur||0)+(+r.fs||0),who=r.username&&r.username!=='admin'&&r.name!=='Quản trị viên'?'<a href="student.html?u='+encodeURIComponent(r.username)+'" title="Mở trang tổng kết học sinh">'+E(r.name)+'</a>':E(r.name);
+     return '<tr><td>'+E(GNAuth.t(r.time))+'</td><td>'+who+' <small class="mut">'+E(r.username)+'</small></td><td>'+E(r.cls)+'</td><td>'+E(r.set_id)+'</td><td>'+E(r.page_id)+'</td><td>'+E(r.type)+'</td><td>'+E(r.score)+'/'+E(r.total)+'</td><td><b>'+E(r.score10)+'</b></td><td>'+Math.round((+r.time_spent||0)/60)+'</td><td>'+((w||r.hasEv)?'<button class="btn sm sec" data-i="'+i+'" style="color:#e11d48;border-color:#e11d48" title="Xem chi tiết vi phạm">⚠ '+(w||'xem')+' lần</button>':'')+'</td><td>'+(r.row?'<button class="btn sm sec" data-i="'+i+'" data-v="1">Xem bài</button>':'')+'</td></tr>'}).join(''):'<tr><td colspan="11">Chưa có kết quả.</td></tr>';
     $('rinfo').textContent=j.rows.length+' kết quả (mới nhất trước, tối đa 3000).';
   }).catch(function(e){$('rinfo').textContent='';fail(e)});
 }
 $('rgo').onclick=loadResults;
+$('tbR').onclick=function(e){var b=e.target.closest('button[data-i]');if(b)GNReview.open(S.rows[+b.dataset.i])};
 $('rcsv').onclick=function(){dl('ket-qua.csv',csv([['Thời gian','Học sinh','Tài khoản','Lớp','Bộ bài','Trang','Loại','Điểm','Tổng','Thang 10','Giây','Chuyển tab','Mất focus','Thoát toàn màn hình']].concat(S.rows.map(function(r){return [GNAuth.t(r.time),r.name,r.username,r.cls,r.set_id,r.page_id,r.type,r.score,r.total,r.score10,r.time_spent,r.tab,r.blur,r.fs]}))))};
 
 /* ---------- góp ý ---------- */
@@ -319,7 +356,7 @@ $('cf').onsubmit=function(e){e.preventDefault();$('e2').textContent='';
   GNAuth.api('auth_change_password',{old_password:$('op').value,new_password:$('np').value}).then(function(){$('cf').reset();msg('Đã đổi mật khẩu.',1)}).catch(function(err){$('e2').textContent=err.server?err.message:'Không kết nối được máy chủ.'})};
 
 /* ---------- tab ---------- */
-var TABS=[['students','Học sinh'],['teachers','Giáo viên',1],['classes','Lớp'],['assign','Giao bài'],['results','Kết quả'],['progress','Tiến độ'],['fb','Góp ý'],['me','Tài khoản của tôi']].filter(function(t){return !t[2]||isAdmin});
+var TABS=[['students','Học sinh'],['teachers','Giáo viên',1],['classes','Lớp'],['assign','Giao bài'],['results','Kết quả'],['progress','Tiến độ'],['fb','Góp ý'],['me','Tài khoản của tôi']].filter(function(t){return (!t[2]||P('full'))&&(t[0]!=='assign'||P('assign'))});
 $('tabs').innerHTML=TABS.map(function(t){return '<button data-t="'+t[0]+'">'+t[1]+(t[0]==='fb'?'<b class="gn-n" id="fbn"></b>':'')+'</button>'}).join('');
 function show(t){
   TABS.forEach(function(x){$('p-'+x[0]).hidden=x[0]!==t});

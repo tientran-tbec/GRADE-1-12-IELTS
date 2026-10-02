@@ -45,7 +45,7 @@ try:
         pg.click('#submitBtn'); pg.click('.btn-confirm'); pg.wait_for_selector('button[onclick="closeResult()"]', state='visible'); time.sleep(1)
         rows = dump().get('Lop1-12_KetQua', [])
         last = rows[-1] if rows else []
-        chk('Full Test: kết quả ghi đúng bộ/tài khoản', len(rows) >= 2 and last[4] == 'ielts-rd-test01' and last[5] == 'Test1_Reading' and last[-1] == un and last[2] == 'Lê Thị An' and last[3] == 'IELTS1' and last[8] == 40)
+        chk('Full Test: kết quả ghi đúng bộ/tài khoản', len(rows) >= 2 and last[4] == 'ielts-rd-test01' and last[5] == 'Test1_Reading' and last[17] == un and last[2] == 'Lê Thị An' and last[3] == 'IELTS1' and last[8] == 40)
         chk('Full Test: ghi chế độ ielts-reading + Band', last[6] == 'ielts-reading' and 'Band' in str(last[16]))
         # bài chưa giao
         pg.goto(U('WebBaiTap/IELTS/Reading/FullTest/Test2_Reading.html')); pg.wait_for_url('**/index.html?denied=1*'); chk('Test 2 chưa giao → bị đẩy về index', True)
@@ -55,7 +55,7 @@ try:
         pg.click('#nameOverlay button'); time.sleep(0.6)
         pg.click('#submitBtn'); pg.click('.btn-confirm'); pg.wait_for_selector('button[onclick="closeResult()"]', state='visible'); time.sleep(1.2)
         d = dump(); rows = d.get('Lop1-12_KetQua', []); last = rows[-1]
-        chk('Completion: kết quả ghi đúng bộ/trang', last[4] == 'ielts-rd-completion' and last[5] == 'Test1_Passage1_Completion' and last[-1] == un)
+        chk('Completion: kết quả ghi đúng bộ/trang', last[4] == 'ielts-rd-completion' and last[5] == 'Test1_Passage1_Completion' and last[17] == un)
         ev = [x for x in d.get('Lop1-12_NhatKy', []) if str(x[1]).startswith('IELTS')]
         chk('Completion: nhật ký sự kiện (enter/submit) theo tài khoản', any('enter' in x[1] for x in ev) and any('submit' in x[1] for x in ev) and all(x[-1] == un for x in ev))
         chk('HS: không lỗi JS', not errs)

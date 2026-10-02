@@ -87,7 +87,7 @@ try:
         pg.click('#submit'); pg.wait_for_selector('#resultModal', state='visible'); time.sleep(1)
         dump = json.loads(urllib.request.urlopen('http://127.0.0.1:%d/dump' % PORT).read())
         kq = dump.get('Lop1-12_KetQua', [])
-        chk('server có dòng kết quả với tài khoản + tên + lớp từ token', len(kq) >= 2 and kq[-1][2] == 'Trần Văn An' and kq[-1][3] == '11A1' and kq[-1][-1] == 'antv')
+        chk('server có dòng kết quả với tài khoản + tên + lớp từ token', len(kq) >= 2 and kq[-1][2] == 'Trần Văn An' and kq[-1][3] == '11A1' and kq[-1][17] == 'antv')
         # 6) Điểm của tôi
         pg.goto(U('me.html')); pg.wait_for_selector('#tb tr td'); time.sleep(0.5)
         chk('Điểm của tôi có kết quả', 'lop11-mt1-test01' in pg.inner_text('#tb'))
