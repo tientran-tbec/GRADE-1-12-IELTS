@@ -425,6 +425,18 @@ main{padding:22px 24px 60px;max-width:1100px;width:100%}
 .tile.t-test{background:rgba(232,89,12,.08);border-color:rgba(232,89,12,.35)}.tile.t-test b{color:var(--test)}
 .empty{text-align:center;padding:50px 10px;color:var(--mut)}
 .foot{text-align:center;color:var(--mut);font-size:13px;margin-top:30px}
+.tree{display:flex;flex-direction:column;gap:2px}
+.tb{display:flex;align-items:center;gap:6px;width:100%;border:0;background:none;color:var(--ink);font-size:15px;text-align:left;cursor:pointer;border-radius:10px;padding:9px 10px}
+.tb:hover{background:var(--bg)}.tb[disabled]{opacity:.4;cursor:not-allowed}.tb small{margin-left:auto;opacity:.7;font-size:12px}
+.tb i{font-style:normal;display:inline-block;width:14px;font-size:11px;transition:.15s;opacity:.7}
+.tg.open>.tb i,.ts.open>.tb i{transform:rotate(90deg)}
+.tb.l1{font-weight:600}.tb.cur{color:var(--pri)}
+.tk{margin-left:12px;padding-left:8px;border-left:2px solid var(--line);display:flex;flex-direction:column;gap:2px}
+.tb.l2{font-size:14.5px}.tb.l3{font-size:14px;padding:7px 10px}
+.tb.on{background:linear-gradient(90deg,var(--pri),var(--pri2));color:#fff;font-weight:600}
+.sb details{margin-top:16px}.sb summary{cursor:pointer;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);font-weight:600}
+.hint{text-align:center;padding:70px 10px;color:var(--mut);font-size:16px}.hint b{display:block;font-size:34px;margin-bottom:6px}
+body.nosb .sb,body.nosb .menu{display:none}body.nosb .layout{grid-template-columns:1fr}
 .scrim{display:none}
 @media(max-width:820px){
  .menu{display:inline-block}.layout{grid-template-columns:1fr}
@@ -437,58 +449,107 @@ main{padding:22px 24px 60px;max-width:1100px;width:100%}
 INDEX_JS = """
 (function(){
 var LBL=@@LBL@@;
-var st={g:'',u:'',k:'',m:'',q:''};
-try{var sv=JSON.parse(localStorage.getItem('gn_idx')||'{}');for(var k in st)if(sv[k]!==undefined)st[k]=sv[k]}catch(e){}
+var st={g:'',s:'',u:'',l:'',k:'',m:'',q:''};
+try{var sv=JSON.parse(localStorage.getItem('gn_idx2')||'{}');for(var k in st)if(sv[k]!==undefined)st[k]=sv[k]}catch(e){}
 var cards=[].slice.call(document.querySelectorAll('.setcard'));
-function save(){try{localStorage.setItem('gn_idx',JSON.stringify(st))}catch(e){}}
+cards.forEach(function(c){if(!c.dataset.s)c.dataset.s=(c.dataset.g==='IELTS'?c.dataset.u:'Tiếng Anh')});
+function save(){try{localStorage.setItem('gn_idx2',JSON.stringify(st))}catch(e){}}
 function norm(s){return (s||'').toLowerCase()}
+function $(i){return document.getElementById(i)}
+function all(sel,root){return [].slice.call((root||document).querySelectorAll(sel))}
 function dueMark(el,sid,stu){
   var d=GNAuth.due(sid),ex=stu&&GNAuth.overdue(sid),m=el.querySelector('.duem');
   if(!d){if(m)m.remove();el.classList.remove('expired');return}
   if(!m){m=document.createElement('span');m.className='duem';(el.querySelector('small')||el.querySelector('.settitle')||el).appendChild(m)}
   var p=d.split('-');m.textContent=(ex?' · Hết hạn ':' · Hạn ')+p[2]+'/'+p[1];el.classList.toggle('expired',!!ex);
 }
+var STU=false,VIS=[];
+function has(g,s,u,l){return VIS.some(function(c){return c.dataset.g===g&&(!s||c.dataset.s===s)&&(!u||c.dataset.u===u)&&(!l||c.dataset.k===l)})}
 function lockAll(){
-  var u=window.GNAuth&&GNAuth.user();var stu=u&&u.role==='student';
+  var u=window.GNAuth&&GNAuth.user();STU=!!(u&&u.role==='student');
   cards.forEach(function(c){
-    var tl=[].slice.call(c.querySelectorAll('.tile[data-sid]'));
-    if(tl.length){var any=false;tl.forEach(function(t){var lk=stu&&!GNAuth.assigned(t.dataset.sid);t.classList.toggle('locked',lk);if(!lk){any=true;dueMark(t,t.dataset.sid,stu)}});c.classList.toggle('locked',!any)}
-    else{var lk2=!!(stu&&c.dataset.sid&&!GNAuth.assigned(c.dataset.sid));c.classList.toggle('locked',lk2);if(!lk2&&c.dataset.sid)dueMark(c,c.dataset.sid,stu)}
+    var tl=all('.tile[data-sid]',c);
+    if(tl.length){var any=false;tl.forEach(function(t){var lk=STU&&!GNAuth.assigned(t.dataset.sid);t.classList.toggle('locked',lk);if(!lk){any=true;dueMark(t,t.dataset.sid,STU)}});c.classList.toggle('locked',!any)}
+    else{var lk2=!!(STU&&c.dataset.sid&&!GNAuth.assigned(c.dataset.sid));c.classList.toggle('locked',lk2);if(!lk2&&c.dataset.sid)dueMark(c,c.dataset.sid,STU)}
   });
-  var vis=cards.filter(function(c){return !c.classList.contains('locked')});
-  [].forEach.call(document.querySelectorAll('.f[data-f=g][data-v]'),function(b){if(!b.dataset.v)return;var n=vis.filter(function(c){return c.dataset.g===b.dataset.v}).length;var sm=b.querySelector('small');if(sm)sm.textContent=n?n+' bộ':'chưa giao';if(stu)b.hidden=!n});
-  [].forEach.call(document.querySelectorAll('.f[data-f=u][data-v]'),function(b){if(!b.dataset.v)return;if(stu)b.hidden=!vis.some(function(c){return c.dataset.u===b.dataset.v})});
-  var nb=document.getElementById('nobai');if(nb)nb.hidden=!(stu&&!vis.length);
+  VIS=cards.filter(function(c){return !c.classList.contains('locked')});
+  /* cây thư mục: học sinh chỉ thấy lớp / môn / bài đã được giao; giáo viên & admin thấy đủ */
+  all('.tg').forEach(function(el){
+    var g=el.dataset.g,n=VIS.filter(function(c){return c.dataset.g===g&&c.dataset.k!=='soon'}).length,b=el.firstElementChild,sm=b.querySelector('small');
+    if(el.dataset.n!=='0'&&sm)sm.textContent=n?n+' bộ':'chưa giao';
+    el.hidden=STU&&!n;
+  });
+  all('.ts').forEach(function(el){
+    var g=el.dataset.g,s=el.dataset.s,n=VIS.filter(function(c){return c.dataset.g===g&&c.dataset.s===s&&c.dataset.k!=='soon'}).length;
+    el.hidden=STU&&!n;
+    var b=el.firstElementChild,sm=b.querySelector('small');if(sm&&el.dataset.n!=='0')sm.textContent=n?'':'chưa giao';
+  });
+  all('.tb.l3').forEach(function(b){
+    b.hidden=STU&&!(b.dataset.lv==='l'?has(b.dataset.g,b.dataset.s,'',b.dataset.l):has(b.dataset.g,b.dataset.s,b.dataset.u));
+  });
+  var none=STU&&!VIS.length;
+  document.body.classList.toggle('nosb',none);
+  var nb=$('nobai');if(nb)nb.hidden=!none;
+}
+function pickAuto(){
+  /* chỉ có 1 lớp / 1 môn khả dụng thì tự mở sẵn cho gọn */
+  if(!st.g){var gs=all('.tg').filter(function(e){return !e.hidden&&e.dataset.n!=='0'});if(gs.length===1)st.g=gs[0].dataset.g}
+  if(st.g&&!st.s){var ss=all('.ts').filter(function(e){return e.dataset.g===st.g&&!e.hidden&&e.dataset.n!=='0'});if(ss.length===1)st.s=ss[0].dataset.s}
 }
 function apply(){
   lockAll();
+  var tg=st.g&&document.querySelector('.tg[data-g="'+st.g+'"]');
+  if(st.g&&(!tg||tg.hidden||tg.dataset.n==='0')){st.g=st.s=st.u=st.l='';}
+  var ts=st.s&&document.querySelector('.ts[data-g="'+st.g+'"][data-s="'+st.s+'"]');
+  if(st.s&&(!ts||ts.hidden||ts.dataset.n==='0')){st.s=st.u=st.l=''}
+  pickAuto();
+  var leaf=!!(st.g&&st.s&&(st.u||st.l));
+  var q=norm(st.q);var showAll=!!q||leaf;
   var shown=0;
   cards.forEach(function(c){
-    if(c.classList.contains('locked')){c.hidden=true;return}
-    var ok=(!st.g||c.dataset.g===st.g)&&(!st.u||c.dataset.u===st.u)&&(!st.k||c.dataset.k===st.k)&&(!st.q||norm(c.textContent).indexOf(norm(st.q))>=0);
+    if(c.classList.contains('locked')||!showAll){c.hidden=true;return}
+    var ok=(!st.g||c.dataset.g===st.g)&&(!st.s||c.dataset.s===st.s)&&(!st.u||c.dataset.u===st.u)&&(!st.l||c.dataset.k===st.l)&&(!st.k||c.dataset.k===st.k)&&(!q||norm(c.textContent).indexOf(q)>=0);
     c.hidden=!ok;
-    [].forEach.call(c.querySelectorAll('.tile'),function(t){
+    all('.tile',c).forEach(function(t){
       var tm=t.dataset.m||'';t.hidden=!!(t.classList.contains('locked')||(st.m&&tm!==st.m));
     });
     if(ok&&st.m&&!c.querySelector('.tile:not([hidden])'))c.hidden=true;
     if(!c.hidden)shown++;
   });
-  document.getElementById('empty').hidden=shown>0||(document.getElementById('nobai')&&!document.getElementById('nobai').hidden);
-  document.getElementById('cnt').textContent=shown+' bộ bài';
-  [].forEach.call(document.querySelectorAll('.f[data-f]'),function(b){b.classList.toggle('on',(st[b.dataset.f]||'')===b.dataset.v)});
-  var t=[];if(st.g)t.push(st.g==='IELTS'?'IELTS':'Lớp '+st.g);if(st.u)t.push((LBL[st.u]||(/^\\d+$/.test(st.u)?'Unit '+st.u:/^Review\\d$/.test(st.u)?'Review '+st.u.slice(6):st.u)));
-  document.getElementById('ttl').textContent=t.length?t.join(' · '):'Tất cả bài học';
+  var nbv=$('nobai')&&!$('nobai').hidden;
+  $('empty').hidden=!showAll||shown>0||nbv;
+  $('hint').hidden=showAll||nbv;
+  $('cnt').textContent=showAll?shown+' bộ bài':'';
+  /* trạng thái mở / chọn trong cây */
+  all('.tg').forEach(function(el){var o=el.dataset.g===st.g;el.classList.toggle('open',o);el.lastElementChild.hidden=!o||el.dataset.n==='0';el.firstElementChild.classList.toggle('cur',o)});
+  all('.ts').forEach(function(el){var o=el.dataset.g===st.g&&el.dataset.s===st.s;el.classList.toggle('open',o);el.lastElementChild.hidden=!o||el.dataset.n==='0';el.firstElementChild.classList.toggle('cur',o)});
+  all('.tb.l3').forEach(function(b){var on=b.dataset.g===st.g&&b.dataset.s===st.s&&(b.dataset.lv==='l'?b.dataset.l===st.l:(b.dataset.u===st.u&&!st.l));b.classList.toggle('on',on)});
+  all('.f[data-f]').forEach(function(b){b.classList.toggle('on',(st[b.dataset.f]||'')===b.dataset.v)});
+  var t=[];if(st.g)t.push(st.g==='IELTS'?'IELTS':'Lớp '+st.g);if(st.s&&st.g)t.push(st.s);
+  if(st.u)t.push(LBL[st.u]||(/^[0-9]+$/.test(st.u)?'Unit '+st.u:/^Review[0-9]$/.test(st.u)?'Review '+st.u.slice(6):st.u));
+  if(st.l){var lb=document.querySelector('.tb.l3[data-l="'+st.l+'"]');if(lb)t.push(lb.firstChild.textContent.trim())}
+  $('ttl').textContent=leaf?t.join(' · '):(q?'Kết quả tìm kiếm':'Chọn bài học');
   save();
 }
 document.addEventListener('click',function(e){
   var b=e.target.closest&&e.target.closest('.f[data-f]');
-  if(b&&!b.disabled){st[b.dataset.f]=b.dataset.v;if(b.dataset.f==='g'){st.u=''}apply();if(window.innerWidth<=820)document.body.classList.remove('open');return}
-  if(e.target.id==='reset'){st={g:'',u:'',k:'',m:'',q:''};document.getElementById('q').value='';apply()}
+  if(b&&!b.disabled){st[b.dataset.f]=b.dataset.v;apply();return}
+  var t=e.target.closest&&e.target.closest('.tb');
+  if(t&&!t.disabled){
+    var lv=t.dataset.lv;
+    if(lv==='g'){var same=st.g===t.dataset.g;st.g=same?'':t.dataset.g;st.s=st.u=st.l=st.k=''}
+    else if(lv==='s'){var same2=st.s===t.dataset.s&&st.g===t.dataset.g;st.g=t.dataset.g;st.s=same2?'':t.dataset.s;st.u=st.l=st.k=''}
+    else if(lv==='u'){st.g=t.dataset.g;st.s=t.dataset.s;st.u=t.dataset.u;st.l=''}
+    else if(lv==='l'){st.g=t.dataset.g;st.s=t.dataset.s;st.u='';st.l=t.dataset.l}
+    apply();
+    if((lv==='u'||lv==='l')&&window.innerWidth<=820)document.body.classList.remove('open');
+    return;
+  }
+  if(e.target.id==='reset'){st={g:'',s:'',u:'',l:'',k:'',m:'',q:''};$('q').value='';apply()}
   if(e.target.closest&&(e.target.closest('.menu')||e.target.classList.contains('scrim')))document.body.classList.toggle('open');
-  if(b&&window.innerWidth<=820)document.body.classList.remove('open');
 });
-document.getElementById('q').addEventListener('input',function(e){st.q=e.target.value;apply()});
-document.getElementById('q').value=st.q||'';
+$('q').addEventListener('input',function(e){st.q=e.target.value;apply()});
+$('q').value=st.q||'';
 window.gnApply=apply;
 apply();
 })();
@@ -513,6 +574,55 @@ def ulabel(u):
     return ('Review ' + m.group(1)) if m else 'Unit ' + u
 
 
+SUBJECTS = ['Tiếng Anh', 'Toán', 'Hóa', 'Lý', 'Sinh', 'Tin', 'Văn', 'Sử']
+GRADE_SUBJECTS = {'11': SUBJECTS}   # lớp nào có nhiều môn; lớp khác chỉ có Tiếng Anh
+SUBJECT_BY_SET = {}                 # mã bộ bài -> môn (không khai báo = Tiếng Anh). Thêm môn mới: khai báo ở đây
+IELTS_SKILLS = [('Reading', [('full', 'Full Test'), ('dang', 'Theo dạng bài')]), ('Listening', None), ('Writing', None), ('Speaking', None)]
+
+
+def subj(sid):
+    return SUBJECT_BY_SET.get(sid, 'Tiếng Anh')
+
+
+def build_tree(done):
+    def ukey(u):
+        return (0 if u.isdigit() else 1, int(u) if u.isdigit() else (UNIT_ORDER.index(u) if u in UNIT_ORDER else 99))
+    units = {}
+    for e, S, _ in done:
+        units.setdefault((e[3][3:], subj(S['id'])), set()).add(unum(e[4]))
+    o = ['<nav class="tree" id="tree">']
+    for g in range(1, 13):
+        gs = str(g)
+        n = sum(1 for e, S, _ in done if e[3][3:] == gs)
+        if not n:
+            o.append('<div class="tg" data-g="%s" data-n="0"><button class="tb l1" disabled>Lớp %d <small>sắp có</small></button><div class="tk" hidden></div></div>' % (gs, g))
+            continue
+        o.append('<div class="tg" data-g="%s"><button class="tb l1" data-lv="g" data-g="%s"><i>▸</i>Lớp %d <small>%d bộ</small></button><div class="tk" hidden>' % (gs, gs, g, n))
+        for sb in GRADE_SUBJECTS.get(gs, ['Tiếng Anh']):
+            us = sorted(units.get((gs, sb), []), key=ukey)
+            if not us:
+                o.append('<div class="ts" data-g="%s" data-s="%s" data-n="0"><button class="tb l2" disabled>%s <small>sắp có</small></button><div class="tk" hidden></div></div>' % (gs, sb, html.escape(sb)))
+                continue
+            o.append('<div class="ts" data-g="%s" data-s="%s"><button class="tb l2" data-lv="s" data-g="%s" data-s="%s"><i>▸</i>%s<small></small></button><div class="tk" hidden>' % (gs, sb, gs, sb, html.escape(sb)))
+            for u in us:
+                o.append('<button class="tb l3" data-lv="u" data-g="%s" data-s="%s" data-u="%s">%s</button>' % (gs, sb, u, ulabel(u)))
+            o.append('</div></div>')
+        o.append('</div></div>')
+    if IELTS['cards']:
+        o.append('<div class="tg" data-g="IELTS"><button class="tb l1" data-lv="g" data-g="IELTS"><i>▸</i>IELTS <small></small></button><div class="tk" hidden>')
+        for sk, leaves in IELTS_SKILLS:
+            if leaves:
+                o.append('<div class="ts" data-g="IELTS" data-s="%s"><button class="tb l2" data-lv="s" data-g="IELTS" data-s="%s"><i>▸</i>%s<small></small></button><div class="tk" hidden>' % (sk, sk, sk))
+                for l, lb in leaves:
+                    o.append('<button class="tb l3" data-lv="l" data-g="IELTS" data-s="%s" data-l="%s">%s</button>' % (sk, l, lb))
+                o.append('</div></div>')
+            else:
+                o.append('<div class="ts" data-g="IELTS" data-s="%s" data-n="0"><button class="tb l2" disabled>%s <small>sắp có</small></button><div class="tk" hidden></div></div>' % (sk, sk))
+        o.append('</div></div>')
+    o.append('</nav>')
+    return ''.join(o)
+
+
 def build_index(done):
     grades = sorted({e[3][3:] for e, _, _ in done}, key=int)
     units = sorted({(e[3][3:], unum(e[4])) for e, _, _ in done}, key=lambda x: (int(x[0]), 0 if x[1].isdigit() else 1, int(x[1]) if x[1].isdigit() else (UNIT_ORDER.index(x[1]) if x[1] in UNIT_ORDER else 99)))
@@ -523,29 +633,15 @@ def build_index(done):
          '<div class="top"><button class="menu" aria-label="Mở bộ lọc">☰ Bộ lọc</button><h1>GRADE 1-12-IELTS</h1><span id="chip"></span></div>',
          '<div class="layout"><aside class="sb">',
          '<h4>Tìm kiếm</h4><input id="q" type="search" placeholder="Tên unit, kỹ năng…">',
-         '<h4>Lớp</h4><div class="fl"><button class="f" data-f="g" data-v="">Tất cả lớp</button>']
-    for g in range(1, 13):
-        n = cnt(lambda e, g=g: e[3][3:] == str(g))
-        if n:
-            o.append('<button class="f" data-f="g" data-v="%d">Lớp %d <small>%d bộ</small></button>' % (g, g, n))
-        else:
-            o.append('<button class="f" disabled>Lớp %d <small>sắp có</small></button>' % g)
-    o.append('<button class="f" data-f="g" data-v="IELTS">IELTS <small>%d bộ</small></button>' % len(IELTS['catalog']))
-    o.append('</div><h4>Unit</h4><div class="fl"><button class="f" data-f="u" data-v="">Tất cả unit</button>')
-    for g, u in units:
-        o.append('<button class="f" data-f="u" data-v="%s">Lớp %s · %s</button>' % (u, g, ulabel(u)))
-    if IELTS['cards']:
-        o.append('<button class="f" data-f="u" data-v="Reading">IELTS · Reading</button>')
-        for sk in ('Listening', 'Writing', 'Speaking'):
-            o.append('<button class="f" disabled>IELTS · %s <small>sắp có</small></button>' % sk)
-    o.append('</div><h4>Loại bài tập</h4><div class="seg kinds"><button class="f" data-f="k" data-v="">Tất cả</button>'
+         '<h4>Lớp học</h4>', build_tree(done)]
+    o.append('<details><summary>Lọc thêm</summary><h4>Loại bài tập</h4><div class="seg kinds"><button class="f" data-f="k" data-v="">Tất cả</button>'
              '<button class="f" data-f="k" data-v="luyentap">Luyện tập</button><button class="f" data-f="k" data-v="botro">Bổ trợ</button><button class="f" data-f="k" data-v="chuyensau">Chuyên sâu</button><button class="f" data-f="k" data-v="4kn">4 kỹ năng</button>'
              '<button class="f" data-f="k" data-v="ontap">Ôn tập</button><button class="f" data-f="k" data-v="test">Đề kiểm tra</button>'
-             '<button class="f" data-f="k" data-v="full">IELTS Full Test</button><button class="f" data-f="k" data-v="dang">IELTS theo dạng</button></div>'
+             '</div>'
              '<h4>Hình thức</h4><div class="seg"><button class="f" data-f="m" data-v="">Tất cả</button>'
              '<button class="f" data-f="m" data-v="prac">Luyện tập</button><button class="f" data-f="m" data-v="test">Kiểm tra</button></div>'
-             '<button class="reset" id="reset">↺ Xoá bộ lọc</button></aside><div class="scrim"></div><main>'
-             '<div class="bar"><h2 id="ttl">Tất cả bài học</h2><span id="cnt"></span></div>')
+             '</details><button class="reset" id="reset">↺ Xoá lựa chọn</button></aside><div class="scrim"></div><main>'
+             '<div class="bar"><h2 id="ttl">Chọn bài học</h2><span id="cnt"></span></div><div class="hint" id="hint"><b>📂</b>Chọn <u>Lớp</u> → <u>Môn học</u> → <u>Bài</u> ở cột bên trái để xem nội dung</div>')
     icons = {'phat-am': '🔊', 'tu-vung': '🔤', 'tu-vung-ngu-phap': '🔤', 'ngu-phap': '🧩', 'nghe': '🎧', 'noi': '🗣️', 'doc': '📖', 'viet': '✍️', 'kiem-tra': '📝', 'phat-am': '🔊', 'loi-sai': '🔍', 'dien-tu': '🧩', 'doc-hieu': '📖', 'noi-giao-tiep': '🗣️'}
     tests = [x for x in done if x[0][5].startswith('test')]
     cards = []   # (vị trí, html) — đề kiểm tra của Unit nào xếp ngay sau Unit đó
@@ -555,8 +651,8 @@ def build_index(done):
         mark_o = len(o)
         g, u = gdir[3:], unum(udir)
         kind = 'test' if slug.startswith('test') else ('luyentap' if slug.startswith('luyentap') else slug)
-        o.append('<section class="card setcard" data-g="%s" data-u="%s" data-k="%s" data-sid="%s"><div class="settitle"><span class="chip">Lớp %s · %s</span><h3>%s</h3></div><div class="tiles">'
-                 % (g, u, kind, S['id'], g, ulabel(u), html.escape(S['title'])))
+        o.append('<section class="card setcard" data-g="%s" data-s="%s" data-u="%s" data-k="%s" data-sid="%s"><div class="settitle"><span class="chip">Lớp %s · %s</span><h3>%s</h3></div><div class="tiles">'
+                 % (g, subj(S['id']), u, kind, S['id'], g, ulabel(u), html.escape(S['title'])))
         if S.get('theory'):
             o.append('<a class="tile" data-m="prac" href="WebBaiTap/%s/%s/%s/ly-thuyet.html"><span class="ic">📘</span><b>Lý thuyết</b><small>Từ vựng · ngữ pháp</small></a>' % (gdir, udir, slug))
         for pid, title, mode, n in pages:
@@ -576,7 +672,7 @@ def build_index(done):
         g, u = gdir[3:], unum(udir)
         mark_o = len(o)
         ttl = 'Đề kiểm tra Mid-term 1 (%d test)' % len(tl) if udir == 'MidTerm1' else 'Đề kiểm tra %s (%d đề)' % (ulabel(u), len(tl))
-        o.append('<section class="card setcard" data-g="%s" data-u="%s" data-k="test"><div class="settitle"><span class="chip">Lớp %s · %s</span><h3>%s</h3></div><div class="tiles">' % (g, u, g, ulabel(u), ttl))
+        o.append('<section class="card setcard" data-g="%s" data-s="%s" data-u="%s" data-k="test"><div class="settitle"><span class="chip">Lớp %s · %s</span><h3>%s</h3></div><div class="tiles">' % (g, subj(tl[0][1]['id']), u, g, ulabel(u), ttl))
         for entry, S, pages in tl:
             pid, title, mode, n = pages[0]
             P0 = S['pages'][0]
@@ -597,7 +693,7 @@ def build_index(done):
     for _, h in sorted(cards, key=lambda c: c[0]):
         o.append(h)
     o.extend(IELTS['cards'])
-    o.append('<div class="empty" id="nobai" hidden>Chưa có bài nào được giao cho lớp của bạn. Hãy nhờ giáo viên giao bài.</div><div class="empty" id="denied" hidden>Bài đó chưa được giao cho lớp của bạn.</div><div class="empty" id="empty" hidden>Không có bộ bài phù hợp. Hãy bấm “Xoá bộ lọc”.</div>'
+    o.append('<div class="empty" id="nobai" hidden>Chưa có bài nào được giao cho lớp của bạn. Hãy nhờ giáo viên giao bài.</div><div class="empty" id="denied" hidden>Bài đó chưa được giao cho lớp của bạn.</div><div class="empty" id="empty" hidden>Không có bộ bài phù hợp. Hãy bấm “Xoá lựa chọn”.</div>'
              '<div class="foot">Học sinh làm bài trên điện thoại hoặc máy tính · Kết quả ghi tự động về giáo viên</div></main></div>'
              '<script>GNAuth.chip("#chip");</script><script>%s</script><script>GNAuth.verify(function(){window.gnApply&&gnApply()});if(/denied=1/.test(location.search)){var d=document.getElementById("denied");if(d)d.hidden=false}</script><script src="engine/feedback.js?v=%s"></script></body></html>' % (INDEX_JS.replace('@@LBL@@', json.dumps(UNIT_LABELS, ensure_ascii=False)), BV))
     open(os.path.join(ROOT, 'index.html'), 'w', encoding='utf8').write(''.join(o))
