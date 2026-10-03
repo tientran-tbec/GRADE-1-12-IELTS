@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>IELTS Reading Test 19</title>
+<style>
+:root{
+  --blue:#1a56b0; --blue-dark:#123e82; --green:#1e8e3e; --red:#d93025; --orange:#e8710a;
+  --gray-bg:#f4f6f8; --border:#d7dde3; --hl-yellow:#FFE066; --hl-green:#90EE90; --hl-pink:#FFB6C1;
+  --sel-orange:#FFD580;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;height:100%;font-family:"Segoe UI",Arial,sans-serif;color:#1b1f23;background:#fff;}
+body{user-select:none;}
+input[type="text"],select,textarea{user-select:text;}
+.passage-panel, .question-panel{user-select:text;}
+input,select,textarea{font-family:inherit;font-size:14px;}
+@media print{ body{display:none !important;} }
+
+/* ---------- Popup ---------- */
+#nameOverlay{position:fixed;inset:0;background:rgba(10,20,40,.78);display:flex;align-items:center;justify-content:center;z-index:9999;}
+#nameOverlay.hidden{display:none;}
+.name-box{background:#fff;padding:28px 32px;border-radius:10px;width:360px;max-width:92vw;box-shadow:0 12px 40px rgba(0,0,0,.3);}
+.name-box h2{margin:0 0 6px;font-size:19px;color:var(--blue-dark);}
+.name-box p.sub{margin:0 0 18px;font-size:13px;color:#556;}
+.name-box label{display:block;font-size:13px;font-weight:600;margin:10px 0 4px;}
+.name-box input{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:6px;font-size:14px;user-select:text;}
+.name-box .err{color:var(--red);font-size:12.5px;min-height:18px;margin-top:8px;}
+.name-box button{margin-top:10px;width:100%;padding:11px;background:var(--blue);color:#fff;border:none;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;}
+.name-box button:hover{background:var(--blue-dark);}
+
+/* ---------- Header ---------- */
+#topbar{position:sticky;top:0;z-index:500;background:#fff;border-bottom:1px solid var(--border);}
+#hlToolbar{display:flex;align-items:center;gap:8px;padding:6px 14px;background:#eef2f7;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+#hlToolbar .lbl{font-size:12.5px;color:#556;margin-right:4px;}
+.hl-btn{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;}
+.hl-btn[data-c="yellow"]{background:var(--hl-yellow);}
+.hl-btn[data-c="green"]{background:var(--hl-green);}
+.hl-btn[data-c="pink"]{background:var(--hl-pink);}
+.hl-btn.active{border-color:#333;transform:scale(1.15);}
+#eraserBtn{padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:13px;}
+#eraserBtn.active{background:#333;color:#fff;}
+#penBtn{padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:13px;}
+#penBtn.active{background:#8a5b00;color:#fff;}
+.pen-color-btn{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;display:none;vertical-align:middle;}
+.pen-color-btn.show{display:inline-block;}
+.pen-color-btn[data-pc="red"]{background:#e53935;}
+.pen-color-btn[data-pc="blue"]{background:#1e88e5;}
+.pen-color-btn[data-pc="black"]{background:#222;}
+.pen-color-btn.active{border-color:#333;transform:scale(1.15);}
+#penEraserBtn{padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:13px;display:none;}
+#penEraserBtn.show{display:inline-block;}
+#penEraserBtn.active{background:#333;color:#fff;}
+#dictModeTag{display:none;font-size:12px;color:var(--green);font-weight:700;padding:4px 10px;background:#e6f6ea;border-radius:6px;}
+#dictModeTag.show{display:inline-block;}
+.hl-yellow{background:var(--hl-yellow);}
+.hl-green{background:var(--hl-green);}
+.hl-pink{background:var(--hl-pink);}
+
+#header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;}
+#tabs{display:flex;gap:6px;}
+.tab-btn{padding:8px 16px;border:1px solid var(--border);background:#f4f6f8;border-radius:6px 6px 0 0;cursor:pointer;font-size:14px;font-weight:600;color:#445;}
+.tab-btn.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+#timerBox{font-size:20px;font-weight:700;padding:6px 14px;border-radius:8px;background:#eef2f7;color:var(--blue-dark);min-width:110px;text-align:center;}
+#timerBox.warn{background:#fff3cd;color:#8a5b00;animation:blink 1s infinite;}
+#timerBox.danger{background:#fbe0de;color:var(--red);animation:blink .5s infinite;}
+@keyframes blink{50%{opacity:.4;}}
+
+/* ---------- Layout ---------- */
+#examArea{display:flex;height:calc(100vh - 128px);}
+.passage-panel{width:50%;overflow-y:auto;padding:18px 22px;border-right:none;background:#fff;}
+#divider{width:6px;cursor:col-resize;background:var(--border);flex-shrink:0;}
+#divider:hover{background:var(--blue);}
+.question-panel{width:50%;overflow-y:auto;padding:18px 22px;background:#fbfcfe;}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+.passage-title{font-size:19px;font-weight:700;color:var(--blue-dark);margin:4px 0 12px;}
+.passage-instr{font-style:italic;font-size:13px;color:#556;margin-bottom:14px;}
+.passage-panel p{line-height:1.65;margin:0 0 12px;text-align:justify;}
+.subheading{display:inline-block;font-weight:700;color:var(--blue-dark);margin-right:6px;}
+.footnote{font-size:12.5px;color:#667;}
+
+.qgroup{margin-bottom:26px;padding-bottom:18px;border-bottom:1px dashed var(--border);}
+.qgroup:last-child{border-bottom:none;}
+.qgroup h3{font-size:14.5px;margin:0 0 4px;color:var(--blue-dark);}
+.qgroup .instr{font-size:13px;color:#445;margin:0 0 10px;line-height:1.5;}
+.qitem{margin:10px 0;font-size:14px;line-height:1.6;}
+.qnum{display:inline-block;min-width:24px;font-weight:700;color:var(--blue-dark);}
+.opt-row{display:block;margin:4px 0 4px 26px;padding:3px 6px;border-radius:5px;cursor:pointer;}
+.opt-row input{margin-right:8px;}
+.opt-row.selected-answer{background:var(--sel-orange);}
+.opt-row.correct{background:#c8f0d0 !important;}
+.opt-row.incorrect{background:#f8d3d0 !important;}
+select.qselect{padding:5px 6px;border:1px solid var(--border);border-radius:5px;font-size:13.5px;margin-left:6px;min-width:150px;}
+input.qtext{padding:4px 7px;border:1px solid var(--border);border-radius:4px;font-size:13.5px;width:150px;margin:0 3px;}
+input.qtext.correct-cell{background:#c8f0d0;border-color:var(--green);}
+input.qtext.incorrect-cell{background:#f8d3d0;border-color:var(--red);}
+.ans-hint{font-size:12px;color:var(--green);font-weight:600;margin-left:6px;}
+.qnum-inline{display:inline-block;min-width:20px;color:#fff;background:var(--blue);border-radius:4px;font-size:11.5px;text-align:center;padding:1px 4px;margin:0 4px 0 2px;vertical-align:middle;}
+.headinglist, .wordbank, .keylist{background:#eef2f7;border:1px solid var(--border);border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:13.5px;line-height:1.65;}
+.headinglist div, .wordbank span, .keylist div{margin:2px 0;}
+.wordbank span{display:inline-block;margin-right:16px;}
+table.qtable{width:100%;border-collapse:collapse;margin:10px 0;font-size:13.5px;}
+table.qtable td, table.qtable th{border:1px solid var(--border);padding:7px 9px;vertical-align:top;text-align:left;}
+table.qtable th{background:#eef2f7;}
+.notebox{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin:10px 0;}
+.notebox h4{margin:12px 0 6px;font-size:14px;color:var(--blue-dark);}
+.notebox h4:first-child{margin-top:0;}
+.notebox ul{margin:4px 0 8px;padding-left:20px;}
+.notebox li{margin:4px 0;font-size:13.5px;line-height:1.6;}
+.summarybox{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin:10px 0;font-size:13.5px;line-height:1.85;}
+.summarybox .stitle{font-weight:700;color:var(--blue-dark);display:block;margin-bottom:8px;}
+
+@media (max-width:768px){
+  #examArea{flex-direction:column;height:auto;}
+  .passage-panel, .question-panel{width:100%;height:60vh;}
+  #divider{display:none;}
+  .tab-btn{padding:7px 10px;font-size:12.5px;}
+}
+
+/* ---------- Submit / violation ---------- */
+#submitBtn{position:fixed;right:22px;bottom:22px;z-index:600;background:var(--red);color:#fff;border:none;padding:14px 24px;border-radius:30px;font-size:15px;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.25);cursor:pointer;}
+#submitBtn:hover{background:#a80f00;}
+.modal-overlay{position:fixed;inset:0;background:rgba(10,20,40,.65);display:flex;align-items:center;justify-content:center;z-index:9998;}
+.modal-overlay.hidden{display:none;}
+.modal-box{background:#fff;border-radius:10px;padding:24px 26px;width:420px;max-width:92vw;box-shadow:0 12px 40px rgba(0,0,0,.3);}
+.modal-box h3{margin:0 0 10px;color:var(--blue-dark);}
+.modal-actions{display:flex;gap:10px;margin-top:18px;}
+.modal-actions button{flex:1;padding:10px;border-radius:6px;border:none;font-size:14px;font-weight:600;cursor:pointer;}
+.btn-confirm{background:var(--red);color:#fff;}
+.btn-cancel{background:#e4e8ec;color:#333;}
+#resultBox{max-height:70vh;overflow-y:auto;}
+#resultBox table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13.5px;}
+#resultBox td,#resultBox th{border:1px solid var(--border);padding:6px 8px;}
+.band-badge{display:inline-block;background:var(--blue);color:#fff;padding:4px 12px;border-radius:20px;font-weight:700;font-size:15px;}
+#warnBanner{position:fixed;top:0;left:0;right:0;background:var(--red);color:#fff;text-align:center;padding:8px;font-weight:700;z-index:9997;display:none;}
+#fsOverlay{position:fixed;inset:0;background:rgba(10,20,40,.9);color:#fff;display:none;align-items:center;justify-content:center;flex-direction:column;z-index:9996;text-align:center;padding:20px;}
+#fsOverlay button{margin-top:16px;padding:10px 20px;border-radius:6px;border:none;background:var(--blue);color:#fff;font-weight:700;cursor:pointer;font-size:14px;}
+
+/* ---------- Pen (freehand drawing) tool ---------- */
+.passage-panel, .question-panel{position:relative;}
+.draw-layer{position:absolute;top:0;left:0;width:100%;pointer-events:none;z-index:40;}
+.draw-layer.pen-active{pointer-events:auto;cursor:crosshair;}
+.draw-layer.pen-erase{pointer-events:auto;cursor:cell;}
+body.pen-mode .passage-panel, body.pen-mode .question-panel{cursor:crosshair;}
+
+/* ---------- Dictionary popup (post-submit) ---------- */
+.dict-popup{position:fixed;max-width:320px;background:#1b1f23;color:#fff;padding:10px 14px;border-radius:8px;font-size:13px;line-height:1.5;z-index:9995;box-shadow:0 8px 24px rgba(0,0,0,.3);}
+.dict-popup.dict-popup-wide{max-width:480px;}
+.dict-popup b{color:#7fd0ff;}
+.dict-popup .dict-close{position:absolute;top:2px;right:8px;cursor:pointer;color:#aaa;font-size:14px;}
+.dict-popup .dict-body{max-height:56vh;overflow-y:auto;padding-right:4px;}
+.dict-popup .dict-orig{margin-bottom:8px;color:#c9d6e3;}
+.dict-popup .dict-trans{color:#d8ffe0;border-top:1px solid #333;padding-top:8px;}
+.dict-popup .dict-progress{margin-top:8px;color:#ffd166;font-size:12px;font-style:italic;}
+
+/* ---------- Explanation panel (post-submit) ---------- */
+.explain-panel{display:none;margin-top:20px;padding-top:14px;border-top:2px solid var(--blue);}
+.explain-panel h3{color:var(--blue-dark);font-size:15px;margin:0 0 10px;}
+.explain-item{background:#f0f6ff;border:1px solid #cfe0f5;border-radius:6px;padding:8px 12px;margin-bottom:8px;font-size:13px;line-height:1.55;}
+.explain-item b.eq{color:var(--blue-dark);}
+.explain-item .eans{color:var(--green);font-weight:700;}
+.explain-item .etext{color:#334;display:block;margin-top:6px;}
+.explain-item .equote{display:block;margin-top:5px;margin-bottom:2px;font-style:italic;color:#4a5568;background:#fff;border-left:3px solid var(--blue);padding:4px 10px;border-radius:0 4px 4px 0;}
+.explain-item .elang{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.03em;color:#fff;background:var(--blue);border-radius:4px;padding:1px 6px;margin-right:6px;vertical-align:middle;}
+.explain-item .etext-vi .elang{background:var(--green);}
+.explain-item .etext-en{font-style:normal;}
+
+</style>
+</head>
+<body>
+
+<div id="nameOverlay">
+  <div class="name-box">
+    <h2>IELTS Reading Test 19</h2>
+    <p class="sub">Vui lòng nhập thông tin để bắt đầu làm bài (thời gian: 60 phút, 40 câu hỏi).</p>
+    <label>Họ và tên</label>
+    <input type="text" id="stuName" placeholder="Nguyễn Văn A">
+    <label>Lớp</label>
+    <input type="text" id="stuClass" placeholder="10A1">
+    <div class="err" id="nameErr"></div>
+    <button onclick="startExam()">Bắt đầu làm bài</button>
+  </div>
+</div>
+
+<div id="warnBanner"></div>
+<div id="fsOverlay">
+  <div>⚠ Bạn đã thoát chế độ toàn màn hình. Vi phạm đã được ghi nhận.</div>
+  <button onclick="enterFullscreen()">Vào toàn màn hình</button>
+</div>
+
+<div id="topbar">
+  <div id="hlToolbar">
+    <span class="lbl">Highlight:</span>
+    <button class="hl-btn" data-c="yellow" title="Vàng"></button>
+    <button class="hl-btn" data-c="green" title="Xanh lá"></button>
+    <button class="hl-btn" data-c="pink" title="Hồng"></button>
+    <button id="eraserBtn" title="Tẩy">🧹 Tẩy</button>
+    <button id="penBtn" title="Bút viết">🖊️ Bút</button>
+    <button class="pen-color-btn" data-pc="red" title="Đỏ"></button>
+    <button class="pen-color-btn" data-pc="blue" title="Xanh dương"></button>
+    <button class="pen-color-btn" data-pc="black" title="Đen"></button>
+    <button id="penEraserBtn" title="Xóa nét bút">🧽 Xóa nét</button>
+    <span id="dictModeTag">📖 Đã mở tra từ: click đúp vào từ hoặc bôi đen đoạn văn để dịch</span>
+  </div>
+  <div id="header">
+    <div id="tabs">
+      <button class="tab-btn active" id="tabBtn-0" onclick="showPassage(0)">Passage 1</button>
+      <button class="tab-btn" id="tabBtn-1" onclick="showPassage(1)">Passage 2</button>
+      <button class="tab-btn" id="tabBtn-2" onclick="showPassage(2)">Passage 3</button>
+    </div>
+    <div id="timerBox">60:00</div>
+  </div>
+</div>
+
+<div id="examArea">
+  <div class="passage-panel tab-content active" id="passage-0">
+<div class="passage-title">Green roofs</div>
+<div class="passage-instr">You should spend about 20 minutes on <b>Questions 1-13,</b> which are based on Reading Passage 1 below.</div>
+<p><span class="subheading">A</span>	Rooftops covered with grass, vegetable gardens and lush foliage are now a common sight in many cities around the world. More and more private companies and city authorities are investing in green roofs, drawn to their wide-ranging benefits. Among the benefits are saving on energy costs, mitigating the risk of floods, making habitats for urban wildlife, tackling air pollution and even growing food. These increasingly radical urban designs can help cities adapt to the monumental problems they face, such as access to resources and a lack of green space due to development. But the involvement of city authorities, businesses and other institutions is crucial to ensuring their success - as is research investigating different options to suit the variety of rooftop spaces found in cities. The UK is relatively new to developing green roofs, and local governments and institutions are playing a major role in spreading the practice. London is home to much of the UK’s green roof market, mainly due to forward-thinking policies such as the London Plan, which has paved the way to more than doubling the area of green roofs in the capital.</p>
+<p><span class="subheading">B</span>	Ongoing research is showcasing how green roofs in cities can integrate with ‘living walls’: environmentally friendly walls which are partially or completely covered with greenery, including a growing medium, such as soil or water. Research also indicates that green roofs can be integrated with drainage systems on the ground, such as street trees, so that the water is managed better and the built environment is made more sustainable. There is also evidence to demonstrate the social value of green roofs. Doctors are increasingly prescribing time spent gardening outdoors for patients dealing with anxiety and depression. And research has found that access to even the most basic green spaces can provide a better quality of life for dementia sufferers and help people avoid obesity.</p>
+<p><span class="subheading">C</span>	In North America, green roofs have become mainstream, with a wide array of expansive, accessible and food-producing roofs installed in buildings. Again, city leaders and authorities have helped push the movement forward - only recently, San Francisco, USA, created a policy requiring new buildings to have green roofs. Toronto, Canada, has policies dating from the 1990s, encouraging the development of urban farms on rooftops. These countries also benefit from having newer buildings than in many parts of the world, which makes it easier to install green roofs. Being able to keep enough water at roof height and distribute it right across the rooftop is crucial to maintaining the plants on any green roof - especially on ‘edible roofs’ where fruit and vegetables are farmed. And it’s much easier to do this in newer buildings, which can typically hold greater weight, than to retro-fit old ones. Having a stronger roof also makes it easier to grow a greater variety of plants, since the soil can be deeper.</p>
+<p><span class="subheading">D</span>	For green roofs to become the norm for new developments, there needs to be support from public authorities and private investors. Those responsible for maintaining buildings may have to acquire new skills, such as landscaping, and in some cases, volunteers may be needed to help out. Other considerations include installing drainage paths, meeting health and safety requirements and perhaps allowing access for the public, as well as planning restrictions and disruption from regular activities in and around the buildings during installation. To convince investors and developers that installing green roofs is worthwhile, economic arguments are still the most important. The term ‘natural capital’ has been developed to explain the economic value of nature; for example, measuring the money saved by installing natural solutions to protect against flood damage, adapt to climate change or help people lead healthier and happier lives.</p>
+<p><span class="subheading">E</span>	As the expertise about green roofs grows, official standards have been developed to ensure that they are designed, constructed and maintained properly, and function well. Improvements in the science and technology underpinning green roof development have also led to new variations in the concept. For example, ‘blue roofs’ enable buildings to hold water over longer periods of time, rather than draining it away quickly - crucial in times of heavier rainfall. There are also combinations of green roofs with solar panels, and ‘brown roofs’ which are wilder in nature and maximise biodiversity. If the trend continues, it could create new jobs and a more vibrant and sustainable local food economy - alongside many other benefits. There are still barriers to overcome, but the evidence so far indicates that green roofs have the potential to transform cities and help them function sustainably long into the future. The success stories need to be studied and replicated elsewhere, to make green, blue, brown and food-producing roofs the norm in cities around the world.</p>
+  </div>
+  <div id="divider"></div>
+  <div class="question-panel tab-content active" id="questions-0">
+<div class="qgroup">
+<h3>Questions 1–5</h3>
+<div class="instr">Reading Passage 1 has five paragraphs, <b>A-E.</b></div>
+<div class="instr">Which paragraph contains the following information?</div>
+<div class="instr">Write the correct letter, <b>A-E</b>, in boxes 1-5 on your answer sheet.</div>
+<div class="instr"><b>NB</b> You may use any letter more than once.</div>
+<div class="qitem"><span class="qnum">1.</span> mention of several challenges to be overcome before a green roof can be installed <select class="qselect" id="q1"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option></select></div>
+<div class="qitem"><span class="qnum">2.</span> reference to a city where green roofs have been promoted for many years <select class="qselect" id="q2"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option></select></div>
+<div class="qitem"><span class="qnum">3.</span> a belief that existing green roofs should be used as a model for new ones <select class="qselect" id="q3"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option></select></div>
+<div class="qitem"><span class="qnum">4.</span> examples of how green roofs can work in combination with other green urban initiatives <select class="qselect" id="q4"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option></select></div>
+<div class="qitem"><span class="qnum">5.</span> the need to make a persuasive argument for the financial benefits of green roofs <select class="qselect" id="q5"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option></select></div>
+</div>
+<div class="qgroup">
+<h3>Questions 6–9</h3>
+<div class="instr">Complete the summary below.</div>
+<div class="instr">Choose <b>ONE WORD ONLY</b> from the passage for each answer.</div>
+<div class="instr">Write your answers in boxes 6-9 on your answer sheet.</div>
+<div class="summarybox"><span class="stitle">Advantages of green roofs</span>City rooftops covered with greenery have many advantages. These include lessening the likelihood that floods will occur, reducing how much money is spent on <b class="qnum-inline">6</b><input type="text" class="qtext" id="q6" autocomplete="off"><span id="hint-q6"></span> and creating environments that are suitable for wildlife. In many cases, they can also be used for producing <b class="qnum-inline">7</b><input type="text" class="qtext" id="q7" autocomplete="off"><span id="hint-q7"></span><br>There are also social benefits of green roofs. For example, the medical profession recommends <b class="qnum-inline">8</b><input type="text" class="qtext" id="q8" autocomplete="off"><span id="hint-q8"></span> as an activity to help people cope with mental health issues. Studies have also shown that the availability of green spaces can prevent physical problems such as <b class="qnum-inline">9</b><input type="text" class="qtext" id="q9" autocomplete="off"><span id="hint-q9"></span></div>
+</div>
+<div class="qgroup">
+<h3>Questions 10–11</h3>
+<div class="instr">Choose <b>TWO</b> letters, <b>A-E.</b></div>
+<div class="instr">Write the correct letters in boxes 10 and 11 on your answer sheet.</div>
+<div class="qitem"><span class="qnum">Q10-11.</span> Which <b>TWO</b> advantages of using newer buildings for green roofs are mentioned in Paragraph C of the passage?<br>
+<label class="opt-row"><input type="checkbox" name="q1011" value="A"> A.  a longer growing season for edible produce</label>
+<label class="opt-row"><input type="checkbox" name="q1011" value="B"> B.  more economical use of water</label>
+<label class="opt-row"><input type="checkbox" name="q1011" value="C"> C.  greater water-storage capacity</label>
+<label class="opt-row"><input type="checkbox" name="q1011" value="D"> D.  ability to cultivate more plant types</label>
+<label class="opt-row"><input type="checkbox" name="q1011" value="E"> E.  a large surface area for growing plants</label>
+</div>
+</div>
+<div class="qgroup">
+<h3>Questions 12–13</h3>
+<div class="instr">Choose <b>TWO</b> letters, <b>A-E.</b></div>
+<div class="instr">Write the correct letters in boxes 12 and 13 on your answer sheet.</div>
+<div class="qitem"><span class="qnum">Q12-13.</span> Which <b>TWO</b> aims of new variations on the concept of green roofs are mentioned in Paragraph E of the passage?<br>
+<label class="opt-row"><input type="checkbox" name="q1213" value="A"> A.  to provide habitats for a wide range of species</label>
+<label class="opt-row"><input type="checkbox" name="q1213" value="B"> B.  to grow plants successfully even in the wettest climates</label>
+<label class="opt-row"><input type="checkbox" name="q1213" value="C"> C.  to regulate the temperature of the immediate environment</label>
+<label class="opt-row"><input type="checkbox" name="q1213" value="D"> D.  to generate power from a sustainable source</label>
+<label class="opt-row"><input type="checkbox" name="q1213" value="E"> E.  to collect water to supply other buildings</label>
+</div>
+</div>
+<div class="explain-panel" id="explainPanel-0"><h3>📘 Giải thích chi tiết đáp án</h3><div class="explain-item"><b class="eq">Câu 1.</b> Đáp án đúng: <span class="eans">D</span><span class="equote">&ldquo;Other considerations include installing drainage paths, meeting health and safety requirements and perhaps allowing access for the public, as well as planning restrictions and disruption from regular activities in and around the buildings during installation.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph D lists several things that must be dealt with before a green roof goes in: new maintenance skills, drainage paths, health and safety requirements, public access, planning restrictions and disruption during installation. 'Several challenges to be overcome' paraphrases these 'other considerations'. No other paragraph lists obstacles like this, so the answer is D.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn D liệt kê nhiều việc phải giải quyết trước khi lắp mái xanh: kỹ năng bảo trì mới, đường thoát nước, yêu cầu an toàn sức khoẻ, cho phép công chúng vào, hạn chế quy hoạch và sự gián đoạn khi thi công. Cụm 'several challenges to be overcome' là cách diễn đạt lại của 'other considerations' này. Không đoạn nào khác liệt kê các trở ngại như vậy nên đáp án là D.</span></div><div class="explain-item"><b class="eq">Câu 2.</b> Đáp án đúng: <span class="eans">C</span><span class="equote">&ldquo;Toronto, Canada, has policies dating from the 1990s, encouraging the development of urban farms on rooftops.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph C says Toronto has had policies since the 1990s encouraging rooftop urban farms. 'A city where green roofs have been promoted for many years' paraphrases 'policies dating from the 1990s'. San Francisco in the same paragraph only recently introduced its policy, so it does not fit 'many years'.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn C nói Toronto có chính sách từ thập niên 1990 khuyến khích trang trại đô thị trên mái nhà. Cụm 'a city where green roofs have been promoted for many years' là diễn đạt lại của 'policies dating from the 1990s'. San Francisco trong cùng đoạn chỉ mới ban hành chính sách gần đây nên không khớp với 'nhiều năm'. Đáp án là C.</span></div><div class="explain-item"><b class="eq">Câu 3.</b> Đáp án đúng: <span class="eans">E</span><span class="equote">&ldquo;The success stories need to be studied and replicated elsewhere, to make green, blue, brown and food-producing roofs the norm in cities around the world.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> In the last paragraph (E) the writer says the success stories need to be studied and replicated elsewhere. 'Existing green roofs should be used as a model for new ones' paraphrases 'studied and replicated'. Paragraph A mentions research into options but not copying successful examples.</span><span class="etext etext-vi"><b class="elang">VI:</b> Ở câu cuối đoạn E, tác giả cho rằng các câu chuyện thành công cần được nghiên cứu và nhân rộng ở nơi khác. Ý 'mái xanh hiện có nên làm hình mẫu cho mái mới' chính là 'studied and replicated'. Đoạn A chỉ nhắc nghiên cứu các lựa chọn chứ không nói việc sao chép mô hình thành công. Đáp án là E.</span></div><div class="explain-item"><b class="eq">Câu 4.</b> Đáp án đúng: <span class="eans">B</span><span class="equote">&ldquo;Ongoing research is showcasing how green roofs in cities can integrate with ‘living walls’: environmentally friendly walls which are partially or completely covered with greenery, including a growing medium, such as soil or water. Research also indicates that green roofs can be integrated with drainage systems on the ground, such as street trees&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph B gives two examples of green roofs combined with other green urban features: 'living walls' and ground-level drainage systems such as street trees. 'Examples of how green roofs can work in combination with other green urban initiatives' paraphrases 'integrate with'. Paragraph E mentions solar panels, but only as a single variation, not as a set of examples of this kind.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn B đưa ra hai ví dụ mái xanh kết hợp với các yếu tố xanh khác của đô thị: 'tường sống' (living walls) và hệ thống thoát nước dưới mặt đất như cây ven đường. Cụm 'work in combination with other green urban initiatives' là diễn đạt lại của 'integrate with'. Đoạn E có nhắc tấm pin mặt trời nhưng chỉ là một biến thể, không phải các ví dụ kiểu này. Đáp án là B.</span></div><div class="explain-item"><b class="eq">Câu 5.</b> Đáp án đúng: <span class="eans">D</span><span class="equote">&ldquo;To convince investors and developers that installing green roofs is worthwhile, economic arguments are still the most important.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph D states that to convince investors and developers, economic arguments are the most important, and explains 'natural capital' as a way to measure money saved. 'Persuasive argument for the financial benefits' paraphrases 'convince ... economic arguments'. Paragraph A lists benefits such as saving energy costs but does not discuss the need to persuade anyone.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn D nêu rằng để thuyết phục nhà đầu tư và nhà phát triển thì lập luận kinh tế là quan trọng nhất, rồi giải thích khái niệm 'natural capital' dùng để đo số tiền tiết kiệm được. Cụm 'persuasive argument for the financial benefits' diễn đạt lại 'convince ... economic arguments'. Đoạn A chỉ liệt kê lợi ích như tiết kiệm chi phí năng lượng, không nói đến nhu cầu thuyết phục. Đáp án là D.</span></div><div class="explain-item"><b class="eq">Câu 6.</b> Đáp án đúng: <span class="eans">energy</span><span class="equote">&ldquo;Among the benefits are saving on energy costs, mitigating the risk of floods, making habitats for urban wildlife, tackling air pollution and even growing food.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> The summary follows the list of benefits in Paragraph A. 'Reducing how much money is spent on' paraphrases 'saving on energy costs', and 'lessening the likelihood that floods will occur' paraphrases 'mitigating the risk of floods'. The missing word is 'energy'.</span><span class="etext etext-vi"><b class="elang">VI:</b> Bài tóm tắt bám theo danh sách lợi ích ở đoạn A. 'Reducing how much money is spent on' là diễn đạt lại của 'saving on energy costs', còn 'lessening the likelihood that floods will occur' là 'mitigating the risk of floods'. Từ cần điền là 'energy'.</span></div><div class="explain-item"><b class="eq">Câu 7.</b> Đáp án đúng: <span class="eans">food</span><span class="equote">&ldquo;Among the benefits are saving on energy costs, mitigating the risk of floods, making habitats for urban wildlife, tackling air pollution and even growing food.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph A ends its list of benefits with 'even growing food'. In the summary, 'they can also be used for producing ...' matches 'growing food', so the answer is 'food' (one word, as required).</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn A kết thúc danh sách lợi ích bằng 'even growing food'. Trong bài tóm tắt, 'they can also be used for producing ...' tương ứng với 'growing food', nên đáp án là 'food' (một từ theo yêu cầu).</span></div><div class="explain-item"><b class="eq">Câu 8.</b> Đáp án đúng: <span class="eans">gardening</span><span class="equote">&ldquo;Doctors are increasingly prescribing time spent gardening outdoors for patients dealing with anxiety and depression.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph B says doctors are prescribing time spent gardening outdoors for patients with anxiety and depression. 'The medical profession recommends' paraphrases 'doctors are ... prescribing', and 'mental health issues' paraphrases 'anxiety and depression'. The answer is 'gardening'.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn B nói bác sĩ ngày càng kê đơn thời gian làm vườn ngoài trời cho bệnh nhân lo âu và trầm cảm. 'The medical profession recommends' là diễn đạt lại của 'doctors are ... prescribing', còn 'mental health issues' tương ứng 'anxiety and depression'. Đáp án là 'gardening'.</span></div><div class="explain-item"><b class="eq">Câu 9.</b> Đáp án đúng: <span class="eans">obesity</span><span class="equote">&ldquo;And research has found that access to even the most basic green spaces can provide a better quality of life for dementia sufferers and help people avoid obesity.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> In Paragraph B, research shows that access to green spaces helps people avoid obesity. 'The availability of green spaces can prevent physical problems' paraphrases 'access to ... green spaces ... help people avoid obesity'. Dementia is a different condition and is not a physical problem being prevented here, so the answer is 'obesity'.</span><span class="etext etext-vi"><b class="elang">VI:</b> Ở đoạn B, nghiên cứu cho thấy việc tiếp cận không gian xanh giúp mọi người tránh béo phì. 'The availability of green spaces can prevent physical problems' là diễn đạt lại 'access to ... green spaces ... help people avoid obesity'. Chứng sa sút trí tuệ (dementia) chỉ được cải thiện chất lượng sống chứ không phải bệnh được ngăn ngừa, nên đáp án là 'obesity'.</span></div><div class="explain-item"><b class="eq">Câu 10-11.</b> Đáp án đúng: <span class="eans">C, D</span><span class="equote">&ldquo;And it’s much easier to do this in newer buildings, which can typically hold greater weight, than to retro-fit old ones. Having a stronger roof also makes it easier to grow a greater variety of plants, since the soil can be deeper.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph C says keeping enough water at roof height is crucial and is easier in newer buildings, so C (greater water-storage capacity) is correct. It also says a stronger roof allows deeper soil and therefore a greater variety of plants, so D is correct. A (growing season), B (economical water use) and E (surface area) are never mentioned as advantages of newer buildings.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn C nói giữ đủ nước ở độ cao mái là điều then chốt và dễ làm hơn ở các toà nhà mới, nên C (sức chứa nước lớn hơn) đúng. Đoạn này cũng nói mái chắc hơn cho phép lớp đất sâu hơn nên trồng được nhiều loại cây hơn, nên D đúng. A (mùa trồng dài hơn), B (dùng nước tiết kiệm hơn) và E (diện tích trồng lớn) không được nhắc như lợi thế của toà nhà mới. Đáp án là C và D.</span></div><div class="explain-item"><b class="eq">Câu 12-13.</b> Đáp án đúng: <span class="eans">A, D</span><span class="equote">&ldquo;For example, ‘blue roofs’ enable buildings to hold water over longer periods of time, rather than draining it away quickly - crucial in times of heavier rainfall. There are also combinations of green roofs with solar panels, and ‘brown roofs’ which are wilder in nature and maximise biodiversity.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph E lists new variations: 'brown roofs' that 'maximise biodiversity' match A (habitats for a wide range of species), and combinations with solar panels match D (generating power from a sustainable source). Blue roofs hold water to cope with heavy rain, not to supply other buildings, so E is wrong; B and C are not mentioned.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn E liệt kê các biến thể mới: 'mái nâu' (brown roofs) nhằm 'maximise biodiversity' khớp với A (tạo môi trường sống cho nhiều loài), và kết hợp với tấm pin mặt trời khớp với D (tạo ra điện từ nguồn bền vững). Mái xanh dương (blue roofs) giữ nước để đối phó mưa lớn chứ không cấp nước cho toà nhà khác nên E sai; B và C không được nhắc đến. Đáp án là A và D.</span></div></div>
+  </div>
+  <div class="passage-panel tab-content" id="passage-1">
+<div class="passage-title">The growth of bike-sharing schemes around the world</div>
+<div class="passage-instr">You should spend about 20 minutes on <b>Questions 14–26</b>, which are based on Reading Passage 2 below.</div>
+<p><span class="subheading">How Dutch engineer Luud Schimmelpennink helped to devise urban bike-sharing schemes</span></p>
+<p><span class="subheading">A</span>	The original idea for an urban bike-sharing scheme dates back to a summer's day in Amsterdam in 1965. Provo, the organisation that came up with the idea, was a group of Dutch activists who wanted to change society. They believed the scheme, which was known as the Witte Fietsenplan, was an answer to the perceived threats of air pollution and consumerism. In the centre of Amsterdam, they painted a small number of used bikes white. They also distributed leaflets describing the dangers of cars and inviting people to use the white bikes. The bikes were then left unlocked at various locations around the city, to be used by anyone in need of transport.</p>
+<p><span class="subheading">B</span>	Luud Schimmelpennink, a Dutch industrial engineer who still lives and cycles in Amsterdam, was heavily involved in the original scheme. He recalls how the scheme succeeded in attracting a great deal of attention – particularly when it came to publicising Provo's aims – but struggled to get off the ground. The police were opposed to Provo's initiatives and almost as soon as the white bikes were distributed around the city, they removed them. However, for Schimmelpennink and for bike-sharing schemes in general, this was just the beginning. 'The first Witte Fietsenplan was just a symbolic thing,' he says. 'We painted a few bikes white, that was all. Things got more serious when I became a member of the Amsterdam city council two years later.'</p>
+<p><span class="subheading">C</span>	Schimmelpennink seized this opportunity to present a more elaborate Witte Fietsenplan to the city council. 'My idea was that the municipality of Amsterdam would distribute 10,000 white bikes over the city, for everyone to use,' he explains. 'I made serious calculations. It turned out that a white bicycle – per person, per kilometre – would cost the municipality only 10% of what it contributed to public transport per person per kilometre.' Nevertheless, the council unanimously rejected the plan. 'They said that the bicycle belongs to the past. They saw a glorious future for the car,' says Schimmelpennink. But he was not in the least discouraged.</p>
+<p><span class="subheading">D</span>	Schimmelpennink never stopped believing in bike-sharing, and in the mid-90s, two Danes asked for his help to set up a system in Copenhagen. The result was the world's first large-scale bike-share programme. It worked on a deposit: 'You dropped a coin in the bike and when you returned it, you got your money back.' After setting up the Danish system, Schimmelpennink decided to try his luck again in the Netherlands – and this time he succeeded in arousing the interest of the Dutch Ministry of Transport. 'Times had changed,' he recalls. 'People had become more environmentally conscious, and the Danish experiment had proved that bike-sharing was a real possibility.' A new Witte Fietsenplan was launched in 1999 in Amsterdam. However, riding a white bike was no longer free; it cost one guilder per trip and payment was made with a chip card developed by the Dutch bank Postbank. Schimmelpennink designed conspicuous, sturdy white bikes locked in special racks which could be opened with the chip card – the plan started with 250 bikes, distributed over five stations.</p>
+<p><span class="subheading">E</span>	Theo Molenaar, who was a system designer for the project, worked alongside Schimmelpennink. 'I remember when we were testing the bike racks, he announced that he had already designed better ones. But of course, we had to go through with the ones we had.' The system, however, was prone to vandalism and theft. 'After every weekend there would always be a couple of bikes missing,' Molenaar says. 'I really have no idea what people did with them, because they could instantly be recognised as white bikes.' But the biggest blow came when Postbank decided to abolish the chip card, because it wasn't profitable. 'That chip card was pivotal to the system,' Molenaar says. 'To continue the project we would have needed to set up another system, but the business partner had lost interest.'</p>
+<p><span class="subheading">F</span>	Schimmelpennink was disappointed, but – characteristically – not for long. In 2002 he got a call from the French advertising corporation JC Decaux, who wanted to set up his bike-sharing scheme in Vienna. 'That went really well. After Vienna, they set up a system in Lyon. Then in 2007, Paris followed. That was a decisive moment in the history of bike-sharing.' The huge and unexpected success of the Parisian bike-sharing programme, which now boasts more than 20,000 bicycles, inspired cities all over the world to set up their own schemes, all modelled on Schimmelpennink's. 'It's wonderful that this happened,' he says. 'But financially I didn't really benefit from it, because I never filed for a patent.'</p>
+<p><span class="subheading">G</span>	In Amsterdam today, 38% of all trips are made by bike and, along with Copenhagen, it is regarded as one of the two most cycle-friendly capitals in the world – but the city never got another Witte Fietsenplan. Molenaar believes this may be because everybody in Amsterdam already has a bike. Schimmelpennink, however, cannot see that this changes Amsterdam's need for a bike-sharing scheme. 'People who travel on the underground don't carry their bikes around. But often they need additional transport to reach their final destination.' Although he thinks it is strange that a city like Amsterdam does not have a successful bike- sharing scheme, he is optimistic about the future. 'In the '60s we didn't stand a chance because people were prepared to give their lives to keep cars in the city. But that mentality has totally changed. Today everybody longs for cities that are not dominated by cars.'</p>
+  </div>
+  <div class="question-panel tab-content" id="questions-1">
+<div class="qgroup">
+<h3>Questions 14–18</h3>
+<div class="instr">Reading Passage 2 has seven paragraphs, <b>A–G</b>.</div>
+<div class="instr">Which paragraph contains the following information?</div>
+<div class="instr">Write the correct letter, <b>A–G</b>, in boxes 14–18 on your answer sheet.</div>
+<div class="qitem"><span class="qnum">14.</span> a description of how people misused a bike-sharing scheme <select class="qselect" id="q14"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option></select></div>
+<div class="qitem"><span class="qnum">15.</span> an explanation of why a proposed bike-sharing scheme was turned down <select class="qselect" id="q15"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option></select></div>
+<div class="qitem"><span class="qnum">16.</span> a reference to a person being unable to profit from their work <select class="qselect" id="q16"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option></select></div>
+<div class="qitem"><span class="qnum">17.</span> an explanation of the potential savings a bike-sharing scheme would bring <select class="qselect" id="q17"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option></select></div>
+<div class="qitem"><span class="qnum">18.</span> a reference to the problems a bike-sharing scheme was intended to solve <select class="qselect" id="q18"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option><option value="F">F</option><option value="G">G</option></select></div>
+</div>
+<div class="qgroup">
+<h3>Questions 19–20</h3>
+<div class="instr">Choose <b>TWO</b> letters, <b>A–E</b>.</div>
+<div class="instr">Write the correct letters in boxes 19 and 20 on your answer sheet.</div>
+<div class="qitem"><span class="qnum">Q19-20.</span> Which <b>TWO</b> of the following statements are made in the text about the Amsterdam bike-sharing scheme of 1999?<br>
+<label class="opt-row"><input type="checkbox" name="q1920" value="A"> A.  It was initially opposed by a government department.</label>
+<label class="opt-row"><input type="checkbox" name="q1920" value="B"> B.  It failed when a partner in the scheme withdrew support.</label>
+<label class="opt-row"><input type="checkbox" name="q1920" value="C"> C.  It aimed to be more successful than the Copenhagen scheme.</label>
+<label class="opt-row"><input type="checkbox" name="q1920" value="D"> D.  It was made possible by a change in people's attitudes.</label>
+<label class="opt-row"><input type="checkbox" name="q1920" value="E"> E.  It attracted interest from a range of bike designers.</label>
+</div>
+</div>
+<div class="qgroup">
+<h3>Questions 21–22</h3>
+<div class="instr">Choose <b>TWO</b> letters, <b>A–E</b>.</div>
+<div class="instr">Write the correct letters in boxes 21 and 22 on your answer sheet.</div>
+<div class="qitem"><span class="qnum">Q21-22.</span> Which <b>TWO</b> of the following statements are made in the text about the Amsterdam today?<br>
+<label class="opt-row"><input type="checkbox" name="q2122" value="A"> A.  The majority of residents would like to prevent all cars from entering the city.</label>
+<label class="opt-row"><input type="checkbox" name="q2122" value="B"> B.  There is little likelihood of the city having another bike-sharing scheme.</label>
+<label class="opt-row"><input type="checkbox" name="q2122" value="C"> C.  More trips in the city are made by bike than by any other form of transport.</label>
+<label class="opt-row"><input type="checkbox" name="q2122" value="D"> D.  A bike-sharing scheme would benefit residents who use public transport.</label>
+<label class="opt-row"><input type="checkbox" name="q2122" value="E"> E.  The city has a reputation as a place that welcomes cyclists.</label>
+</div>
+</div>
+<div class="qgroup">
+<h3>Questions 23–26</h3>
+<div class="instr">Complete the summary below.</div>
+<div class="instr">Choose <b>ONE WORD ONLY</b> from the passage for each answer.</div>
+<div class="instr">Write your answers in boxes 23–26 on your answer sheet.</div>
+<div class="summarybox"><span class="stitle">The first urban bike-sharing scheme</span>The first bike-sharing scheme was the idea of the Dutch group Provo. The people who belonged to this group were <b class="qnum-inline">23</b><input type="text" class="qtext" id="q23" autocomplete="off"><span id="hint-q23"></span> They were concerned about damage to the environment and about <b class="qnum-inline">24</b><input type="text" class="qtext" id="q24" autocomplete="off"><span id="hint-q24"></span>, and believed that the bike-sharing scheme would draw attention to these issues. As well as painting some bikes white, they handed out <b class="qnum-inline">25</b><input type="text" class="qtext" id="q25" autocomplete="off"><span id="hint-q25"></span> that condemned the use of cars.<br>However, the scheme was not a great success: almost as quickly as Provo left the bikes around the city, the <b class="qnum-inline">26</b><input type="text" class="qtext" id="q26" autocomplete="off"><span id="hint-q26"></span> took them away. According to Schimmelpennink, the scheme was intended to be symbolic. The idea was to get people thinking about the issues.</div>
+</div>
+<div class="explain-panel" id="explainPanel-1"><h3>📘 Giải thích chi tiết đáp án</h3><div class="explain-item"><b class="eq">Câu 14.</b> Đáp án đúng: <span class="eans">E</span><span class="equote">&ldquo;The system, however, was prone to vandalism and theft. 'After every weekend there would always be a couple of bikes missing,' Molenaar says.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph E describes how the 1999 system suffered from vandalism and theft, with bikes going missing every weekend. 'How people misused a bike-sharing scheme' paraphrases 'prone to vandalism and theft'. The answer is E.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn E mô tả hệ thống năm 1999 bị phá hoại và trộm cắp, cuối tuần nào cũng mất vài chiếc xe. Cụm 'how people misused a bike-sharing scheme' là diễn đạt lại 'prone to vandalism and theft'. Đáp án là E.</span></div><div class="explain-item"><b class="eq">Câu 15.</b> Đáp án đúng: <span class="eans">C</span><span class="equote">&ldquo;Nevertheless, the council unanimously rejected the plan. 'They said that the bicycle belongs to the past. They saw a glorious future for the car,' says Schimmelpennink.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> In Paragraph C the city council unanimously rejected the plan, and the reason given is that they thought the bicycle belonged to the past and saw a future for the car. 'Why a proposed scheme was turned down' matches this explanation. The answer is C.</span><span class="etext etext-vi"><b class="elang">VI:</b> Ở đoạn C, hội đồng thành phố nhất trí bác bỏ kế hoạch, và lý do được nêu là họ cho rằng xe đạp thuộc về quá khứ và thấy tương lai thuộc về ô tô. Ý 'why a proposed scheme was turned down' khớp với phần giải thích này. Đáp án là C.</span></div><div class="explain-item"><b class="eq">Câu 16.</b> Đáp án đúng: <span class="eans">F</span><span class="equote">&ldquo;'It's wonderful that this happened,' he says. 'But financially I didn't really benefit from it, because I never filed for a patent.'&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> In Paragraph F Schimmelpennink says he did not benefit financially from the worldwide success of bike-sharing because he never filed for a patent. 'A person being unable to profit from their work' paraphrases this. The answer is F.</span><span class="etext etext-vi"><b class="elang">VI:</b> Ở đoạn F, Schimmelpennink nói ông không hưởng lợi về tài chính từ thành công của các chương trình xe đạp chung trên thế giới vì ông chưa bao giờ đăng ký bằng sáng chế. Ý 'a person being unable to profit from their work' diễn đạt lại điều này. Đáp án là F.</span></div><div class="explain-item"><b class="eq">Câu 17.</b> Đáp án đúng: <span class="eans">C</span><span class="equote">&ldquo;It turned out that a white bicycle – per person, per kilometre – would cost the municipality only 10% of what it contributed to public transport per person per kilometre.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph C explains his calculations: a white bicycle would cost the municipality only 10% of what it paid for public transport per person per kilometre. This is the 'potential savings' the scheme would bring. The answer is C.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn C trình bày phép tính của ông: một chiếc xe đạp trắng chỉ tốn chính quyền 10% so với khoản đóng góp cho giao thông công cộng tính theo người và km. Đây chính là 'potential savings' (khoản tiết kiệm tiềm năng) mà chương trình mang lại. Đáp án là C.</span></div><div class="explain-item"><b class="eq">Câu 18.</b> Đáp án đúng: <span class="eans">A</span><span class="equote">&ldquo;They believed the scheme, which was known as the Witte Fietsenplan, was an answer to the perceived threats of air pollution and consumerism.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph A says Provo believed the scheme was an answer to the perceived threats of air pollution and consumerism. 'The problems a scheme was intended to solve' paraphrases 'an answer to the ... threats'. The answer is A.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn A nói nhóm Provo tin rằng chương trình là câu trả lời cho các mối đe doạ được cảm nhận là ô nhiễm không khí và chủ nghĩa tiêu dùng. Cụm 'the problems a scheme was intended to solve' diễn đạt lại 'an answer to the ... threats'. Đáp án là A.</span></div><div class="explain-item"><b class="eq">Câu 19-20.</b> Đáp án đúng: <span class="eans">B, D</span><span class="equote">&ldquo;But the biggest blow came when Postbank decided to abolish the chip card, because it wasn't profitable. ... To continue the project we would have needed to set up another system, but the business partner had lost interest. ... 'Times had changed,' he recalls. 'People had become more environmentally conscious, and the Danish experiment had proved that bike-sharing was a real possibility.'&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> B is correct: Paragraph E says the scheme ended when Postbank, the business partner, abolished the chip card and lost interest. D is correct: in Paragraph D, 'times had changed' and people had become more environmentally conscious, which made the 1999 plan possible. A is wrong because the Ministry of Transport became interested, not opposed; C and E are not mentioned.</span><span class="etext etext-vi"><b class="elang">VI:</b> B đúng: đoạn E nói chương trình chấm dứt khi Postbank, đối tác kinh doanh, bỏ thẻ chip và mất hứng thú. D đúng: ở đoạn D, 'times had changed', mọi người ý thức môi trường hơn nên kế hoạch 1999 mới khả thi. A sai vì Bộ Giao thông Hà Lan lại quan tâm chứ không phản đối; C và E không được nhắc đến. Đáp án là B và D.</span></div><div class="explain-item"><b class="eq">Câu 21-22.</b> Đáp án đúng: <span class="eans">D, E</span><span class="equote">&ldquo;In Amsterdam today, 38% of all trips are made by bike and, along with Copenhagen, it is regarded as one of the two most cycle-friendly capitals in the world ... 'People who travel on the underground don't carry their bikes around. But often they need additional transport to reach their final destination.'&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> E is correct: Amsterdam is regarded as one of the two most cycle-friendly capitals in the world. D is correct: Schimmelpennink argues that underground travellers need extra transport to reach their destination, so a scheme would help them. C is wrong because 38% of trips by bike does not show it is the most common mode; A and B contradict or go beyond the text (he is optimistic).</span><span class="etext etext-vi"><b class="elang">VI:</b> E đúng: Amsterdam được xem là một trong hai thủ đô thân thiện với xe đạp nhất thế giới. D đúng: Schimmelpennink cho rằng người đi tàu điện ngầm cần phương tiện bổ sung để đến đích, nên chương trình chia sẻ xe sẽ có ích cho họ. C sai vì 38% chuyến đi bằng xe đạp không chứng minh đó là phương tiện phổ biến nhất; A và B vượt quá hoặc trái với bài (ông lạc quan về tương lai). Đáp án là D và E.</span></div><div class="explain-item"><b class="eq">Câu 23.</b> Đáp án đúng: <span class="eans">activists</span><span class="equote">&ldquo;Provo, the organisation that came up with the idea, was a group of Dutch activists who wanted to change society.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph A describes Provo as a group of Dutch activists who wanted to change society. The summary sentence 'The people who belonged to this group were ...' needs this noun, so the answer is 'activists'.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn A mô tả Provo là một nhóm các nhà hoạt động (activists) người Hà Lan muốn thay đổi xã hội. Câu tóm tắt 'The people who belonged to this group were ...' cần danh từ này nên đáp án là 'activists'.</span></div><div class="explain-item"><b class="eq">Câu 24.</b> Đáp án đúng: <span class="eans">consumerism</span><span class="equote">&ldquo;They believed the scheme, which was known as the Witte Fietsenplan, was an answer to the perceived threats of air pollution and consumerism.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph A names two concerns: air pollution (which matches 'damage to the environment') and consumerism. The gap after 'and about' therefore takes 'consumerism'.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn A nêu hai mối lo: ô nhiễm không khí (tương ứng 'damage to the environment') và chủ nghĩa tiêu dùng. Vì vậy chỗ trống sau 'and about' điền 'consumerism'.</span></div><div class="explain-item"><b class="eq">Câu 25.</b> Đáp án đúng: <span class="eans">leaflets</span><span class="equote">&ldquo;They also distributed leaflets describing the dangers of cars and inviting people to use the white bikes.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph A says Provo distributed leaflets describing the dangers of cars. 'Handed out ... that condemned the use of cars' paraphrases this, so the answer is 'leaflets'.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn A nói Provo phát tờ rơi (leaflets) mô tả mối nguy của ô tô. 'Handed out ... that condemned the use of cars' là diễn đạt lại ý này, nên đáp án là 'leaflets'.</span></div><div class="explain-item"><b class="eq">Câu 26.</b> Đáp án đúng: <span class="eans">police</span><span class="equote">&ldquo;The police were opposed to Provo's initiatives and almost as soon as the white bikes were distributed around the city, they removed them.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph B says the police opposed Provo's initiatives and removed the bikes almost as soon as they were distributed. The summary's 'almost as quickly as Provo left the bikes ... took them away' matches this, so the answer is 'police'.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn B nói cảnh sát phản đối sáng kiến của Provo và thu hồi xe gần như ngay khi chúng được phân phát. Câu tóm tắt 'almost as quickly as Provo left the bikes ... took them away' khớp với điều này, nên đáp án là 'police'.</span></div></div>
+  </div>
+  <div class="passage-panel tab-content" id="passage-2">
+<div class="passage-title">What is exploration?</div>
+<div class="passage-instr">You should spend about 20 minutes on <b>Questions 27-40,</b> which are based on Reading Passage 3 below.</div>
+<p>We are all explorers. Our desire to discover, and then share that new-found knowledge, is part of what makes us human - indeed, this has played an important part in our success as a species. Long before the first caveman slumped down beside the fire and grunted news that there were plenty of wildebeest over yonder, our ancestors had learnt the value of sending out scouts to investigate the unknown. This questing nature of ours undoubtedly helped our species spread around the globe, just as it nowadays no doubt helps the last nomadic Penan maintain their existence in the depleted forests of Borneo, and a visitor negotiate the subways of New York.</p>
+<p>Over the years, we’ve come to think of explorers as a peculiar breed - different from the rest of us, different from those of us who are merely ‘well travelled’, even; and perhaps there <i>is</i> a type of person more suited to seeking out the new, a type of caveman more inclined to risk venturing out. That, however, doesn’t take away from the fact that we all have this enquiring instinct, even today; and that in all sorts of professions - whether artist, marine biologist or astronomer - borders of the unknown are being tested each day.</p>
+<p>Thomas Hardy set some of his novels in Egdon Heath, a fictional area of uncultivated land, and used the landscape to suggest the desires and fears of his characters. He is delving into matters we all recognise because they are common to humanity. This is surely an act of exploration, and into a world as remote as the author chooses. Explorer and travel writer Peter Fleming talks of the moment when the explorer returns to the existence he has left behind with his loved ones. The traveller ‘who has for weeks or months seen himself only as a puny and irrelevant alien crawling laboriously over a country in which he has no roots and no background, suddenly encounters his other self, a relatively solid figure, with a place in the minds of certain people’.</p>
+<p>In this book about the exploration of the earth’s surface, I have confined myself to those whose travels were real and who also aimed at more than personal discovery. But that still left me with another problem: the word ‘explorer’ has become associated with a past era. We think back to a golden age, as if exploration peaked somehow in the 19th century - as if the process of discovery is now on the decline, though the truth is that we have named only one and a half million of this planet’s species, and there may be more than 10 million - and that’s not including bacteria. We have studied only 5 per cent of the species we know. We have scarcely mapped the ocean floors, and know even less about ourselves; we fully understand the workings of only 10 per cent of our brains.</p>
+<p>Here is how some of today’s ‘explorers’ define the word. Ran Fiennes, dubbed the ‘greatest living explorer’, said, ‘An explorer is someone who has done something that no human has done before - and also done something scientifically useful.’ Chris Bonington, a leading mountaineer, felt exploration was to be found in the act of physically touching the unknown: ‘You have to have gone somewhere new.’ Then Robin Hanbury-Tenison, a campaigner on behalf of remote so-called ‘tribal’ peoples, said, ‘A traveller simply records information about some far-off world, and reports back; but an explorer <i>changes</i> the world.’ Wilfred Thesiger, who crossed Arabia’s Empty Quarter in 1946, and belongs to an era of unmechanised travel now lost to the rest of us, told me, ‘If I’d gone across by camel when I could have gone by car, it would have been a stunt.’ To him, exploration meant bringing back information from a remote place regardless of any great self-discovery.</p>
+<p>Each definition is slightly different - and tends to reflect the field of endeavour of each pioneer. It was the same whoever I asked: the prominent historian would say exploration was a thing of the past, the cutting-edge scientist would say it was of the present. And so on. They each set their own particular criteria; the common factor in their approach being that they all had, unlike many of us who simply enjoy travel or discovering new things, both a very definite objective from the outset and also a desire to record their findings.</p>
+<p>I’d best declare my own bias. As a writer, I’m interested in the exploration of ideas. I’ve done a great many expeditions and each one was unique. I’ve lived for months alone with isolated groups of people all around the world, even two ‘uncontacted tribes’. But none of these things is of the slightest interest to anyone unless, through my books, I’ve found a new slant, explored a new idea. Why? Because the world has moved on. The time has long passed for the great continental voyages - another walk to the poles, another crossing of the Empty Quarter. We know how the land surface of our planet lies; exploration of it is now down to the details - the habits of microbes, say, or the grazing behaviour of buffalo. Aside from the deep sea and deep underground, it’s the era of specialists. However, this is to disregard the role the human mind has in conveying remote places; and this is what interests me: how a fresh interpretation, even of a well-travelled route, can give its readers new insights.</p>
+  </div>
+  <div class="question-panel tab-content" id="questions-2">
+<div class="qgroup">
+<h3>Questions 27–32</h3>
+<div class="instr">Choose the correct letter, A, <b>B, C</b> or <b>D.</b></div>
+<div class="instr">Write the correct letter in boxes 27-32 on your answer sheet.</div>
+<div class="qitem"><span class="qnum">27.</span> The writer refers to visitors to New York to illustrate the point that<span id="hint-q27"></span><br>
+<label class="opt-row"><input type="radio" name="q27" value="A"> A.  exploration is an intrinsic element of being human.</label>
+<label class="opt-row"><input type="radio" name="q27" value="B"> B.  most people are enthusiastic about exploring.</label>
+<label class="opt-row"><input type="radio" name="q27" value="C"> C.  exploration can lead to surprising results.</label>
+<label class="opt-row"><input type="radio" name="q27" value="D"> D.  most people find exploration daunting.</label>
+</div>
+<div class="qitem"><span class="qnum">28.</span> According to the second paragraph, what is the writer’s view of explorers?<span id="hint-q28"></span><br>
+<label class="opt-row"><input type="radio" name="q28" value="A"> A.  Their discoveries have brought both benefits and disadvantages.</label>
+<label class="opt-row"><input type="radio" name="q28" value="B"> B.  Their main value is in teaching others.</label>
+<label class="opt-row"><input type="radio" name="q28" value="C"> C.  They act on an urge that is common to everyone.</label>
+<label class="opt-row"><input type="radio" name="q28" value="D"> D.  They tend to be more attracted to certain professions than to others.</label>
+</div>
+<div class="qitem"><span class="qnum">29.</span> The writer refers to a description of Egdon Heath to suggest that<span id="hint-q29"></span><br>
+<label class="opt-row"><input type="radio" name="q29" value="A"> A.  Hardy was writing about his own experience of exploration.</label>
+<label class="opt-row"><input type="radio" name="q29" value="B"> B.  Hardy was mistaken about the nature of exploration.</label>
+<label class="opt-row"><input type="radio" name="q29" value="C"> C.  Hardy’s aim was to investigate people’s emotional states.</label>
+<label class="opt-row"><input type="radio" name="q29" value="D"> D.  Hardy’s aim was to show the attraction of isolation.</label>
+</div>
+<div class="qitem"><span class="qnum">30.</span> In the fourth paragraph, the writer refers to ‘a golden age’ to suggest that<span id="hint-q30"></span><br>
+<label class="opt-row"><input type="radio" name="q30" value="A"> A.  the amount of useful information produced by exploration has decreased.</label>
+<label class="opt-row"><input type="radio" name="q30" value="B"> B.  fewer people are interested in exploring than in the 19th century.</label>
+<label class="opt-row"><input type="radio" name="q30" value="C"> C.  recent developments have made exploration less exciting.</label>
+<label class="opt-row"><input type="radio" name="q30" value="D"> D.  we are wrong to think that exploration is no longer necessary.</label>
+</div>
+<div class="qitem"><span class="qnum">31.</span> In the sixth paragraph, when discussing the definition of exploration, the writer argues that<span id="hint-q31"></span><br>
+<label class="opt-row"><input type="radio" name="q31" value="A"> A.  people tend to relate exploration to their own professional interests.</label>
+<label class="opt-row"><input type="radio" name="q31" value="B"> B.  certain people are likely to misunderstand the nature of exploration.</label>
+<label class="opt-row"><input type="radio" name="q31" value="C"> C.  the generally accepted definition has changed over time.</label>
+<label class="opt-row"><input type="radio" name="q31" value="D"> D.  historians and scientists have more valid definitions than the general public.</label>
+</div>
+<div class="qitem"><span class="qnum">32.</span> In the last paragraph, the writer explains that he is interested in<span id="hint-q32"></span><br>
+<label class="opt-row"><input type="radio" name="q32" value="A"> A.  how someone’s personality is reflected in their choice of places to visit.</label>
+<label class="opt-row"><input type="radio" name="q32" value="B"> B.  the human ability to cast new light on places that may be familiar.</label>
+<label class="opt-row"><input type="radio" name="q32" value="C"> C.  how travel writing has evolved to meet changing demands.</label>
+<label class="opt-row"><input type="radio" name="q32" value="D"> D.  the feelings that writers develop about the places that they explore.</label>
+</div>
+</div>
+<div class="qgroup">
+<h3>Questions 33–37</h3>
+<div class="instr">Look at the following statements (Questions 33-37) and the list of explorers below.</div>
+<div class="instr">Match each statement with the correct explorer, <b>A-E.</b></div>
+<div class="instr">Write the correct letter, <b>A-E</b>, in boxes 33-37 on your answer sheet.</div>
+<div class="instr"><b>NB</b> You may use any letter more than once.</div>
+<div class="headinglist"><b>List of Explorers</b><br>
+<div>A.  Peter Fleming</div>
+<div>B.  Ran Fiennes</div>
+<div>C.  Chris Bonington</div>
+<div>D.  Robin Hanbury-Tenison</div>
+<div>E.  Wilfred Thesiger</div>
+</div>
+<div class="qitem"><span class="qnum">33.</span> He referred to the relevance of the form of transport used. <select class="qselect" id="q33"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option></select></div>
+<div class="qitem"><span class="qnum">34.</span> He described feelings on coming back home after a long journey. <select class="qselect" id="q34"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option></select></div>
+<div class="qitem"><span class="qnum">35.</span> He worked for the benefit of specific groups of people. <select class="qselect" id="q35"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option></select></div>
+<div class="qitem"><span class="qnum">36.</span> He did not consider learning about oneself an essential part of exploration. <select class="qselect" id="q36"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option></select></div>
+<div class="qitem"><span class="qnum">37.</span> He defined exploration as being both unique and of value to others. <select class="qselect" id="q37"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option></select></div>
+</div>
+<div class="qgroup">
+<h3>Questions 38–40</h3>
+<div class="instr">Complete the summary below.</div>
+<div class="instr">Choose <b>NO MORE THAN TWO WORDS</b> from the passage for each answer.</div>
+<div class="instr">Write your answers in boxes 38-40 on your answer sheet.</div>
+<div class="summarybox"><span class="stitle">The writer’s own bias</span>The writer has experience of a large number of <b class="qnum-inline">38</b><input type="text" class="qtext" id="q38" autocomplete="off"><span id="hint-q38"></span> and was the first stranger that certain previously <b class="qnum-inline">39</b><input type="text" class="qtext" id="q39" autocomplete="off"><span id="hint-q39"></span> people had encountered. He believes there is no need for further exploration of Earth’s <b class="qnum-inline">40</b><input type="text" class="qtext" id="q40" autocomplete="off"><span id="hint-q40"></span>, except to answer specific questions such as how buffalo eat.</div>
+</div>
+<div class="explain-panel" id="explainPanel-2"><h3>📘 Giải thích chi tiết đáp án</h3><div class="explain-item"><b class="eq">Câu 27.</b> Đáp án đúng: <span class="eans">A</span><span class="equote">&ldquo;This questing nature of ours undoubtedly helped our species spread around the globe, just as it nowadays no doubt helps the last nomadic Penan maintain their existence in the depleted forests of Borneo, and a visitor negotiate the subways of New York.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> In the first paragraph the writer says exploration is 'part of what makes us human', then gives the nomadic Penan and a visitor in New York as modern examples of the same questing nature. This supports A, that exploration is an intrinsic element of being human. B and D are about attitudes not discussed, and C (surprising results) is not suggested.</span><span class="etext etext-vi"><b class="elang">VI:</b> Ở đoạn đầu, tác giả nói khám phá là 'part of what makes us human', rồi dùng người Penan du mục và du khách ở New York làm ví dụ hiện đại cho cùng bản tính ham khám phá đó. Điều này ủng hộ A: khám phá là yếu tố vốn có của con người. B và D nói về thái độ không được bàn đến, còn C (kết quả bất ngờ) không được gợi ý. Đáp án là A.</span></div><div class="explain-item"><b class="eq">Câu 28.</b> Đáp án đúng: <span class="eans">C</span><span class="equote">&ldquo;That, however, doesn’t take away from the fact that we all have this enquiring instinct, even today&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> In the second paragraph the writer admits explorers are seen as a peculiar breed, but stresses that we all have this enquiring instinct. That matches C, an urge common to everyone. A, B and D are not claimed; the professions are only examples of people testing the unknown.</span><span class="etext etext-vi"><b class="elang">VI:</b> Ở đoạn hai, tác giả thừa nhận người ta coi nhà thám hiểm là một 'giống người' đặc biệt, nhưng nhấn mạnh rằng tất cả chúng ta đều có bản năng tò mò khám phá. Điều này khớp với C: một thôi thúc chung của mọi người. A, B, D không được khẳng định; các nghề nghiệp chỉ là ví dụ về những người thử thách vùng chưa biết. Đáp án là C.</span></div><div class="explain-item"><b class="eq">Câu 29.</b> Đáp án đúng: <span class="eans">C</span><span class="equote">&ldquo;Thomas Hardy set some of his novels in Egdon Heath, a fictional area of uncultivated land, and used the landscape to suggest the desires and fears of his characters. He is delving into matters we all recognise because they are common to humanity.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph 3 says Hardy used the landscape of Egdon Heath to suggest the desires and fears of his characters, which means exploring people's emotional states (C). There is no claim that this was his own exploration (A), that he was mistaken (B), or that he wanted to show the attraction of isolation (D).</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn 3 nói Hardy dùng cảnh quan Egdon Heath để gợi lên ham muốn và nỗi sợ của các nhân vật, tức là khám phá trạng thái cảm xúc của con người (C). Bài không nói đó là trải nghiệm khám phá của chính ông (A), không nói ông sai (B), cũng không nói ông muốn cho thấy sức hấp dẫn của sự cô lập (D). Đáp án là C.</span></div><div class="explain-item"><b class="eq">Câu 30.</b> Đáp án đúng: <span class="eans">D</span><span class="equote">&ldquo;We think back to a golden age, as if exploration peaked somehow in the 19th century - as if the process of discovery is now on the decline, though the truth is that we have named only one and a half million of this planet’s species, and there may be more than 10 million&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> In the fourth paragraph the writer says we think of a golden age 'as if' discovery is declining, 'though the truth' is that we have named only a fraction of species and understand little of the oceans or our brains. So he suggests we are wrong to think exploration is no longer needed (D). A, B and C all assume decline, which he rejects.</span><span class="etext etext-vi"><b class="elang">VI:</b> Ở đoạn bốn, tác giả nói chúng ta nhớ về một 'thời hoàng kim' như thể khám phá đang suy giảm, 'though the truth' là chúng ta mới đặt tên một phần nhỏ các loài và hiểu rất ít về đại dương hay bộ não. Vậy ông ngụ ý chúng ta sai khi nghĩ khám phá không còn cần thiết (D). A, B, C đều giả định khám phá suy giảm, điều ông bác bỏ. Đáp án là D.</span></div><div class="explain-item"><b class="eq">Câu 31.</b> Đáp án đúng: <span class="eans">A</span><span class="equote">&ldquo;Each definition is slightly different - and tends to reflect the field of endeavour of each pioneer. It was the same whoever I asked: the prominent historian would say exploration was a thing of the past, the cutting-edge scientist would say it was of the present.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> The sixth paragraph says each definition reflects the field of endeavour of the person giving it: the historian says exploration is past, the scientist says it is present. This matches A, people relate exploration to their own professional interests. B, C and D are not argued.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn sáu nói mỗi định nghĩa phản ánh lĩnh vực hoạt động của người đưa ra nó: nhà sử học bảo khám phá thuộc về quá khứ, nhà khoa học bảo nó thuộc về hiện tại. Điều này khớp với A: mọi người gắn khái niệm khám phá với lợi ích nghề nghiệp của mình. B, C, D không được lập luận. Đáp án là A.</span></div><div class="explain-item"><b class="eq">Câu 32.</b> Đáp án đúng: <span class="eans">B</span><span class="equote">&ldquo;However, this is to disregard the role the human mind has in conveying remote places; and this is what interests me: how a fresh interpretation, even of a well-travelled route, can give its readers new insights.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> In the last paragraph the writer says what interests him is how a fresh interpretation, even of a well-travelled route, gives readers new insights. This is B, the human ability to cast new light on familiar places. The other options (personality, travel-writing trends, writers' feelings) are not mentioned.</span><span class="etext etext-vi"><b class="elang">VI:</b> Ở đoạn cuối, tác giả nói điều ông quan tâm là cách một cách diễn giải mới, kể cả về một tuyến đường đã quen thuộc, mang lại cho độc giả những hiểu biết mới. Đó là B: khả năng của con người soi chiếu những nơi quen thuộc bằng cái nhìn mới. Các phương án còn lại (tính cách, xu hướng văn du ký, cảm xúc của nhà văn) không được nhắc. Đáp án là B.</span></div><div class="explain-item"><b class="eq">Câu 33.</b> Đáp án đúng: <span class="eans">E</span><span class="equote">&ldquo;Wilfred Thesiger, who crossed Arabia’s Empty Quarter in 1946, and belongs to an era of unmechanised travel now lost to the rest of us, told me, ‘If I’d gone across by camel when I could have gone by car, it would have been a stunt.’&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Thesiger said that crossing by camel when he could have used a car would have been a stunt, so the form of transport mattered to him. 'Referred to the relevance of the form of transport' paraphrases this. The answer is E.</span><span class="etext etext-vi"><b class="elang">VI:</b> Thesiger nói nếu ông băng qua bằng lạc đà trong khi có thể đi bằng ô tô thì đó chỉ là một màn trình diễn (stunt), tức là phương tiện di chuyển có ý nghĩa với ông. Cụm 'referred to the relevance of the form of transport' diễn đạt lại ý này. Đáp án là E.</span></div><div class="explain-item"><b class="eq">Câu 34.</b> Đáp án đúng: <span class="eans">A</span><span class="equote">&ldquo;Explorer and travel writer Peter Fleming talks of the moment when the explorer returns to the existence he has left behind with his loved ones.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Peter Fleming describes the moment the explorer returns to the life and loved ones left behind after weeks or months away. 'Feelings on coming back home after a long journey' matches this. The answer is A.</span><span class="etext etext-vi"><b class="elang">VI:</b> Peter Fleming nói về khoảnh khắc nhà thám hiểm trở về cuộc sống và những người thân đã bỏ lại sau nhiều tuần hoặc nhiều tháng đi xa. Ý 'feelings on coming back home after a long journey' khớp với điều này. Đáp án là A.</span></div><div class="explain-item"><b class="eq">Câu 35.</b> Đáp án đúng: <span class="eans">D</span><span class="equote">&ldquo;Then Robin Hanbury-Tenison, a campaigner on behalf of remote so-called ‘tribal’ peoples, said, ‘A traveller simply records information about some far-off world, and reports back; but an explorer changes the world.’&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Robin Hanbury-Tenison is described as a campaigner on behalf of remote 'tribal' peoples, so he worked for the benefit of specific groups. 'Specific groups of people' paraphrases 'remote tribal peoples'. The answer is D.</span><span class="etext etext-vi"><b class="elang">VI:</b> Robin Hanbury-Tenison được mô tả là nhà vận động vì các dân tộc 'bộ lạc' xa xôi, tức là ông làm việc vì lợi ích của những nhóm người cụ thể. 'Specific groups of people' diễn đạt lại 'remote tribal peoples'. Đáp án là D.</span></div><div class="explain-item"><b class="eq">Câu 36.</b> Đáp án đúng: <span class="eans">E</span><span class="equote">&ldquo;To him, exploration meant bringing back information from a remote place regardless of any great self-discovery.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> The writer says that for Thesiger exploration meant bringing back information from a remote place 'regardless of any great self-discovery'. So he did not see learning about oneself as essential. The answer is E.</span><span class="etext etext-vi"><b class="elang">VI:</b> Tác giả nói với Thesiger, khám phá nghĩa là mang thông tin về từ một nơi xa xôi 'regardless of any great self-discovery' (bất kể có tự khám phá bản thân lớn lao hay không). Vậy ông không coi việc hiểu về chính mình là thiết yếu. Đáp án là E.</span></div><div class="explain-item"><b class="eq">Câu 37.</b> Đáp án đúng: <span class="eans">B</span><span class="equote">&ldquo;Ran Fiennes, dubbed the ‘greatest living explorer’, said, ‘An explorer is someone who has done something that no human has done before - and also done something scientifically useful.’&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Ran Fiennes defined an explorer as someone who has done something no human has done before (unique) and also something scientifically useful (of value to others). Bonington only requires going somewhere new, with no mention of value to others. The answer is B.</span><span class="etext etext-vi"><b class="elang">VI:</b> Ran Fiennes định nghĩa nhà thám hiểm là người làm điều chưa ai làm trước đây (độc nhất) và còn làm điều hữu ích về mặt khoa học (có giá trị với người khác). Bonington chỉ yêu cầu đến một nơi mới, không nhắc đến giá trị cho người khác. Đáp án là B.</span></div><div class="explain-item"><b class="eq">Câu 38.</b> Đáp án đúng: <span class="eans">expeditions</span><span class="equote">&ldquo;I’ve done a great many expeditions and each one was unique.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> In the last paragraph the writer says he has done a great many expeditions, each one unique. The summary 'experience of a large number of ...' paraphrases 'a great many expeditions', so the answer is 'expeditions' (the key also accepts 'unique expeditions').</span><span class="etext etext-vi"><b class="elang">VI:</b> Ở đoạn cuối, tác giả nói ông đã thực hiện rất nhiều chuyến thám hiểm, mỗi chuyến đều độc nhất. Cụm 'experience of a large number of ...' diễn đạt lại 'a great many expeditions', nên đáp án là 'expeditions' (đáp án cũng chấp nhận 'unique expeditions').</span></div><div class="explain-item"><b class="eq">Câu 39.</b> Đáp án đúng: <span class="eans">uncontacted</span><span class="equote">&ldquo;I’ve lived for months alone with isolated groups of people all around the world, even two ‘uncontacted tribes’.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> The writer says he lived with isolated groups, even two 'uncontacted tribes'. 'Previously ... people' in the summary refers to people who had not been contacted before, so the answer is 'uncontacted' (isolated is also accepted).</span><span class="etext etext-vi"><b class="elang">VI:</b> Tác giả kể đã sống nhiều tháng với các nhóm người biệt lập, thậm chí hai 'uncontacted tribes' (bộ lạc chưa từng tiếp xúc). Cụm 'previously ... people' trong bài tóm tắt chỉ những người trước đó chưa từng được tiếp xúc, nên đáp án là 'uncontacted' ('isolated' cũng được chấp nhận).</span></div><div class="explain-item"><b class="eq">Câu 40.</b> Đáp án đúng: <span class="eans">surface</span><span class="equote">&ldquo;We know how the land surface of our planet lies; exploration of it is now down to the details - the habits of microbes, say, or the grazing behaviour of buffalo.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> The writer says we already know how the land surface of the planet lies and exploration is now down to details such as the grazing behaviour of buffalo. The summary's 'Earth's ... except to answer specific questions such as how buffalo eat' matches this, so the answer is 'surface' ('land surface' is also accepted).</span><span class="etext etext-vi"><b class="elang">VI:</b> Tác giả nói chúng ta đã biết bề mặt đất liền của hành tinh ra sao và việc khám phá giờ chỉ còn là chi tiết như tập tính gặm cỏ của trâu rừng. Câu tóm tắt 'Earth's ... except to answer specific questions such as how buffalo eat' khớp với ý này, nên đáp án là 'surface' ('land surface' cũng được chấp nhận).</span></div></div>
+  </div>
+</div>
+
+<button id="submitBtn" onclick="requestSubmit()">Nộp bài</button>
+
+<div class="modal-overlay hidden" id="confirmModal">
+  <div class="modal-box">
+    <h3>Xác nhận nộp bài</h3>
+    <p>Bạn có chắc muốn nộp bài? Sau khi nộp sẽ không thể sửa lại.</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="cancelSubmit()">Quay lại làm bài</button>
+      <button class="btn-confirm" onclick="confirmSubmit()">Xác nhận nộp</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="timeUpModal">
+  <div class="modal-box">
+    <h3>⏰ Hết giờ!</h3>
+    <p>Đã hết 60 phút làm bài. Bạn có 5 phút để nộp bài, sau đó bài sẽ tự động được nộp.</p>
+    <div class="modal-actions">
+      <button class="btn-confirm" style="flex:none;width:100%;" onclick="confirmSubmit()">Nộp bài ngay</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="resultModal">
+  <div class="modal-box" style="width:560px;">
+    <div id="resultBox"></div>
+    <div class="modal-actions"><button class="btn-cancel" style="flex:none;width:100%;" onclick="closeResult()">Đóng — Xem lại bài làm</button></div>
+  </div>
+</div>
+
+<script>
+var TEST_NUM = 19;
+var TOTAL_QUESTIONS = 40;
+var PASSAGE_COUNTS = [13, 13, 14];
+var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyfZgrcZfOw-g5nCLlQ5QyLCCADuct8QRxW31SG8F3IZfkgL0x_3LOoPWBHRFRNiXA1/exec";
+var ANS = {"1": "D", "2": "C", "3": "E", "4": "B", "5": "D", "6": ["energy"], "7": ["food"], "8": ["gardening"], "9": ["obesity"], "q1011": ["C", "D"], "q1213": ["A", "D"], "14": "E", "15": "C", "16": "F", "17": "C", "18": "A", "q1920": ["B", "D"], "q2122": ["D", "E"], "23": ["activists"], "24": ["consumerism"], "25": ["leaflets"], "26": ["police"], "27": "A", "28": "C", "29": "C", "30": "D", "31": "A", "32": "B", "33": "E", "34": "A", "35": "D", "36": "E", "37": "B", "38": ["expeditions", "unique expeditions"], "39": ["uncontacted", "isolated"], "40": ["surface", "land surface"]};
+var UNITS = [{"type": "select", "n": 1}, {"type": "select", "n": 2}, {"type": "select", "n": 3}, {"type": "select", "n": 4}, {"type": "select", "n": 5}, {"type": "text", "n": 6}, {"type": "text", "n": 7}, {"type": "text", "n": 8}, {"type": "text", "n": 9}, {"type": "checkboxGroup", "group": "q1011", "members": [10, 11], "max": 2}, {"type": "checkboxGroup", "group": "q1213", "members": [12, 13], "max": 2}, {"type": "select", "n": 14}, {"type": "select", "n": 15}, {"type": "select", "n": 16}, {"type": "select", "n": 17}, {"type": "select", "n": 18}, {"type": "checkboxGroup", "group": "q1920", "members": [19, 20], "max": 2}, {"type": "checkboxGroup", "group": "q2122", "members": [21, 22], "max": 2}, {"type": "text", "n": 23}, {"type": "text", "n": 24}, {"type": "text", "n": 25}, {"type": "text", "n": 26}, {"type": "radio", "n": 27}, {"type": "radio", "n": 28}, {"type": "radio", "n": 29}, {"type": "radio", "n": 30}, {"type": "radio", "n": 31}, {"type": "radio", "n": 32}, {"type": "select", "n": 33}, {"type": "select", "n": 34}, {"type": "select", "n": 35}, {"type": "select", "n": 36}, {"type": "select", "n": 37}, {"type": "text", "n": 38}, {"type": "text", "n": 39}, {"type": "text", "n": 40}];
+var CHECKBOX_GROUPS = [{"name": "q1011", "max": 2}, {"name": "q1213", "max": 2}, {"name": "q1920", "max": 2}, {"name": "q2122", "max": 2}];
+</script>
+<script>
+/* ===================== READING TEST ENGINE (shared) ===================== */
+/* Requires globals defined in the per-test <script> block BEFORE this file:
+   TEST_NUM, TOTAL_QUESTIONS, PASSAGE_COUNTS ([n1,n2,n3]), ANS {}, UNITS [], APPS_SCRIPT_URL
+*/
+(function(){
+  'use strict';
+
+  function pad(n,len){ n=String(n); while(n.length<len) n='0'+n; return n; }
+  function qLabel(n){ return 'Q.'+pad(n,2)+'.TEST'+pad(TEST_NUM,3); }
+  function norm(s){ return String(s==null?'':s).toLowerCase().trim().replace(/\s+/g,' '); }
+  window.qLabel = qLabel;
+
+  /* ---------------- Popup / start ---------------- */
+  window._studentName = '';
+  window._studentClass = '';
+  window._testStartTime = null;
+  var submitted = false;
+  var timerStopped = false;
+
+  window.startExam = function(){
+    var nameEl = document.getElementById('stuName');
+    var classEl = document.getElementById('stuClass');
+    var errEl = document.getElementById('nameErr');
+    var name = nameEl.value.trim();
+    var cls = classEl.value.trim();
+    if(!name || !cls){
+      errEl.textContent = 'Vui lòng nhập đầy đủ Họ và tên và Lớp.';
+      return;
+    }
+    errEl.textContent = '';
+    window._studentName = name;
+    window._studentClass = cls;
+    window._testStartTime = Date.now();
+    document.getElementById('nameOverlay').classList.add('hidden');
+    window.enterFullscreen();
+  };
+
+  /* ---------------- Fullscreen / anti-cheat ---------------- */
+  var fsViolations = 0, tabViolations = 0, focusViolations = 0;
+  var violationLog = [];
+
+  window.enterFullscreen = function(){
+    var el = document.documentElement;
+    try{
+      if(el.requestFullscreen) el.requestFullscreen().catch(function(){});
+      else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    }catch(e){}
+    var ov = document.getElementById('fsOverlay');
+    if(ov) ov.style.display = 'none';
+  };
+
+  function isFullscreen(){
+    return !!(document.fullscreenElement || document.webkitFullscreenElement);
+  }
+
+  function onFsChange(){
+    if(submitted) return;
+    if(!window._testStartTime) return;
+    if(!isFullscreen()){
+      fsViolations++;
+      violationLog.push('Thoát fullscreen lúc ' + new Date().toLocaleTimeString());
+      var ov = document.getElementById('fsOverlay');
+      if(ov) ov.style.display = 'flex';
+    }
+  }
+  document.addEventListener('fullscreenchange', onFsChange);
+  document.addEventListener('webkitfullscreenchange', onFsChange);
+
+  document.addEventListener('visibilitychange', function(){
+    if(submitted || !window._testStartTime) return;
+    if(document.hidden){
+      tabViolations++;
+      violationLog.push('Chuyển tab lúc ' + new Date().toLocaleTimeString());
+      showBanner('⚠ Phát hiện chuyển tab! Vi phạm được ghi nhận.');
+    }
+  });
+
+  window.addEventListener('blur', function(){
+    if(submitted || !window._testStartTime) return;
+    focusViolations++;
+    violationLog.push('Mất focus cửa sổ lúc ' + new Date().toLocaleTimeString());
+    showBanner('⚠ Phát hiện mất focus cửa sổ! Vi phạm được ghi nhận.');
+  });
+
+  function showBanner(msg){
+    var b = document.getElementById('warnBanner');
+    if(!b) return;
+    b.textContent = msg;
+    b.style.display = 'block';
+    clearTimeout(b._t);
+    b._t = setTimeout(function(){ b.style.display = 'none'; }, 4000);
+  }
+
+  document.addEventListener('contextmenu', function(e){ if(submitted) return; e.preventDefault(); });
+  document.addEventListener('copy', function(e){ if(submitted) return; e.preventDefault(); });
+  document.addEventListener('paste', function(e){ if(submitted) return; e.preventDefault(); });
+  document.addEventListener('cut', function(e){ if(submitted) return; e.preventDefault(); });
+  document.addEventListener('dragstart', function(e){ if(submitted) return; e.preventDefault(); });
+  document.addEventListener('drop', function(e){ if(submitted) return; e.preventDefault(); });
+
+  document.addEventListener('keydown', function(e){
+    if(submitted) return;
+    var k = e.key;
+    if(k === 'F12'){ e.preventDefault(); return; }
+    if(e.ctrlKey && ['c','C','a','A','s','S','u','U','p','P','v','V'].indexOf(k) !== -1){ e.preventDefault(); return; }
+    if(e.ctrlKey && e.shiftKey && ['i','I','j','J','c','C','k','K'].indexOf(k) !== -1){ e.preventDefault(); return; }
+    if(k === 'Escape'){ e.preventDefault(); return; }
+  });
+
+  window.getViolationLog = function(){
+    submitted = true;
+    return { tabViolations: tabViolations, focusViolations: focusViolations, fsViolations: fsViolations, log: violationLog };
+  };
+  window.stopTimer = function(){ timerStopped = true; };
+
+  /* ---------------- Timer ---------------- */
+  (function(){
+    var DURATION = 60*60*1000, EXTRA = 5*60*1000;
+    var startTime = null, extraTriggered = false, autoSubmitted = false;
+    function fmt(ms){
+      if(ms<0) ms=0;
+      var s = Math.floor(ms/1000);
+      var m = Math.floor(s/60); s = s%60;
+      return pad(m,2)+':'+pad(s,2);
+    }
+    function tick(){
+      if(!startTime){
+        if(!window._testStartTime){ requestAnimationFrame(tick); return; }
+        startTime = window._testStartTime;
+      }
+      if(timerStopped) return;
+      var box = document.getElementById('timerBox');
+      var elapsed = Date.now() - startTime;
+      var remain = DURATION - elapsed;
+      if(remain <= 0 && !extraTriggered){
+        extraTriggered = true;
+        showTimeUpModal();
+        remain = 0 - (Date.now() - (startTime+DURATION));
+      }
+      if(remain <= -EXTRA && !autoSubmitted){
+        autoSubmitted = true;
+        doSubmit();
+        return;
+      }
+      if(box){
+        var showMs = extraTriggered ? (EXTRA + (DURATION - elapsed)) : remain;
+        box.textContent = fmt(Math.max(0,showMs));
+        box.classList.remove('warn','danger');
+        if(!extraTriggered){
+          if(remain <= 2*60*1000) box.classList.add('danger');
+          else if(remain <= 10*60*1000) box.classList.add('warn');
+        } else {
+          box.classList.add('danger');
+        }
+      }
+      setTimeout(tick, 500);
+    }
+    function showTimeUpModal(){
+      var m = document.getElementById('timeUpModal');
+      if(m) m.classList.remove('hidden');
+    }
+    window._timerTick = tick;
+    requestAnimationFrame(tick);
+  })();
+
+  /* ---------------- Tabs ---------------- */
+  window.showPassage = function(idx){
+    for(var i=0;i<3;i++){
+      var p = document.getElementById('passage-'+i);
+      var q = document.getElementById('questions-'+i);
+      var t = document.getElementById('tabBtn-'+i);
+      if(!p) continue;
+      if(i===idx){ p.classList.add('active'); q.classList.add('active'); t.classList.add('active'); }
+      else { p.classList.remove('active'); q.classList.remove('active'); t.classList.remove('active'); }
+    }
+  };
+
+  /* ---------------- Split divider ---------------- */
+  function initDivider(){
+    var dragging = false;
+    var divider = document.getElementById('divider');
+    var area = document.getElementById('examArea');
+    if(!divider) return;
+    function onMove(clientX){
+      var rect = area.getBoundingClientRect();
+      var pct = (clientX - rect.left) / rect.width * 100;
+      pct = Math.max(20, Math.min(80, pct));
+      document.querySelectorAll('.passage-panel').forEach(function(el){ el.style.width = pct+'%'; });
+      document.querySelectorAll('.question-panel').forEach(function(el){ el.style.width = (100-pct)+'%'; });
+    }
+    divider.addEventListener('mousedown', function(e){ dragging = true; e.preventDefault(); });
+    document.addEventListener('mousemove', function(e){ if(dragging) onMove(e.clientX); });
+    document.addEventListener('mouseup', function(){ dragging = false; });
+    divider.addEventListener('touchstart', function(e){ dragging = true; }, {passive:true});
+    document.addEventListener('touchmove', function(e){ if(dragging && e.touches[0]) onMove(e.touches[0].clientX); }, {passive:true});
+    document.addEventListener('touchend', function(){ dragging = false; });
+  }
+
+  /* ---------------- Highlight ---------------- */
+  var currentColor = 'yellow';
+  var eraserMode = false;
+  var penMode = false;
+  var penEraseMode = false;
+  var penColor = 'red';
+
+  function initHighlightToolbar(){
+    document.querySelectorAll('.hl-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        currentColor = btn.getAttribute('data-c');
+        eraserMode = false;
+        document.querySelectorAll('.hl-btn').forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active');
+        document.getElementById('eraserBtn').classList.remove('active');
+      });
+    });
+    var er = document.getElementById('eraserBtn');
+    if(er) er.addEventListener('click', function(){
+      eraserMode = !eraserMode;
+      er.classList.toggle('active', eraserMode);
+    });
+    var first = document.querySelector('.hl-btn[data-c="yellow"]');
+    if(first) first.classList.add('active');
+  }
+
+  function wrapRange(range, cls){
+    var frag = range.extractContents();
+    var span = document.createElement('span');
+    span.className = cls;
+    span.appendChild(frag);
+    range.insertNode(span);
+  }
+
+  function handleMouseUp(container){
+    var sel = window.getSelection();
+    if(!sel || sel.isCollapsed || sel.rangeCount===0) return;
+    var range = sel.getRangeAt(0);
+    if(!container.contains(range.commonAncestorContainer)) return;
+    var tag = range.commonAncestorContainer.nodeType===1 ? range.commonAncestorContainer.tagName : range.commonAncestorContainer.parentElement.tagName;
+    if(['INPUT','SELECT','TEXTAREA'].indexOf(tag)!==-1) return;
+    if(submitted){
+      var rect = range.getBoundingClientRect();
+      var text = sel.toString();
+      sel.removeAllRanges();
+      doDictLookup(text, rect);
+      return;
+    }
+    if(eraserMode || penMode) return;
+    try{
+      wrapRange(range, 'hl-'+currentColor);
+    }catch(e){}
+    sel.removeAllRanges();
+  }
+
+  function handleEraseClick(e){
+    if(!eraserMode) return;
+    var el = e.target;
+    if(el.classList && (el.classList.contains('hl-yellow')||el.classList.contains('hl-green')||el.classList.contains('hl-pink'))){
+      var parent = el.parentNode;
+      while(el.firstChild) parent.insertBefore(el.firstChild, el);
+      parent.removeChild(el);
+    }
+  }
+
+  function initHighlightZones(){
+    document.querySelectorAll('.passage-panel, .question-panel').forEach(function(zone){
+      zone.addEventListener('mouseup', function(){ handleMouseUp(zone); });
+      zone.addEventListener('click', function(e){ handleEraseClick(e); });
+      zone.addEventListener('touchend', function(){ handleMouseUp(zone); });
+      zone.addEventListener('dblclick', function(){
+        if(!submitted) return;
+        var sel = window.getSelection();
+        if(!sel || sel.isCollapsed || sel.rangeCount===0) return;
+        var range = sel.getRangeAt(0);
+        var rect = range.getBoundingClientRect();
+        var text = sel.toString();
+        doDictLookup(text, rect);
+      });
+    });
+  }
+
+  /* ---------------- Selected-answer highlight ---------------- */
+  function initSelectedAnswerHighlight(){
+    document.querySelectorAll('input[type=radio], input[type=checkbox]').forEach(function(inp){
+      inp.addEventListener('change', function(){
+        var label = inp.closest('.opt-row');
+        if(inp.type==='radio'){
+          document.querySelectorAll('input[name="'+inp.name+'"]').forEach(function(o){
+            var l = o.closest('.opt-row');
+            if(l) l.classList.remove('selected-answer');
+          });
+          if(inp.checked && label) label.classList.add('selected-answer');
+        } else {
+          if(label) label.classList.toggle('selected-answer', inp.checked);
+        }
+      });
+    });
+  }
+
+  /* ---------------- Checkbox group max-limit ---------------- */
+  window.wireCheckboxLimit = function(name, max){
+    function showLimit(){
+      var id = 'chk-limit-'+name;
+      var el = document.getElementById(id);
+      if(!el){
+        el = document.createElement('div');
+        el.id = id;
+        el.style.cssText = 'color:#e74c3c;font-size:12px;font-weight:bold;margin-top:4px;';
+        var grp = document.querySelector('input[name="'+name+'"]');
+        if(grp && grp.parentNode && grp.parentNode.parentNode) grp.parentNode.parentNode.appendChild(el);
+      }
+      el.textContent = '⚠ Chỉ được chọn tối đa ' + max + ' đáp án!';
+      clearTimeout(el._t);
+      el._t = setTimeout(function(){ el.textContent=''; }, 2500);
+    }
+    document.querySelectorAll('input[name="'+name+'"]').forEach(function(inp){
+      inp.addEventListener('change', function(){
+        if(inp.checked){
+          var n = document.querySelectorAll('input[name="'+name+'"]:checked').length;
+          if(n>max){ inp.checked=false; inp.dispatchEvent(new Event('_uncheck')); showLimit();
+            var label = inp.closest('.opt-row'); if(label) label.classList.remove('selected-answer');
+          }
+        }
+      });
+    });
+  };
+
+  /* ---------------- Pen (freehand drawing) tool ---------------- */
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+  var drawLayers = []; // {zone, svg}
+
+  function initDrawLayers(){
+    document.querySelectorAll('.passage-panel, .question-panel').forEach(function(zone){
+      var svg = document.createElementNS(SVG_NS, 'svg');
+      svg.setAttribute('class', 'draw-layer');
+      svg.style.height = Math.max(zone.scrollHeight, zone.clientHeight) + 'px';
+      zone.appendChild(svg);
+      drawLayers.push({zone: zone, svg: svg});
+      wireDrawing(zone, svg);
+    });
+  }
+
+  function resizeDrawLayer(entry){
+    entry.svg.style.height = Math.max(entry.zone.scrollHeight, entry.zone.clientHeight) + 'px';
+  }
+
+  function wireDrawing(zone, svg){
+    var drawing = false;
+    var curPath = null;
+    var pts = [];
+
+    function pos(ev){
+      var rect = zone.getBoundingClientRect();
+      var cx = (ev.touches ? ev.touches[0].clientX : ev.clientX);
+      var cy = (ev.touches ? ev.touches[0].clientY : ev.clientY);
+      return { x: cx - rect.left + zone.scrollLeft, y: cy - rect.top + zone.scrollTop };
+    }
+
+    function startDraw(ev){
+      if(!penMode || penEraseMode || submitted) return;
+      var tag = ev.target.tagName;
+      if(['INPUT','SELECT','TEXTAREA','A'].indexOf(tag)!==-1) return;
+      drawing = true;
+      pts = [];
+      var p = pos(ev);
+      pts.push(p.x.toFixed(1)+','+p.y.toFixed(1));
+      curPath = document.createElementNS(SVG_NS, 'polyline');
+      curPath.setAttribute('points', pts.join(' '));
+      curPath.setAttribute('fill', 'none');
+      curPath.setAttribute('stroke', penColor==='red' ? '#e53935' : (penColor==='blue' ? '#1e88e5' : '#222'));
+      curPath.setAttribute('stroke-width', '2.2');
+      curPath.setAttribute('stroke-linecap', 'round');
+      curPath.setAttribute('stroke-linejoin', 'round');
+      svg.appendChild(curPath);
+      ev.preventDefault();
+    }
+    function moveDraw(ev){
+      if(!drawing || !curPath) return;
+      var p = pos(ev);
+      pts.push(p.x.toFixed(1)+','+p.y.toFixed(1));
+      curPath.setAttribute('points', pts.join(' '));
+      ev.preventDefault();
+    }
+    function endDraw(){
+      drawing = false;
+      curPath = null;
+      pts = [];
+    }
+    function eraseAt(ev){
+      if(!penEraseMode || submitted) return;
+      var p = pos(ev);
+      var els = svg.querySelectorAll('polyline');
+      for(var i=0;i<els.length;i++){
+        var el = els[i];
+        var box = el.getBBox();
+        var pad = 8;
+        if(p.x >= box.x-pad && p.x <= box.x+box.width+pad && p.y >= box.y-pad && p.y <= box.y+box.height+pad){
+          el.remove();
+        }
+      }
+    }
+
+    svg.addEventListener('mousedown', function(ev){
+      if(penEraseMode){ eraseAt(ev); return; }
+      startDraw(ev);
+    });
+    svg.addEventListener('mousemove', moveDraw);
+    svg.addEventListener('mouseup', endDraw);
+    svg.addEventListener('mouseleave', endDraw);
+    svg.addEventListener('touchstart', function(ev){
+      if(penEraseMode){ eraseAt(ev); return; }
+      startDraw(ev);
+    }, {passive:false});
+    svg.addEventListener('touchmove', moveDraw, {passive:false});
+    svg.addEventListener('touchend', endDraw);
+  }
+
+  function updatePenLayers(){
+    drawLayers.forEach(function(entry){
+      resizeDrawLayer(entry);
+      entry.svg.classList.toggle('pen-active', penMode && !penEraseMode);
+      entry.svg.classList.toggle('pen-erase', penMode && penEraseMode);
+    });
+  }
+
+  function initPenTool(){
+    var btn = document.getElementById('penBtn');
+    var eraseBtn = document.getElementById('penEraserBtn');
+    var colorBtns = document.querySelectorAll('.pen-color-btn');
+    if(!btn) return;
+    function setColorBtnsVisible(show){
+      colorBtns.forEach(function(b){ b.classList.toggle('show', show); });
+      if(eraseBtn) eraseBtn.classList.toggle('show', show);
+    }
+    colorBtns.forEach(function(b){
+      if(b.getAttribute('data-pc')===penColor) b.classList.add('active');
+      b.addEventListener('click', function(){
+        penColor = b.getAttribute('data-pc');
+        penEraseMode = false;
+        if(eraseBtn) eraseBtn.classList.remove('active');
+        colorBtns.forEach(function(o){ o.classList.remove('active'); });
+        b.classList.add('active');
+        updatePenLayers();
+      });
+    });
+    btn.addEventListener('click', function(){
+      penMode = !penMode;
+      btn.classList.toggle('active', penMode);
+      document.body.classList.toggle('pen-mode', penMode);
+      setColorBtnsVisible(penMode);
+      if(penMode){
+        eraserMode = false;
+        var er = document.getElementById('eraserBtn');
+        if(er) er.classList.remove('active');
+      } else {
+        penEraseMode = false;
+        if(eraseBtn) eraseBtn.classList.remove('active');
+      }
+      updatePenLayers();
+    });
+    if(eraseBtn){
+      eraseBtn.addEventListener('click', function(){
+        penEraseMode = !penEraseMode;
+        eraseBtn.classList.toggle('active', penEraseMode);
+        updatePenLayers();
+      });
+    }
+  }
+
+  /* ---------------- Post-submit dictionary lookup ---------------- */
+  function dictEsc(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+  function removeDictPopup(){
+    var el = document.getElementById('dictPopup');
+    if(el) el.remove();
+  }
+  function showDictPopup(innerHtml, rect, wide){
+    // keep existing popup element in place if it already exists (avoids losing
+    // scroll position while a multi-chunk translation is progressively updated)
+    var el = document.getElementById('dictPopup');
+    var isNew = !el;
+    if(!el){
+      el = document.createElement('div');
+      el.className = 'dict-popup';
+      el.id = 'dictPopup';
+      document.body.appendChild(el);
+    }
+    el.classList.toggle('dict-popup-wide', !!wide);
+    el.innerHTML = '<span class="dict-close">✕</span><div class="dict-body">' + innerHtml + '</div>';
+    el.querySelector('.dict-close').addEventListener('click', removeDictPopup);
+    if(isNew){
+      var popW = wide ? 480 : 320;
+      var top = rect.bottom + 8;
+      var left = rect.left;
+      var maxLeft = window.innerWidth - popW - 16;
+      if(left > maxLeft) left = Math.max(8, maxLeft);
+      if(left < 8) left = 8;
+      var maxTop = window.innerHeight - 90;
+      if(top > maxTop) top = Math.max(8, rect.top - 90);
+      el.style.top = Math.max(8,top) + 'px';
+      el.style.left = left + 'px';
+    }
+  }
+  // MyMemory's free/anonymous endpoint truncates or degrades quality on long queries
+  // (roughly >450-500 chars), so long selections are split into sentence-sized chunks
+  // and translated sequentially, then re-assembled — this is what makes long-passage
+  // translation actually show the FULL translated text instead of one short fragment.
+  function splitIntoChunks(text, maxLen){
+    var sentences = text.match(/[^.!?]+[.!?]*(\s+|$)/g) || [text];
+    var chunks = [];
+    var cur = '';
+    sentences.forEach(function(s){
+      if(s.length > maxLen){
+        // a single "sentence" is itself too long (no punctuation) — hard-split it
+        if(cur){ chunks.push(cur); cur = ''; }
+        for(var i=0;i<s.length;i+=maxLen){ chunks.push(s.slice(i, i+maxLen)); }
+        return;
+      }
+      if((cur+s).length > maxLen){
+        chunks.push(cur);
+        cur = s;
+      } else {
+        cur += s;
+      }
+    });
+    if(cur) chunks.push(cur);
+    return chunks.map(function(c){ return c.trim(); }).filter(Boolean);
+  }
+  function translateChunk(chunk){
+    return fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(chunk)+'&langpair=en|vi')
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var t = data && data.responseData && data.responseData.translatedText;
+        return t || '(không dịch được đoạn này)';
+      })
+      .catch(function(){ return '⚠ Lỗi kết nối dịch đoạn này.'; });
+  }
+  function doDictLookup(text, rect){
+    if(!text) return;
+    text = text.trim().replace(/\s+/g,' ');
+    if(!text) return;
+    var MAX_LOOKUP = 3000;
+    if(text.length > MAX_LOOKUP) text = text.slice(0, MAX_LOOKUP);
+
+    var isLong = text.length > 70;
+    if(!isLong){
+      showDictPopup('<b>'+dictEsc(text)+'</b><br>Đang dịch…', rect, false);
+      translateChunk(text).then(function(t){
+        showDictPopup('<b>'+dictEsc(text)+'</b><br>→ '+dictEsc(t), rect, false);
+      });
+      return;
+    }
+
+    // Long passage: chunk it, translate sequentially, render full original +
+    // full translation (both scrollable) so nothing gets cut short.
+    var chunks = splitIntoChunks(text, 450);
+    var translated = new Array(chunks.length).fill('');
+    function render(progressIdx){
+      var status = (progressIdx < chunks.length)
+        ? '<div class="dict-progress">Đang dịch… ('+(progressIdx+1)+'/'+chunks.length+')</div>' : '';
+      var html = '<div class="dict-orig"><b>Đoạn gốc:</b><br>'+dictEsc(text)+'</div>'
+        + '<div class="dict-trans"><b>Bản dịch:</b><br>'+dictEsc(translated.join(' ').trim() || '…')+'</div>'
+        + status;
+      showDictPopup(html, rect, true);
+    }
+    render(0);
+    var chain = Promise.resolve();
+    chunks.forEach(function(chunk, idx){
+      chain = chain.then(function(){
+        return translateChunk(chunk).then(function(t){
+          translated[idx] = t;
+          render(idx+1);
+        });
+      });
+    });
+  }
+
+  function enablePostExamTools(){
+    var tag = document.getElementById('dictModeTag');
+    if(tag) tag.classList.add('show');
+    var hlbar = document.getElementById('hlToolbar');
+    if(hlbar) hlbar.style.display = 'none';
+    var b = document.getElementById('warnBanner');
+    if(b) b.style.display = 'none';
+    var ov = document.getElementById('fsOverlay');
+    if(ov) ov.style.display = 'none';
+    document.body.classList.remove('pen-mode');
+    penMode = false; penEraseMode = false;
+    var pb = document.getElementById('penBtn'); if(pb) pb.classList.remove('active');
+    document.querySelectorAll('.pen-color-btn, #penEraserBtn').forEach(function(b){ b.classList.remove('show','active'); });
+    drawLayers.forEach(function(entry){ entry.svg.classList.remove('pen-active','pen-erase'); });
+    document.querySelectorAll('.explain-panel').forEach(function(p){ p.style.display = 'block'; });
+  }
+
+  /* ---------------- Grading helpers ---------------- */
+  function getRadio(name){
+    var el = document.querySelector('input[name="'+name+'"]:checked');
+    return el ? el.value : '';
+  }
+  function getChecked(name){
+    var out = [];
+    document.querySelectorAll('input[name="'+name+'"]:checked').forEach(function(el){ out.push(el.value); });
+    return out;
+  }
+  function getSelect(name){
+    var el = document.getElementById(name);
+    return el ? el.value : '';
+  }
+  function getText(name){
+    var el = document.getElementById(name);
+    return el ? el.value : '';
+  }
+  function textMatches(val, ansArr){
+    var v = norm(val);
+    if(!v) return false;
+    for(var i=0;i<ansArr.length;i++){ if(norm(ansArr[i])===v) return true; }
+    return false;
+  }
+
+  /* ---------------- Submit flow ---------------- */
+  window.requestSubmit = function(){
+    document.getElementById('confirmModal').classList.remove('hidden');
+  };
+  window.cancelSubmit = function(){
+    document.getElementById('confirmModal').classList.add('hidden');
+  };
+  window.confirmSubmit = function(){
+    document.getElementById('confirmModal').classList.add('hidden');
+    doSubmit();
+  };
+
+  function passageIndexOfQ(n){
+    var c = PASSAGE_COUNTS, acc = 0;
+    for(var i=0;i<3;i++){ acc += c[i]; if(n<=acc) return i; }
+    return 2;
+  }
+
+  function doSubmit(){
+    if(submitted) return;
+    submitted = true;
+    window.getViolationLog();
+    window.stopTimer();
+    var box = document.getElementById('timerBox');
+    if(box) box.style.display = 'none';
+    var tuModal = document.getElementById('timeUpModal');
+    if(tuModal) tuModal.classList.add('hidden');
+
+    var pScore = [0,0,0], pTotal = PASSAGE_COUNTS.slice();
+    var totalCorrect = 0;
+    var detailsParts = [];
+    var doneGroups = {};
+
+    UNITS.forEach(function(u){
+      if(u.type==='checkboxGroup'){
+        if(doneGroups[u.group]) return;
+        doneGroups[u.group] = true;
+        var chosen = getChecked(u.group);
+        var correct = ANS[u.group];
+        var matched = chosen.filter(function(v){ return correct.indexOf(v)!==-1; });
+        var score = Math.min(matched.length, u.max);
+        var pIdx = passageIndexOfQ(u.members[0]);
+        pScore[pIdx] += score;
+        totalCorrect += score;
+        // color options
+        document.querySelectorAll('input[name="'+u.group+'"]').forEach(function(inp){
+          var label = inp.closest('.opt-row');
+          if(!label) return;
+          if(inp.checked && correct.indexOf(inp.value)!==-1) label.classList.add('correct');
+          else if(inp.checked && correct.indexOf(inp.value)===-1) label.classList.add('incorrect');
+          else if(!inp.checked && correct.indexOf(inp.value)!==-1) label.style.outline = '2px dashed #e8b800';
+        });
+        var parts = chosen.map(function(v){ return v + (correct.indexOf(v)>=0 ? '✔' : '✘'); });
+        var missed = correct.filter(function(v){ return chosen.indexOf(v)<0; }).map(function(v){ return v+'(đáp án)'; });
+        detailsParts.push('Q'+u.members.join('-')+':['+parts.concat(missed).join(' ')+']');
+        return;
+      }
+      var n = u.n;
+      var pIdx = passageIndexOfQ(n);
+      var ok = false, val = '';
+      if(u.type==='radio'){
+        val = getRadio('q'+n);
+        ok = Array.isArray(ANS[n]) ? ANS[n].indexOf(val)!==-1 : (val === ANS[n]);
+        document.querySelectorAll('input[name="q'+n+'"]').forEach(function(inp){
+          var label = inp.closest('.opt-row');
+          if(!label) return;
+          if(Array.isArray(ANS[n]) ? ANS[n].indexOf(inp.value)!==-1 : inp.value === ANS[n]) label.classList.add('correct');
+          else if(inp.checked) label.classList.add('incorrect');
+        });
+      } else if(u.type==='select'){
+        val = getSelect('q'+n);
+        ok = Array.isArray(ANS[n]) ? ANS[n].indexOf(val)!==-1 : (val === ANS[n]);
+        var sel = document.getElementById('q'+n);
+        if(sel) sel.classList.add(ok?'correct-cell':'incorrect-cell');
+      } else { // text
+        val = getText('q'+n);
+        ok = textMatches(val, ANS[n]);
+        var inp2 = document.getElementById('q'+n);
+        if(inp2) inp2.classList.add(ok?'correct-cell':'incorrect-cell');
+        if(!ok){
+          var hint = document.getElementById('hint-q'+n);
+          if(hint) hint.textContent = ' (Đáp án: ' + ANS[n][0] + ')';
+        }
+      }
+      if(ok){ pScore[pIdx]++; totalCorrect++; }
+      detailsParts.push('Q'+n+':'+(ok?'✔':'✘')+'('+val+')');
+    });
+
+    // lock inputs
+    document.querySelectorAll('input,select,textarea').forEach(function(el){
+      if(el.id==='stuName'||el.id==='stuClass') return;
+      el.disabled = true;
+    });
+
+    enablePostExamTools();
+
+    var total = TOTAL_QUESTIONS;
+    var band = computeBand(totalCorrect, total);
+    var elapsedMs = Date.now() - window._testStartTime;
+    var elapsedMin = Math.floor(elapsedMs/60000), elapsedSec = Math.floor((elapsedMs%60000)/1000);
+    var timeTaken = elapsedMin+' phút '+elapsedSec+' giây';
+
+    showResult(pScore, pTotal, totalCorrect, total, band, timeTaken);
+
+    var vlog = { tabViolations: tabViolations, focusViolations: focusViolations, fsViolations: fsViolations };
+    var payload = {
+      action: 'save_result',
+      timestamp: new Date().toISOString(),
+      student: window._studentName + ' — ' + window._studentClass,
+      test: 'Reading Test ' + TEST_NUM,
+      score: totalCorrect,
+      total: total,
+      band: band,
+      timeTaken: timeTaken,
+      p1score: pScore[0]+'/'+pTotal[0],
+      p2score: pScore[1]+'/'+pTotal[1],
+      p3score: pScore[2]+'/'+pTotal[2],
+      tabViol: vlog.tabViolations,
+      focusViol: vlog.focusViolations,
+      fsViol: vlog.fsViolations,
+      details: detailsParts.join(' | ')
+    };
+    fetch(APPS_SCRIPT_URL, {
+      method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify(payload)
+    }).catch(function(){});
+  }
+
+  function computeBand(score, total){
+    var s = Math.round(score/total*40);
+    if(s>=39) return '9';
+    if(s>=37) return '8.5';
+    if(s>=35) return '8';
+    if(s>=33) return '7.5';
+    if(s>=30) return '7';
+    if(s>=27) return '6.5';
+    if(s>=23) return '6';
+    if(s>=19) return '5.5';
+    if(s>=15) return '5';
+    if(s>=13) return '4.5';
+    if(s>=10) return '4';
+    return '< 4';
+  }
+
+  function showResult(pScore, pTotal, totalCorrect, total, band, timeTaken){
+    var box = document.getElementById('resultBox');
+    var html = '<h3>Kết quả bài thi</h3>';
+    html += '<p>Thí sinh: <b>'+esc(window._studentName)+'</b> — Lớp: <b>'+esc(window._studentClass)+'</b></p>';
+    html += '<p>Thời gian làm bài: <b>'+timeTaken+'</b></p>';
+    html += '<table><tr><th>Passage</th><th>Điểm</th></tr>';
+    for(var i=0;i<3;i++){ html += '<tr><td>Passage '+(i+1)+'</td><td>'+pScore[i]+'/'+pTotal[i]+'</td></tr>'; }
+    html += '<tr><td><b>Tổng điểm</b></td><td><b>'+totalCorrect+'/'+total+'</b></td></tr></table>';
+    html += '<p>Band ước tính: <span class="band-badge">Band '+band+'</span></p>';
+    html += '<p style="font-size:12.5px;color:#667;">Báo cáo vi phạm — Chuyển tab: '+tabViolations+' | Mất focus: '+focusViolations+' | Thoát fullscreen: '+fsViolations+'</p>';
+    html += '<p style="font-size:12.5px;color:#667;">Các ô được tô <span style="color:var(--green);font-weight:700;">xanh</span> là đáp án đúng, tô <span style="color:var(--red);font-weight:700;">đỏ</span> là sai. Đáp án đúng bị bỏ sót (checkbox) được viền nét đứt vàng.</p>';
+    box.innerHTML = html;
+    document.getElementById('resultModal').classList.remove('hidden');
+  }
+  window.closeResult = function(){
+    document.getElementById('resultModal').classList.add('hidden');
+  };
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  /* ---------------- Init (script is at end of body, DOM already ready — wire directly) ---------------- */
+  initHighlightToolbar();
+  initHighlightZones();
+  initSelectedAnswerHighlight();
+  initDrawLayers();
+  initPenTool();
+  initDivider();
+  if(window.CHECKBOX_GROUPS){
+    window.CHECKBOX_GROUPS.forEach(function(g){ window.wireCheckboxLimit(g.name, g.max); });
+  }
+
+})();
+
+</script>
+</body>
+</html>

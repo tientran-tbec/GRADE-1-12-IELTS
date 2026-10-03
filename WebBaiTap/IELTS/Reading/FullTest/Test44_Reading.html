@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><script>window.GN_URL="https://script.google.com/macros/s/AKfycbyZ4UJgI763vPb4TZhKbKgxl6p-lGCQCJnZDqgCL9mHCVQpUzb4sbJGg89GLWSI-sQj/exec";window.GN_ROOT="../../../../";</script><script src="../../../../engine/auth.js?v=1791025698"></script><script>GNAuth.require()</script><script>GNAuth.requireSet("ielts-rd-test44")</script><script>window.GN_RD={"set": "ielts-rd-test44", "page": "Test44_Reading", "kind": "full"}</script><script src="../../../../engine/reading_shim.js?v=1791025698"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>IELTS Reading Test 44</title>
+<style>
+:root{
+  --blue:#1a56b0; --blue-dark:#123e82; --green:#1e8e3e; --red:#d93025; --orange:#e8710a;
+  --gray-bg:#f4f6f8; --border:#d7dde3; --hl-yellow:#FFE066; --hl-green:#90EE90; --hl-pink:#FFB6C1;
+  --sel-orange:#FFD580;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;height:100%;font-family:"Segoe UI",Arial,sans-serif;color:#1b1f23;background:#fff;}
+body{user-select:none;}
+input[type="text"],select,textarea{user-select:text;}
+.passage-panel, .question-panel{user-select:text;}
+input,select,textarea{font-family:inherit;font-size:14px;}
+@media print{ body{display:none !important;} }
+
+/* ---------- Popup ---------- */
+#nameOverlay{position:fixed;inset:0;background:rgba(10,20,40,.78);display:flex;align-items:center;justify-content:center;z-index:9999;}
+#nameOverlay.hidden{display:none;}
+.name-box{background:#fff;padding:28px 32px;border-radius:10px;width:360px;max-width:92vw;box-shadow:0 12px 40px rgba(0,0,0,.3);}
+.name-box h2{margin:0 0 6px;font-size:19px;color:var(--blue-dark);}
+.name-box p.sub{margin:0 0 18px;font-size:13px;color:#556;}
+.name-box label{display:block;font-size:13px;font-weight:600;margin:10px 0 4px;}
+.name-box input{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:6px;font-size:14px;user-select:text;}
+.name-box .err{color:var(--red);font-size:12.5px;min-height:18px;margin-top:8px;}
+.name-box button{margin-top:10px;width:100%;padding:11px;background:var(--blue);color:#fff;border:none;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;}
+.name-box button:hover{background:var(--blue-dark);}
+
+/* ---------- Header ---------- */
+#topbar{position:sticky;top:0;z-index:500;background:#fff;border-bottom:1px solid var(--border);}
+#hlToolbar{display:flex;align-items:center;gap:8px;padding:6px 14px;background:#eef2f7;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+#hlToolbar .lbl{font-size:12.5px;color:#556;margin-right:4px;}
+.hl-btn{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;}
+.hl-btn[data-c="yellow"]{background:var(--hl-yellow);}
+.hl-btn[data-c="green"]{background:var(--hl-green);}
+.hl-btn[data-c="pink"]{background:var(--hl-pink);}
+.hl-btn.active{border-color:#333;transform:scale(1.15);}
+#eraserBtn{padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:13px;}
+#eraserBtn.active{background:#333;color:#fff;}
+#penBtn{padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:13px;}
+#penBtn.active{background:#8a5b00;color:#fff;}
+.pen-color-btn{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;display:none;vertical-align:middle;}
+.pen-color-btn.show{display:inline-block;}
+.pen-color-btn[data-pc="red"]{background:#e53935;}
+.pen-color-btn[data-pc="blue"]{background:#1e88e5;}
+.pen-color-btn[data-pc="black"]{background:#222;}
+.pen-color-btn.active{border-color:#333;transform:scale(1.15);}
+#penEraserBtn{padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:13px;display:none;}
+#penEraserBtn.show{display:inline-block;}
+#penEraserBtn.active{background:#333;color:#fff;}
+#dictModeTag{display:none;font-size:12px;color:var(--green);font-weight:700;padding:4px 10px;background:#e6f6ea;border-radius:6px;}
+#dictModeTag.show{display:inline-block;}
+.hl-yellow{background:var(--hl-yellow);}
+.hl-green{background:var(--hl-green);}
+.hl-pink{background:var(--hl-pink);}
+
+#header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;}
+#tabs{display:flex;gap:6px;}
+.tab-btn{padding:8px 16px;border:1px solid var(--border);background:#f4f6f8;border-radius:6px 6px 0 0;cursor:pointer;font-size:14px;font-weight:600;color:#445;}
+.tab-btn.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+#timerBox{font-size:20px;font-weight:700;padding:6px 14px;border-radius:8px;background:#eef2f7;color:var(--blue-dark);min-width:110px;text-align:center;}
+#timerBox.warn{background:#fff3cd;color:#8a5b00;animation:blink 1s infinite;}
+#timerBox.danger{background:#fbe0de;color:var(--red);animation:blink .5s infinite;}
+@keyframes blink{50%{opacity:.4;}}
+
+/* ---------- Layout ---------- */
+#examArea{display:flex;height:calc(100vh - 128px);}
+.passage-panel{width:50%;overflow-y:auto;padding:18px 22px;border-right:none;background:#fff;}
+#divider{width:6px;cursor:col-resize;background:var(--border);flex-shrink:0;}
+#divider:hover{background:var(--blue);}
+.question-panel{width:50%;overflow-y:auto;padding:18px 22px;background:#fbfcfe;}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+.passage-title{font-size:19px;font-weight:700;color:var(--blue-dark);margin:4px 0 12px;}
+.passage-instr{font-style:italic;font-size:13px;color:#556;margin-bottom:14px;}
+.passage-panel p{line-height:1.65;margin:0 0 12px;text-align:justify;}
+.subheading{display:inline-block;font-weight:700;color:var(--blue-dark);margin-right:6px;}
+.footnote{font-size:12.5px;color:#667;}
+
+.qgroup{margin-bottom:26px;padding-bottom:18px;border-bottom:1px dashed var(--border);}
+.qgroup:last-child{border-bottom:none;}
+.qgroup h3{font-size:14.5px;margin:0 0 4px;color:var(--blue-dark);}
+.qgroup .instr{font-size:13px;color:#445;margin:0 0 10px;line-height:1.5;}
+.qitem{margin:10px 0;font-size:14px;line-height:1.6;}
+.qnum{display:inline-block;min-width:24px;font-weight:700;color:var(--blue-dark);}
+.opt-row{display:block;margin:4px 0 4px 26px;padding:3px 6px;border-radius:5px;cursor:pointer;}
+.opt-row input{margin-right:8px;}
+.opt-row.selected-answer{background:var(--sel-orange);}
+.opt-row.correct{background:#c8f0d0 !important;}
+.opt-row.incorrect{background:#f8d3d0 !important;}
+select.qselect{padding:5px 6px;border:1px solid var(--border);border-radius:5px;font-size:13.5px;margin-left:6px;min-width:150px;}
+input.qtext{padding:4px 7px;border:1px solid var(--border);border-radius:4px;font-size:13.5px;width:150px;margin:0 3px;}
+input.qtext.correct-cell{background:#c8f0d0;border-color:var(--green);}
+input.qtext.incorrect-cell{background:#f8d3d0;border-color:var(--red);}
+.ans-hint{font-size:12px;color:var(--green);font-weight:600;margin-left:6px;}
+.qnum-inline{display:inline-block;min-width:20px;color:#fff;background:var(--blue);border-radius:4px;font-size:11.5px;text-align:center;padding:1px 4px;margin:0 4px 0 2px;vertical-align:middle;}
+.headinglist, .wordbank, .keylist{background:#eef2f7;border:1px solid var(--border);border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:13.5px;line-height:1.65;}
+.headinglist div, .wordbank span, .keylist div{margin:2px 0;}
+.wordbank span{display:inline-block;margin-right:16px;}
+table.qtable{width:100%;border-collapse:collapse;margin:10px 0;font-size:13.5px;}
+table.qtable td, table.qtable th{border:1px solid var(--border);padding:7px 9px;vertical-align:top;text-align:left;}
+table.qtable th{background:#eef2f7;}
+.notebox{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin:10px 0;}
+.notebox h4{margin:12px 0 6px;font-size:14px;color:var(--blue-dark);}
+.notebox h4:first-child{margin-top:0;}
+.notebox ul{margin:4px 0 8px;padding-left:20px;}
+.notebox li{margin:4px 0;font-size:13.5px;line-height:1.6;}
+.summarybox{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin:10px 0;font-size:13.5px;line-height:1.85;}
+.summarybox .stitle{font-weight:700;color:var(--blue-dark);display:block;margin-bottom:8px;}
+
+@media (max-width:768px){
+  #examArea{flex-direction:column;height:auto;}
+  .passage-panel, .question-panel{width:100%;height:60vh;}
+  #divider{display:none;}
+  .tab-btn{padding:7px 10px;font-size:12.5px;}
+}
+
+/* ---------- Submit / violation ---------- */
+#submitBtn{position:fixed;right:22px;bottom:22px;z-index:600;background:var(--red);color:#fff;border:none;padding:14px 24px;border-radius:30px;font-size:15px;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.25);cursor:pointer;}
+#submitBtn:hover{background:#a80f00;}
+.modal-overlay{position:fixed;inset:0;background:rgba(10,20,40,.65);display:flex;align-items:center;justify-content:center;z-index:9998;}
+.modal-overlay.hidden{display:none;}
+.modal-box{background:#fff;border-radius:10px;padding:24px 26px;width:420px;max-width:92vw;box-shadow:0 12px 40px rgba(0,0,0,.3);}
+.modal-box h3{margin:0 0 10px;color:var(--blue-dark);}
+.modal-actions{display:flex;gap:10px;margin-top:18px;}
+.modal-actions button{flex:1;padding:10px;border-radius:6px;border:none;font-size:14px;font-weight:600;cursor:pointer;}
+.btn-confirm{background:var(--red);color:#fff;}
+.btn-cancel{background:#e4e8ec;color:#333;}
+#resultBox{max-height:70vh;overflow-y:auto;}
+#resultBox table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13.5px;}
+#resultBox td,#resultBox th{border:1px solid var(--border);padding:6px 8px;}
+.band-badge{display:inline-block;background:var(--blue);color:#fff;padding:4px 12px;border-radius:20px;font-weight:700;font-size:15px;}
+#warnBanner{position:fixed;top:0;left:0;right:0;background:var(--red);color:#fff;text-align:center;padding:8px;font-weight:700;z-index:9997;display:none;}
+#fsOverlay{position:fixed;inset:0;background:rgba(10,20,40,.9);color:#fff;display:none;align-items:center;justify-content:center;flex-direction:column;z-index:9996;text-align:center;padding:20px;}
+#fsOverlay button{margin-top:16px;padding:10px 20px;border-radius:6px;border:none;background:var(--blue);color:#fff;font-weight:700;cursor:pointer;font-size:14px;}
+
+/* ---------- Pen (freehand drawing) tool ---------- */
+.passage-panel, .question-panel{position:relative;}
+.draw-layer{position:absolute;top:0;left:0;width:100%;pointer-events:none;z-index:40;}
+.draw-layer.pen-active{pointer-events:auto;cursor:crosshair;}
+.draw-layer.pen-erase{pointer-events:auto;cursor:cell;}
+body.pen-mode .passage-panel, body.pen-mode .question-panel{cursor:crosshair;}
+
+/* ---------- Dictionary popup (post-submit) ---------- */
+.dict-popup{position:fixed;max-width:320px;background:#1b1f23;color:#fff;padding:10px 14px;border-radius:8px;font-size:13px;line-height:1.5;z-index:9995;box-shadow:0 8px 24px rgba(0,0,0,.3);}
+.dict-popup.dict-popup-wide{max-width:480px;}
+.dict-popup b{color:#7fd0ff;}
+.dict-popup .dict-close{position:absolute;top:2px;right:8px;cursor:pointer;color:#aaa;font-size:14px;}
+.dict-popup .dict-body{max-height:56vh;overflow-y:auto;padding-right:4px;}
+.dict-popup .dict-orig{margin-bottom:8px;color:#c9d6e3;}
+.dict-popup .dict-trans{color:#d8ffe0;border-top:1px solid #333;padding-top:8px;}
+.dict-popup .dict-progress{margin-top:8px;color:#ffd166;font-size:12px;font-style:italic;}
+
+/* ---------- Explanation panel (post-submit) ---------- */
+.explain-panel{display:none;margin-top:20px;padding-top:14px;border-top:2px solid var(--blue);}
+.explain-panel h3{color:var(--blue-dark);font-size:15px;margin:0 0 10px;}
+.explain-item{background:#f0f6ff;border:1px solid #cfe0f5;border-radius:6px;padding:8px 12px;margin-bottom:8px;font-size:13px;line-height:1.55;}
+.explain-item b.eq{color:var(--blue-dark);}
+.explain-item .eans{color:var(--green);font-weight:700;}
+.explain-item .etext{color:#334;display:block;margin-top:6px;}
+.explain-item .equote{display:block;margin-top:5px;margin-bottom:2px;font-style:italic;color:#4a5568;background:#fff;border-left:3px solid var(--blue);padding:4px 10px;border-radius:0 4px 4px 0;}
+.explain-item .elang{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.03em;color:#fff;background:var(--blue);border-radius:4px;padding:1px 6px;margin-right:6px;vertical-align:middle;}
+.explain-item .etext-vi .elang{background:var(--green);}
+.explain-item .etext-en{font-style:normal;}
+
+</style>
+</head>
+<body>
+
+<div id="nameOverlay">
+  <div class="name-box">
+    <h2>IELTS Reading Test 44</h2>
+    <p class="sub">Vui lòng nhập thông tin để bắt đầu làm bài (thời gian: 60 phút, 40 câu hỏi).</p>
+    <label>Họ và tên</label>
+    <input type="text" id="stuName" placeholder="Nguyễn Văn A">
+    <label>Lớp</label>
+    <input type="text" id="stuClass" placeholder="10A1">
+    <div class="err" id="nameErr"></div>
+    <button onclick="startExam()">Bắt đầu làm bài</button>
+  </div>
+</div>
+
+<div id="warnBanner"></div>
+<div id="fsOverlay">
+  <div>⚠ Bạn đã thoát chế độ toàn màn hình. Vi phạm đã được ghi nhận.</div>
+  <button onclick="enterFullscreen()">Vào toàn màn hình</button>
+</div>
+
+<div id="topbar">
+  <div id="hlToolbar">
+    <span class="lbl">Highlight:</span>
+    <button class="hl-btn" data-c="yellow" title="Vàng"></button>
+    <button class="hl-btn" data-c="green" title="Xanh lá"></button>
+    <button class="hl-btn" data-c="pink" title="Hồng"></button>
+    <button id="eraserBtn" title="Tẩy">🧹 Tẩy</button>
+    <button id="penBtn" title="Bút viết">🖊️ Bút</button>
+    <button class="pen-color-btn" data-pc="red" title="Đỏ"></button>
+    <button class="pen-color-btn" data-pc="blue" title="Xanh dương"></button>
+    <button class="pen-color-btn" data-pc="black" title="Đen"></button>
+    <button id="penEraserBtn" title="Xóa nét bút">🧽 Xóa nét</button>
+    <span id="dictModeTag">📖 Đã mở tra từ: click đúp vào từ hoặc bôi đen đoạn văn để dịch</span>
+  </div>
+  <div id="header">
+    <div id="tabs">
+      <button class="tab-btn active" id="tabBtn-0" onclick="showPassage(0)">Passage 1</button>
+      <button class="tab-btn" id="tabBtn-1" onclick="showPassage(1)">Passage 2</button>
+      <button class="tab-btn" id="tabBtn-2" onclick="showPassage(2)">Passage 3</button>
+    </div>
+    <div id="timerBox">60:00</div>
+  </div>
+</div>
+
+<div id="examArea">
+  <div class="passage-panel tab-content active" id="passage-0">
+<div class="passage-title">Lake Vostok</div>
+<p><span class="subheading">A</span>	Beneath the white blanket of Antarctica lies half a continent of virtually uncharted territory – an area so completely hidden that scientists have little clue what riches await discovery. Recently, Russian and British glaciologists identified an immense lake – one of Earth's largest and deepest – buried beneath 4,000 meters of ice immediately below Russia's Vostok Station.</p>
+<p><span class="subheading">B</span>	As details have emerged, a growing number of scientists are showing interest, with dozens of investigators keen to explore the feature, known as Lake Vostok. A thick layer of sediment at the bottom of the lake could hold novel clues to the planet's climate going back tens of millions of years. By looking at the ratio of different oxygen isotopes, scientists should be able to trace how Earth's temperature changed over the millennia. NASA has expressed interest in Lake Vostok because of its similarity to Europa. This moon of Jupiter appears to have a water ocean covered by a thick ice sheet, measuring perhaps tens of kilometers in depth. If hydrothermal vents exist beneath the ice, chemical reactions on Europa could have created the molecular building blocks for life, if not life itself. Vostok would be an ideal testing ground for technology that would eventually fly to Europa or places even more distant, say many scientists. Though cheap compared with a Europan mission, any expedition to Vostok would represent a significant investment.</p>
+<p><span class="subheading">C</span>	Vostok Station holds the uncomfortable distinction of having recorded the coldest temperature on Earth. Thermometers there measured in July 1983, and the average temperature hovers around -55ºC. It's the thick ice, strangely, that enables a lake to survive in such a frozen environment. The 4 kilometers of ice acts effectively as an insulating blanket protecting the bedrock underneath the ice from the cold temperatures above. Geothermal heat coming from the planet's interior keeps the lake from freezing and warms the lowest layers of ice. The tremendous weight of the ice sheet also plays a role in maintaining the lake. Beneath 4 kilometers of glacier, the pressure is intense enough to melt ice at a temperature of -4°C. These factors have helped lakes develop across much of the thickly blanketed East Antarctica. More than 70 hidden lakes have been detected in the small portion of the continent to date. Lake Vostok is the largest of these, stretching 280km from south to north and some 60 km from east to west. At Vostok station, which sits at the southern end of the lake, the water depth appears to be 500m according to seismic experiments carried out by Russian researchers.</p>
+<p><span class="subheading">D</span>	The first clues to Lake Vostok's existence came in the 1970s, when British, U.S., and Danish researchers collected radar observations by flying over this region. The radar penetrates the ice and bounces off whatever sits below. When researchers found a surface as flat as a mirror, they surmised that a lake must exist underneath the ice. An airborne survey of the lake is being undertaken, the first step toward eventually drilling into the water. Along with the potential rewards come a host of challenges. Researchers must find a way to penetrate the icy covering without introducing any microorganisms or pollutants into the sealed-off water.</p>
+<p><span class="subheading">E</span>	What about life in the depths? If tiny microbes do populate the lake, they may be some of the hungriest organisms ever discovered. Lake Vostok has the potential to be one of the most energy-limited, or oligotrophic, environments on the planet. For the lake's residents, the only nutrients would come from below. Russian investigators have speculated that the lake floor may have hot springs spewing out hydrothermal fluids stocked with reduced metals and other sorts of chemical nutrients. Scant geological evidence available for this region, however, indicates that the crust is old and dead. Without a stream of nutrients seeping up from the deep Earth, the only potential source of energy lies above the lake. The ice sheet above the water is creeping from west to east at a rate of roughly four meters per year. The lowermost layers of ice melt when they come in contact with the lake, liberating trapped gases and bits of crushed-up rock. If the glacier recently passed over rock before reaching the lake, it could be supplying organic compounds useful to microorganisms. It also could be seeding the lake with a continuous source of new residents. Bacteria, yeasts, fungi, algae and even pollen grains have been found in the Vostok ice core samples taken down to depths of 2,750m – three quarters of the way to the bottom. At least some of these organisms are alive and capable of growing, according to recent reports. The results of this analysis may indirectly indicate whether anything survives in the lightless body of water.</p>
+  </div>
+  <div id="divider"></div>
+  <div class="question-panel tab-content active" id="questions-0">
+<div class="qgroup">
+<h3>Questions 1–4</h3>
+<div class="instr">The passage has 5 sections A–E. Choose the most suitable heading for sections B–E from the list of headings below. There are more headings than sections so you will not use all of them. (Example: Section A = v, Discovery of the lake)</div>
+<div class="headinglist"><b>List of Headings</b><br>
+<div>i.  Cost of exploration</div>
+<div>ii.  Location and description of the lake</div>
+<div>iii.  Potential for living organisms in the lake</div>
+<div>iv.  Challenges of exploration</div>
+<div>v.  Discovery of the lake</div>
+<div>vi.  Possible sources of nutrients to support life</div>
+<div>vii.  Types of organisms in the lake</div>
+<div>viii.  Scientific interest in Lake Vostok</div>
+</div>
+<div class="qitem"><span class="qnum">1.</span> Section B <select class="qselect" id="q1"><option value="">-- chọn --</option><option value="i">i. Cost of exploration</option><option value="ii">ii. Location and description of the lake</option><option value="iii">iii. Potential for living organisms in the lake</option><option value="iv">iv. Challenges of exploration</option><option value="v">v. Discovery of the lake</option><option value="vi">vi. Possible sources of nutrients to support life</option><option value="vii">vii. Types of organisms in the lake</option><option value="viii">viii. Scientific interest in Lake Vostok</option></select></div>
+<div class="qitem"><span class="qnum">2.</span> Section C <select class="qselect" id="q2"><option value="">-- chọn --</option><option value="i">i. Cost of exploration</option><option value="ii">ii. Location and description of the lake</option><option value="iii">iii. Potential for living organisms in the lake</option><option value="iv">iv. Challenges of exploration</option><option value="v">v. Discovery of the lake</option><option value="vi">vi. Possible sources of nutrients to support life</option><option value="vii">vii. Types of organisms in the lake</option><option value="viii">viii. Scientific interest in Lake Vostok</option></select></div>
+<div class="qitem"><span class="qnum">3.</span> Section D <select class="qselect" id="q3"><option value="">-- chọn --</option><option value="i">i. Cost of exploration</option><option value="ii">ii. Location and description of the lake</option><option value="iii">iii. Potential for living organisms in the lake</option><option value="iv">iv. Challenges of exploration</option><option value="v">v. Discovery of the lake</option><option value="vi">vi. Possible sources of nutrients to support life</option><option value="vii">vii. Types of organisms in the lake</option><option value="viii">viii. Scientific interest in Lake Vostok</option></select></div>
+<div class="qitem"><span class="qnum">4.</span> Section E <select class="qselect" id="q4"><option value="">-- chọn --</option><option value="i">i. Cost of exploration</option><option value="ii">ii. Location and description of the lake</option><option value="iii">iii. Potential for living organisms in the lake</option><option value="iv">iv. Challenges of exploration</option><option value="v">v. Discovery of the lake</option><option value="vi">vi. Possible sources of nutrients to support life</option><option value="vii">vii. Types of organisms in the lake</option><option value="viii">viii. Scientific interest in Lake Vostok</option></select></div>
+</div>
+<div class="qgroup">
+<h3>Questions 5–6</h3>
+<div class="instr">Choose the correct letter A–D.</div>
+<div class="qitem"><span class="qnum">5.</span> Which is NOT given as a reason for interest in exploring Lake Vostok?<span id="hint-q5"></span><br>
+<label class="opt-row"><input type="radio" name="q5" value="A"> A.  to test technology for space exploration</label>
+<label class="opt-row"><input type="radio" name="q5" value="B"> B.  to develop anti-pollution devices</label>
+<label class="opt-row"><input type="radio" name="q5" value="C"> C.  to investigate the history of Earth's climate</label>
+<label class="opt-row"><input type="radio" name="q5" value="D"> D.  to look for living organisms</label>
+</div>
+<div class="qitem"><span class="qnum">6.</span> Lake Vostok does not freeze because ...<span id="hint-q6"></span><br>
+<label class="opt-row"><input type="radio" name="q6" value="A"> A.  a thick ice cover provides insulation.</label>
+<label class="opt-row"><input type="radio" name="q6" value="B"> B.  it is warmed by heat from the earth's surface.</label>
+<label class="opt-row"><input type="radio" name="q6" value="C"> C.  low pressure prevents freezing.</label>
+<label class="opt-row"><input type="radio" name="q6" value="D"> D.  an underwater volcano erupted recently.</label>
+</div>
+</div>
+<div class="qgroup">
+<h3>Questions 7–13</h3>
+<div class="instr">Do the following statements reflect the claims of the author? Write YES, NO, or NOT GIVEN.</div>
+<div class="qitem"><span class="qnum">7.</span> Only one lake has been found beneath Antarctica.<span id="hint-q7"></span><br>
+<label class="opt-row"><input type="radio" name="q7" value="YES"> YES</label>
+<label class="opt-row"><input type="radio" name="q7" value="NO"> NO</label>
+<label class="opt-row"><input type="radio" name="q7" value="NOT GIVEN"> NOT GIVEN</label>
+</div>
+<div class="qitem"><span class="qnum">8.</span> Lake Vostok was detected by radar.<span id="hint-q8"></span><br>
+<label class="opt-row"><input type="radio" name="q8" value="YES"> YES</label>
+<label class="opt-row"><input type="radio" name="q8" value="NO"> NO</label>
+<label class="opt-row"><input type="radio" name="q8" value="NOT GIVEN"> NOT GIVEN</label>
+</div>
+<div class="qitem"><span class="qnum">9.</span> Exploration of Lake Vostok is coordinated by Russia.<span id="hint-q9"></span><br>
+<label class="opt-row"><input type="radio" name="q9" value="YES"> YES</label>
+<label class="opt-row"><input type="radio" name="q9" value="NO"> NO</label>
+<label class="opt-row"><input type="radio" name="q9" value="NOT GIVEN"> NOT GIVEN</label>
+</div>
+<div class="qitem"><span class="qnum">10.</span> Nutrients to support life have been found in the Antarctic ice.<span id="hint-q10"></span><br>
+<label class="opt-row"><input type="radio" name="q10" value="YES"> YES</label>
+<label class="opt-row"><input type="radio" name="q10" value="NO"> NO</label>
+<label class="opt-row"><input type="radio" name="q10" value="NOT GIVEN"> NOT GIVEN</label>
+</div>
+<div class="qitem"><span class="qnum">11.</span> The ice above the lake is moving to the east.<span id="hint-q11"></span><br>
+<label class="opt-row"><input type="radio" name="q11" value="YES"> YES</label>
+<label class="opt-row"><input type="radio" name="q11" value="NO"> NO</label>
+<label class="opt-row"><input type="radio" name="q11" value="NOT GIVEN"> NOT GIVEN</label>
+</div>
+<div class="qitem"><span class="qnum">12.</span> Scientists have drilled through the ice into the water of Lake Vostok.<span id="hint-q12"></span><br>
+<label class="opt-row"><input type="radio" name="q12" value="YES"> YES</label>
+<label class="opt-row"><input type="radio" name="q12" value="NO"> NO</label>
+<label class="opt-row"><input type="radio" name="q12" value="NOT GIVEN"> NOT GIVEN</label>
+</div>
+<div class="qitem"><span class="qnum">13.</span> The water in the lake is approximately 500 m deep at the southern end.<span id="hint-q13"></span><br>
+<label class="opt-row"><input type="radio" name="q13" value="YES"> YES</label>
+<label class="opt-row"><input type="radio" name="q13" value="NO"> NO</label>
+<label class="opt-row"><input type="radio" name="q13" value="NOT GIVEN"> NOT GIVEN</label>
+</div>
+</div>
+<div class="explain-panel" id="explainPanel-0"><h3>📘 Giải thích chi tiết đáp án</h3><div class="explain-item"><b class="eq">Câu 1.</b> Đáp án đúng: <span class="eans">viii</span><span class="equote">&ldquo;As details have emerged, a growing number of scientists are showing interest, with dozens of investigators keen to explore the feature, known as Lake Vostok.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Section B opens by saying a growing number of scientists, dozens of investigators and NASA are interested in Lake Vostok (sediment climate clues, similarity to Europa). The heading that fits is viii, 'Scientific interest in Lake Vostok'. 'Cost of exploration' (i) is only mentioned in one closing sentence.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn B mở đầu bằng việc ngày càng nhiều nhà khoa học, hàng chục nhà nghiên cứu và cả NASA quan tâm đến hồ Vostok (trầm tích cho manh mối khí hậu, giống mặt trăng Europa). Tiêu đề phù hợp là viii 'Sự quan tâm của giới khoa học đối với hồ Vostok'. Chi phí (i) chỉ được nhắc ở một câu cuối nên không phải ý chính.</span></div><div class="explain-item"><b class="eq">Câu 2.</b> Đáp án đúng: <span class="eans">ii</span><span class="equote">&ldquo;Lake Vostok is the largest of these, stretching 280km from south to north and some 60 km from east to west.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Section C gives the station's temperature, how the lake survives under 4 km of ice, and the lake's size (280 km by 60 km) and depth (500 m). This is a description of where the lake is and what it is like, so the answer is ii, 'Location and description of the lake'.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn C nêu nhiệt độ tại trạm, cách hồ tồn tại dưới lớp băng dày 4 km, cùng kích thước (280 km x 60 km) và độ sâu (500 m) của hồ. Đây là phần mô tả vị trí và đặc điểm của hồ → đáp án ii 'Vị trí và mô tả hồ'.</span></div><div class="explain-item"><b class="eq">Câu 3.</b> Đáp án đúng: <span class="eans">iv</span><span class="equote">&ldquo;Researchers must find a way to penetrate the icy covering without introducing any microorganisms or pollutants into the sealed-off water.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Section D recounts how radar first revealed the lake, then turns to the difficulties: researchers must penetrate the ice without contaminating the sealed water ('along with the potential rewards come a host of challenges'). Heading iv, 'Challenges of exploration', fits best; v is already used for Section A in the example.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn D kể việc radar lần đầu phát hiện ra hồ, rồi chuyển sang các khó khăn: phải khoan qua lớp băng mà không làm nhiễm vi sinh vật hay chất ô nhiễm vào vùng nước kín ('cùng với phần thưởng tiềm năng là hàng loạt thách thức'). Tiêu đề iv 'Thách thức của việc thăm dò' phù hợp nhất; v đã dùng cho đoạn A trong ví dụ.</span></div><div class="explain-item"><b class="eq">Câu 4.</b> Đáp án đúng: <span class="eans">iii</span><span class="equote">&ldquo;What about life in the depths? If tiny microbes do populate the lake, they may be some of the hungriest organisms ever discovered.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Section E asks about life in the lake and discusses whether microbes could survive there and where nutrients might come from. The overall focus is the possibility of life, so iii, 'Potential for living organisms in the lake', is correct. vi (nutrients) covers only part of the section and vii (types of organisms) is too specific.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn E đặt câu hỏi về sự sống dưới đáy hồ và bàn xem vi sinh vật có thể tồn tại không, cùng nguồn dinh dưỡng của chúng. Trọng tâm chung là khả năng có sự sống → đáp án iii 'Tiềm năng có sinh vật sống trong hồ'. vi (nguồn dinh dưỡng) chỉ là một phần của đoạn, vii (các loại sinh vật) quá cụ thể.</span></div><div class="explain-item"><b class="eq">Câu 5.</b> Đáp án đúng: <span class="eans">B</span><span class="equote">&ldquo;NASA has expressed interest in Lake Vostok because of its similarity to Europa. ... Vostok would be an ideal testing ground for technology that would eventually fly to Europa or places even more distant&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Section B gives reasons for interest: climate history from sediment (C), testing space technology for Europa (A), and Section E discusses looking for life (D). Developing anti-pollution devices is never mentioned; pollution appears only as a risk to avoid. So B is NOT given.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn B nêu các lý do quan tâm: lịch sử khí hậu từ trầm tích (C), thử nghiệm công nghệ vũ trụ cho Europa (A), và đoạn E bàn về việc tìm sự sống (D). Việc phát triển thiết bị chống ô nhiễm không hề được nhắc đến; ô nhiễm chỉ xuất hiện như rủi ro cần tránh. Vậy B là phương án KHÔNG được nêu.</span></div><div class="explain-item"><b class="eq">Câu 6.</b> Đáp án đúng: <span class="eans">A</span><span class="equote">&ldquo;The 4 kilometers of ice acts effectively as an insulating blanket protecting the bedrock underneath the ice from the cold temperatures above.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Section C explains that the 4 km of ice acts as an insulating blanket, while geothermal heat from the planet's interior keeps the lake from freezing. Option A matches the insulation. B is wrong (heat from the interior, not the surface), C is wrong (high pressure, not low) and D is not mentioned.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn C giải thích lớp băng dày 4 km đóng vai trò như tấm chăn cách nhiệt, đồng thời nhiệt địa nhiệt từ bên trong Trái Đất giữ cho hồ không đóng băng. Phương án A khớp với ý cách nhiệt. B sai (nhiệt từ lòng đất chứ không phải bề mặt), C sai (áp suất cao chứ không thấp), D không được nhắc đến.</span></div><div class="explain-item"><b class="eq">Câu 7.</b> Đáp án đúng: <span class="eans">NO</span><span class="equote">&ldquo;More than 70 hidden lakes have been detected in the small portion of the continent to date.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Section C says more than 70 hidden lakes have been detected in the small part of Antarctica explored so far, and Lake Vostok is merely the largest. So 'only one lake has been found' is contradicted: NO.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn C nói đã phát hiện hơn 70 hồ ẩn trong phần nhỏ của châu Nam Cực được khảo sát, và hồ Vostok chỉ là hồ lớn nhất. Vì vậy câu 'chỉ có một hồ được tìm thấy' bị phủ định → đáp án NO.</span></div><div class="explain-item"><b class="eq">Câu 8.</b> Đáp án đúng: <span class="eans">YES</span><span class="equote">&ldquo;The first clues to Lake Vostok's existence came in the 1970s, when British, U.S., and Danish researchers collected radar observations by flying over this region.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Section D says the first clues came from radar observations made by flying over the region, and a mirror-flat surface suggested a lake. This confirms that Lake Vostok was detected by radar: YES.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn D cho biết những manh mối đầu tiên về hồ Vostok đến từ các quan sát radar khi bay qua khu vực, và bề mặt phẳng như gương gợi ý có hồ bên dưới. Điều này xác nhận hồ được phát hiện bằng radar → đáp án YES.</span></div><div class="explain-item"><b class="eq">Câu 9.</b> Đáp án đúng: <span class="eans">NOT GIVEN</span><span class="equote">&ldquo;Recently, Russian and British glaciologists identified an immense lake – one of Earth's largest and deepest – buried beneath 4,000 meters of ice immediately below Russia's Vostok Station.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> The passage mentions Russian and British glaciologists, a Russian station and international interest (British, US, Danish, NASA), but never says who coordinates the exploration. The statement that Russia coordinates it is NOT GIVEN.</span><span class="etext etext-vi"><b class="elang">VI:</b> Bài đọc nhắc đến các nhà băng hà học Nga và Anh, trạm Vostok của Nga và sự quan tâm quốc tế (Anh, Mỹ, Đan Mạch, NASA), nhưng không hề nói ai là bên điều phối việc thăm dò. Vì vậy câu 'Nga điều phối' là NOT GIVEN.</span></div><div class="explain-item"><b class="eq">Câu 10.</b> Đáp án đúng: <span class="eans">NOT GIVEN</span><span class="equote">&ldquo;If the glacier recently passed over rock before reaching the lake, it could be supplying organic compounds useful to microorganisms.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Section E only speculates that the glacier 'could be supplying organic compounds useful to microorganisms'. The passage never states that nutrients to support life have actually been found in the ice (what was found in the ice cores are organisms, not nutrients), so there is no information confirming or contradicting the statement: NOT GIVEN.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn E chỉ phỏng đoán băng 'có thể cung cấp hợp chất hữu cơ có ích cho vi sinh vật'. Bài không hề nói đã tìm thấy chất dinh dưỡng nuôi sự sống trong băng (thứ tìm thấy trong lõi băng là sinh vật, không phải dinh dưỡng), nên không có thông tin xác nhận hay mâu thuẫn → NOT GIVEN.</span></div><div class="explain-item"><b class="eq">Câu 11.</b> Đáp án đúng: <span class="eans">YES</span><span class="equote">&ldquo;The ice sheet above the water is creeping from west to east at a rate of roughly four meters per year.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Section E states that the ice sheet above the water is creeping from west to east at about four metres a year. 'Moving to the east' matches exactly, so the answer is YES.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn E nêu tấm băng phía trên mặt nước đang trượt từ tây sang đông với tốc độ khoảng bốn mét mỗi năm. 'Di chuyển về phía đông' khớp hoàn toàn → đáp án YES.</span></div><div class="explain-item"><b class="eq">Câu 12.</b> Đáp án đúng: <span class="eans">NO</span><span class="equote">&ldquo;An airborne survey of the lake is being undertaken, the first step toward eventually drilling into the water.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Section D says an airborne survey is only the first step toward eventually drilling into the water, and that researchers must still find a way to penetrate the ice. Drilling has therefore not yet happened, so the statement is contradicted: NO.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn D nói khảo sát từ trên không chỉ là bước đầu tiên để cuối cùng khoan vào nước, và các nhà nghiên cứu vẫn phải tìm cách xuyên qua lớp băng. Như vậy chưa hề khoan xuống hồ, câu hỏi bị phủ định → đáp án NO.</span></div><div class="explain-item"><b class="eq">Câu 13.</b> Đáp án đúng: <span class="eans">YES</span><span class="equote">&ldquo;At Vostok station, which sits at the southern end of the lake, the water depth appears to be 500m according to seismic experiments carried out by Russian researchers.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Section C states that at Vostok station, at the southern end of the lake, the water depth appears to be 500 m. This matches the statement exactly, so the answer is YES.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn C nêu tại trạm Vostok, nằm ở đầu phía nam của hồ, độ sâu nước dường như là 500 m. Khớp hoàn toàn với câu hỏi → đáp án YES.</span></div></div>
+  </div>
+  <div class="passage-panel tab-content" id="passage-1">
+<div class="passage-title">The cells from hell</div>
+<p>Recently, an international team of biologists met to discuss what they believe is a global crisis in the sudden appearance of strange marine microorganisms capable of poisoning not just fish but people too.</p>
+<p>In the mid-1980s, fishermen in North Carolina, on the eastern coast of the United States, began complaining about mysterious fish kills. They were convinced that pollution was responsible but nobody would listen. That changed in 1988 after an accident at a research center. Tank after tank of fish suddenly died. Researchers spotted an unknown microorganism in the water. It was later named pfiesteria.</p>
+<p>Pfiesteria belongs to a prehistoric group of algae that are part plant, part animal. They are called dinoflagellates after the tiny whips or flagella that propel them through the water. Magnified a thousand times they are some of the strangest and most beautiful creatures in the sea. They are at the bottom of the food chain but, to deter fish from swallowing them, some have evolved powerful toxins.</p>
+<p>As the researchers were to discover, pfiesteria doesn't just discourage fish. It actively hunts them, then eats them. Fish are one of its preferred foods but one of the intriguing things about pfiesteria is that it will eat everything from bacteria to dead plant and animal remains all the way up to mammalian tissues. So its food spans the entire food web of an estuary. Gradually the researchers realised that nothing in the water was safe from pfiesteria. It could harm humans too. A mis-directed air-conditioning duct from a room containing the toxins nearly killed one of the researchers. He suffered a host of symptoms ranging from profuse sweating, tingling hands and feet, to liver and kidney problems, as well as memory loss.</p>
+<p>As the research intensified, some startling discoveries were made. In tanks, pfiesteria was quite content to behave like a plant and photosynthesize. However, when fish were added, a dramatic transformation occurred, pfiesteria switched to attack mode. In a matter of minutes it changed shape and secreted a toxin. The fish quickly became disorientated and within five minutes all were dead. Pfiesteria changed shape again and devoured them. When it had had its fill, it vanished. No one had ever seen an organism do this.</p>
+<p>Initially scientists believed this was part of a natural cycle, but on closer examination, it seemed pollution was to blame. When the water containing the biggest fish kills was analysed, scientists found high levels of pollution. But this is just one of the factors that can boost the transformation in pfiesteria. Others include large numbers of fish travelling together which feed in poorly flushed places with a lot of algae to eat and other rich food sources. That is the perfect habitat for pfiesteria.</p>
+<p>But pfiesteria is not the only concern. In the oceans all around the world similar kinds of algae are now materialising and turning toxic. In the last decade these algal blooms have poisoned sea-lions in California, caused catastrophic fish kills in the Pacific, the Mediterranean and the North Sea, and devastated the shellfish industry in New Zealand. Researchers from forty-seven nations met recently to share the latest information about harmful algal blooms. They heard about new kinds of toxins and discussed possible links between algae and whale strandings. But what dominated the proceedings was news that toxic algae are spreading to new shores in ballast water carried by ships.</p>
+<p>That may have already happened in Australian waters. A tuna kill in 1996 cost fish farmers an estimated $45 million. The official explanation was that a storm was to blame. But there were also reports of orange-brown streaks in the water. When a water sample was examined, it was found to be teeming with an alga never before seen in Australia, called chattonella. The same chattonella killed half a billion dollars' worth of fish in Japan in 1972.</p>
+<p>This toxin was also present in the livers of the dead tuna. Despite this powerful evidence, the official explanation remains that a storm was the killer. However, in Japan this was a prime example of an algal bloom induced by the waste products of the aquaculture industry itself, and of course that is not something that the tuna industry wants to hear.</p>
+<p>It is clear that chattonella is present in Australian waters. But there is little knowledge of what else may surface or where it may have come from. What is of greater concern is that, in Australia and around the world, there is a reluctance to acknowledge that it is human activity which is triggering the transformation of normally benign organisms into increasingly dangerous forms. If we continue to mismanage the way nutrients and pollutants are released into the environment, we will have to confront new versions of the cells from hell.</p>
+  </div>
+  <div class="question-panel tab-content" id="questions-1">
+<div class="qgroup">
+<h3>Questions 14–17</h3>
+<div class="instr">Complete the summary below. Choose your answers from the box below the summary. There are more words than you need so you will not use all of them. (Example: Pfiesteria is a microorganism)</div>
+<div class="wordbank"><span>jaws  jaws</span><span>grows  grows</span><span>animal  animal</span><span>kills  kills</span><span>eats  eats</span><span>poisons  poisons</span><span>plant  plant</span><span>disappears  disappears</span><span>microorganism  microorganism</span><span>bacteria  bacteria</span><span>fish  fish</span><span>dies  dies</span></div>
+<div class="summarybox">Under normal conditions, it acts like a <b class="qnum-inline">14</b><select class="qselect" id="q14"><option value="">--</option><option value="jaws">jaws. jaws</option><option value="grows">grows. grows</option><option value="animal">animal. animal</option><option value="kills">kills. kills</option><option value="eats">eats. eats</option><option value="poisons">poisons. poisons</option><option value="plant">plant. plant</option><option value="disappears">disappears. disappears</option><option value="microorganism">microorganism. microorganism</option><option value="bacteria">bacteria. bacteria</option><option value="fish">fish. fish</option><option value="dies">dies. dies</option></select><span id="hint-q14"></span> but it has also developed powerful <b class="qnum-inline">15</b><select class="qselect" id="q15"><option value="">--</option><option value="jaws">jaws. jaws</option><option value="grows">grows. grows</option><option value="animal">animal. animal</option><option value="kills">kills. kills</option><option value="eats">eats. eats</option><option value="poisons">poisons. poisons</option><option value="plant">plant. plant</option><option value="disappears">disappears. disappears</option><option value="microorganism">microorganism. microorganism</option><option value="bacteria">bacteria. bacteria</option><option value="fish">fish. fish</option><option value="dies">dies. dies</option></select><span id="hint-q15"></span> as a defence against being eaten by fish. When the fish are disabled and killed by the neurotoxins, the organism <b class="qnum-inline">16</b><select class="qselect" id="q16"><option value="">--</option><option value="jaws">jaws. jaws</option><option value="grows">grows. grows</option><option value="animal">animal. animal</option><option value="kills">kills. kills</option><option value="eats">eats. eats</option><option value="poisons">poisons. poisons</option><option value="plant">plant. plant</option><option value="disappears">disappears. disappears</option><option value="microorganism">microorganism. microorganism</option><option value="bacteria">bacteria. bacteria</option><option value="fish">fish. fish</option><option value="dies">dies. dies</option></select><span id="hint-q16"></span> them and it <b class="qnum-inline">17</b><select class="qselect" id="q17"><option value="">--</option><option value="jaws">jaws. jaws</option><option value="grows">grows. grows</option><option value="animal">animal. animal</option><option value="kills">kills. kills</option><option value="eats">eats. eats</option><option value="poisons">poisons. poisons</option><option value="plant">plant. plant</option><option value="disappears">disappears. disappears</option><option value="microorganism">microorganism. microorganism</option><option value="bacteria">bacteria. bacteria</option><option value="fish">fish. fish</option><option value="dies">dies. dies</option></select><span id="hint-q17"></span> afterward.</div>
+</div>
+<div class="qgroup">
+<h3>Questions 18–21</h3>
+<div class="instr">Fill in the blanks with NO MORE THAN THREE WORDS from the passage.</div>
+<div class="summarybox">Conditions which favour the growth of toxic algae include high levels of <b class="qnum-inline">18</b><input type="text" class="qtext" id="q18" autocomplete="off"><span id="hint-q18"></span> and <b class="qnum-inline">19</b><input type="text" class="qtext" id="q19" autocomplete="off"><span id="hint-q19"></span> fish feeding together. Research scientists at the international conference learned about <b class="qnum-inline">20</b><input type="text" class="qtext" id="q20" autocomplete="off"><span id="hint-q20"></span> toxic algae and how they are spreading around the world in water <b class="qnum-inline">21</b><input type="text" class="qtext" id="q21" autocomplete="off"><span id="hint-q21"></span>.</div>
+</div>
+<div class="qgroup">
+<h3>Questions 22–26</h3>
+<div class="instr">Classify the following. (Example: Serious illness of researcher = A)</div>
+<div class="headinglist"><b>List</b><br>
+<div>A.  caused by pfiesteria</div>
+<div>B.  caused by chattonella</div>
+<div>C.  caused by an unidentified micro-organism</div>
+</div>
+<div class="qitem"><span class="qnum">22.</span> death of sea-lions off the coast of California (1990s) <select class="qselect" id="q22"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></div>
+<div class="qitem"><span class="qnum">23.</span> fish kill in Japan (1972) <select class="qselect" id="q23"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></div>
+<div class="qitem"><span class="qnum">24.</span> shellfish industry losses in New Zealand (1990s) <select class="qselect" id="q24"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></div>
+<div class="qitem"><span class="qnum">25.</span> tuna industry losses in Australia (1990s) <select class="qselect" id="q25"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></div>
+<div class="qitem"><span class="qnum">26.</span> fish kill in North Carolina (1980s) <select class="qselect" id="q26"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></div>
+</div>
+<div class="explain-panel" id="explainPanel-1"><h3>📘 Giải thích chi tiết đáp án</h3><div class="explain-item"><b class="eq">Câu 14.</b> Đáp án đúng: <span class="eans">plant</span><span class="equote">&ldquo;In tanks, pfiesteria was quite content to behave like a plant and photosynthesize.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph 5 says that in tanks pfiesteria behaves like a plant and photosynthesizes when no fish are present. The summary's 'under normal conditions, it acts like a ___' is therefore 'plant'.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn 5 nói trong bể, khi không có cá, pfiesteria cư xử như thực vật và quang hợp. Vì vậy 'trong điều kiện bình thường, nó hoạt động như một ___' là 'plant'.</span></div><div class="explain-item"><b class="eq">Câu 15.</b> Đáp án đúng: <span class="eans">poisons</span><span class="equote">&ldquo;They are at the bottom of the food chain but, to deter fish from swallowing them, some have evolved powerful toxins.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph 3 says that to deter fish from swallowing them, some dinoflagellates have evolved powerful toxins. The summary's 'powerful ___ as a defence against being eaten by fish' matches this; the key is 'poisons', the word-bank equivalent of toxins.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn 3 nói để ngăn cá nuốt chúng, một số tảo hai roi đã tiến hóa các độc tố mạnh. Câu tóm tắt 'powerful ___ as a defence against being eaten by fish' khớp ý này; key là 'poisons', từ tương đương với toxins trong bảng từ.</span></div><div class="explain-item"><b class="eq">Câu 16.</b> Đáp án đúng: <span class="eans">eats</span><span class="equote">&ldquo;Pfiesteria changed shape again and devoured them.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph 5 says that after the fish die, pfiesteria changes shape again and devours them. 'The organism ___ them' means eats, which is the answer according to the word box.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn 5 nói sau khi cá chết, pfiesteria lại đổi hình dạng và ngấu nghiến chúng. 'The organism ___ them' nghĩa là ăn (eats) → đáp án theo bảng từ.</span></div><div class="explain-item"><b class="eq">Câu 17.</b> Đáp án đúng: <span class="eans">disappears</span><span class="equote">&ldquo;When it had had its fill, it vanished. No one had ever seen an organism do this.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph 5 ends by saying that when pfiesteria had had its fill of the fish, it vanished, and that no one had ever seen an organism do this. The summary's 'it ___ afterward' is therefore 'disappears', the sequel to the fish being devoured.</span><span class="etext etext-vi"><b class="elang">VI:</b> Cuối đoạn 5 nói khi pfiesteria đã ăn no số cá, nó biến mất, và chưa ai từng thấy một sinh vật làm như vậy. Câu tóm tắt 'it ___ afterward' vì vậy là 'disappears', diễn biến ngay sau khi đàn cá bị ăn sạch.</span></div><div class="explain-item"><b class="eq">Câu 18.</b> Đáp án đúng: <span class="eans">pollution</span><span class="equote">&ldquo;When the water containing the biggest fish kills was analysed, scientists found high levels of pollution. ... Others include large numbers of fish travelling together which feed in poorly flushed places with a lot of algae to eat&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph 6 says the water with the biggest fish kills showed high levels of pollution, and other factors include large numbers of fish travelling together. 'High levels of ___' therefore takes 'pollution'.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn 6 nói nước ở nơi cá chết nhiều nhất có mức ô nhiễm cao, và các yếu tố khác gồm số lượng lớn cá di chuyển cùng nhau. Vì vậy 'high levels of ___' điền 'pollution'.</span></div><div class="explain-item"><b class="eq">Câu 19.</b> Đáp án đúng: <span class="eans">large numbers of</span><span class="equote">&ldquo;Others include large numbers of fish travelling together which feed in poorly flushed places with a lot of algae to eat and other rich food sources.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph 6 lists another favourable condition: large numbers of fish travelling together and feeding in poorly flushed places. The blank in 'and ___ fish feeding together' takes 'large numbers of'.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn 6 liệt kê điều kiện thuận lợi khác: số lượng lớn cá di chuyển cùng nhau và kiếm ăn ở nơi nước lưu thông kém. Chỗ trống trong 'and ___ fish feeding together' điền 'large numbers of'.</span></div><div class="explain-item"><b class="eq">Câu 20.</b> Đáp án đúng: <span class="eans">new kinds of</span><span class="equote">&ldquo;They heard about new kinds of toxins and discussed possible links between algae and whale strandings.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph 7 says the researchers at the international meeting heard about new kinds of toxins. 'Learned about ___ toxic algae' takes the phrase 'new kinds of' (three words).</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn 7 nói các nhà nghiên cứu tại hội nghị quốc tế đã nghe về các loại độc tố mới. 'Learned about ___ toxic algae' điền cụm 'new kinds of' (ba từ).</span></div><div class="explain-item"><b class="eq">Câu 21.</b> Đáp án đúng: <span class="eans">carried by ship</span><span class="equote">&ldquo;But what dominated the proceedings was news that toxic algae are spreading to new shores in ballast water carried by ships.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph 7 says toxic algae are spreading to new shores in ballast water carried by ships. The sentence 'in water ___' therefore needs 'carried by ships' (the key lists 'carried by ship(s)').</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn 7 nói tảo độc đang lan sang các bờ biển mới trong nước dằn tàu do tàu chở. Câu 'in water ___' vì vậy điền 'carried by ships' (key ghi 'carried by ship(s)').</span></div><div class="explain-item"><b class="eq">Câu 22.</b> Đáp án đúng: <span class="eans">C</span><span class="equote">&ldquo;In the last decade these algal blooms have poisoned sea-lions in California, caused catastrophic fish kills in the Pacific, the Mediterranean and the North Sea&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph 7 says algal blooms poisoned sea-lions in California but gives no name for the organism responsible. It is neither pfiesteria nor chattonella, so it is classed as an unidentified micro-organism: C.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn 7 nói tảo nở hoa đã làm chết sư tử biển ở California nhưng không nêu tên sinh vật gây ra. Đó không phải pfiesteria hay chattonella, nên xếp vào vi sinh vật chưa xác định: C.</span></div><div class="explain-item"><b class="eq">Câu 23.</b> Đáp án đúng: <span class="eans">B</span><span class="equote">&ldquo;The same chattonella killed half a billion dollars' worth of fish in Japan in 1972.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph 8 explicitly says that the same chattonella killed half a billion dollars' worth of fish in Japan in 1972. The event in the question (fish kill in Japan, 1972) matches this sentence exactly, so the answer is B, 'caused by chattonella'.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn 8 nói rõ chính tảo chattonella đã giết số cá trị giá nửa tỷ đô la ở Nhật năm 1972. Sự kiện trong câu hỏi (cá chết ở Nhật, 1972) khớp hoàn toàn với câu này nên đáp án là B 'do chattonella gây ra'.</span></div><div class="explain-item"><b class="eq">Câu 24.</b> Đáp án đúng: <span class="eans">C</span><span class="equote">&ldquo;In the last decade these algal blooms have poisoned sea-lions in California, caused catastrophic fish kills in the Pacific, the Mediterranean and the North Sea, and devastated the shellfish industry in New Zealand.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph 7 mentions the devastated shellfish industry in New Zealand without naming the organism responsible. Like the sea-lions, it falls under an unidentified micro-organism: C.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn 7 nhắc đến ngành nuôi trồng nhuyễn thể ở New Zealand bị tàn phá mà không nêu tên sinh vật gây hại. Giống trường hợp sư tử biển, nó thuộc loại vi sinh vật chưa xác định: C.</span></div><div class="explain-item"><b class="eq">Câu 25.</b> Đáp án đúng: <span class="eans">B</span><span class="equote">&ldquo;When a water sample was examined, it was found to be teeming with an alga never before seen in Australia, called chattonella.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraphs 8-9 describe the 1996 tuna kill in Australia, where the water was teeming with chattonella and its toxin was found in the dead tuna's livers. The tuna losses are therefore attributed to chattonella: B.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn 8-9 mô tả vụ cá ngừ chết năm 1996 ở Úc, khi mẫu nước đầy tảo chattonella và độc tố của nó được tìm thấy trong gan cá ngừ chết. Thiệt hại ngành cá ngừ được quy cho chattonella → đáp án B.</span></div><div class="explain-item"><b class="eq">Câu 26.</b> Đáp án đúng: <span class="eans">A</span><span class="equote">&ldquo;In the mid-1980s, fishermen in North Carolina, on the eastern coast of the United States, began complaining about mysterious fish kills. ... Researchers spotted an unknown microorganism in the water. It was later named pfiesteria.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph 2 says the mysterious fish kills in North Carolina in the 1980s were later traced to the microorganism named pfiesteria. So the answer is A, 'caused by pfiesteria'.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn 2 nói các vụ cá chết bí ẩn ở North Carolina những năm 1980 sau đó được xác định do vi sinh vật được đặt tên là pfiesteria. Vì vậy đáp án là A 'do pfiesteria gây ra'.</span></div></div>
+  </div>
+  <div class="passage-panel tab-content" id="passage-2">
+<div class="passage-title">Mystery of the mummies</div>
+<p>In 1992, a German scientist made a discovery which was to upset whole areas of scientific study from history and archaeology to chemistry and botany. Dr. Svetlana Balabanova, a forensic specialist, was performing tissue tests on an Egyptian mummy, part of a German museum collection. The mummified remains were of a woman named Henut-Taui who had died over 3,000 years ago. Amazingly, the tests revealed that her body contained large quantities of cocaine and nicotine. Dr. Balabanova had regularly used the same testing methods to convict people of drug consumption but she had not expected to find nicotine and cocaine in an Ancient Egyptian mummy. It is generally accepted that these two plants, native to the Americas, did not exist on other continents prior to European exploration.</p>
+<p>Dr. Balabanova repeated the tests then sent out fresh samples to three other labs. When the results came back positive, she published a paper with two other scientists. If Balabanova was shocked by the results of her tests, she was even more shocked at the hostile response to her publication. She received many insulting letters, accusing her of fraud.</p>
+<p>There were two explanations that came immediately to mind. One was that something in the tests could have given a false result. The second was that the mummies tested were not truly Ancient Egyptian. Perhaps they were relatively modern bodies, containing traces of cocaine. Dr. Balabanova then examined tissue from 134 naturally preserved bodies over a thousand years old discovered in an excavated cemetery in the Sudan. About a third of them tested positive for nicotine or cocaine.</p>
+<p>But something had happened even earlier which should have initiated serious discussion. In 1976, the mummified remains of Ramses II arrived in Paris for repair work. Dr. Michelle Lescot of the Natural History Museum (Paris) was looking at sections of bandages and within the fibres found a plant fragment. When she checked it under a microscope, she was amazed to discover that the plant was tobacco. Fearing that she had made some mistake, she repeated her tests again and again with the same result every time: a New World plant had been found on an Old World mummy. The results caused a sensation in Europe. Was it possible that a piece of tobacco had been dropped by chance from the pipe of some forgotten archaeologist? Dr. Lescot responded to this charge of contamination by carefully extracting new samples from the abdomen, with the entire process recorded on film. These samples, which could not be 'droppings', were then tested. Once again they were shown to be tobacco. The discovery of tobacco fragments in the mummified body of Ramses II should have had a profound influence upon our whole understanding of the relationship between Ancient Egypt and America but this piece of evidence was simply ignored. It raised too many questions and was too far outside of commonly accepted scientific views.</p>
+<p>So now the question had returned. Could Ancient Egyptian trade have stretched all the way across the Atlantic Ocean? This was an idea so unbelievable it could only be considered after all other possibilities had been eliminated. Could Egyptians have obtained imports from a place thousands of miles away, from a continent supposedly not discovered until thousands of years later? Was it possible that coca – a plant from South America – had found its way to Egypt 3,000 years ago? If the cocaine found in mummies could not be explained by contamination, or fake mummies or by Egyptian plants containing it, there appeared to be another interesting possibility: a trade route with links all the way to the Americas.</p>
+<p>The Egyptians did make great efforts to obtain incense and other valuable plants used in religious ceremonies and herbal medicines, but to the majority of archaeologists, the idea is hardly worth talking about. Professor John Baines, an Egyptologist from Oxford University, states: 'I don't think it is at all likely that there was an ancient trade network that included America. The essential problem with any such idea is that there are no artefacts found either in Europe or in America.' But other experts aren't so sure. Professor Martin Bernal, an historian from Cornell University, says, 'We're getting more and more evidence of world trade at an earlier stage. You have the Chinese silk definitely arriving in Egypt by 1000 BC.' In his opinion, it is arrogance on the part of modern people to believe that a transoceanic trading network could only have been set up in recent times.</p>
+<p>The discoveries in mummies from Egypt and Sudan have challenged conventional beliefs. It is no longer possible to exclude the hypothesis of transoceanic trade in ancient times. The tale of Henut-Taui and the story of Ramses II show that, in science, facts can be rejected if they don't fit with our beliefs, while what is believed to be proven, may actually be uncertain. It is understandable then, how a story of a scientist, a few mummies and some routine tests, could upset whole areas of knowledge we thought we could take for granted.</p>
+  </div>
+  <div class="question-panel tab-content" id="questions-2">
+<div class="qgroup">
+<h3>Questions 27–29</h3>
+<div class="instr">Choose the correct letter A–D.</div>
+<div class="qitem"><span class="qnum">27.</span> What most surprised Dr. Balabanova about her discovery?<span id="hint-q27"></span><br>
+<label class="opt-row"><input type="radio" name="q27" value="A"> A.  the presence of drugs in the mummies</label>
+<label class="opt-row"><input type="radio" name="q27" value="B"> B.  the fact that the plants originated in the western hemisphere</label>
+<label class="opt-row"><input type="radio" name="q27" value="C"> C.  the positive results of tests on other mummies</label>
+<label class="opt-row"><input type="radio" name="q27" value="D"> D.  the hostile reaction of the scientific community</label>
+</div>
+<div class="qitem"><span class="qnum">28.</span> Which of the following was ruled out by Dr. Lescot's investigation?<span id="hint-q28"></span><br>
+<label class="opt-row"><input type="radio" name="q28" value="A"> A.  Tobacco had been dropped onto the mummy.</label>
+<label class="opt-row"><input type="radio" name="q28" value="B"> B.  Tobacco grew in Ancient Egypt.</label>
+<label class="opt-row"><input type="radio" name="q28" value="C"> C.  Chemicals produced false test results.</label>
+<label class="opt-row"><input type="radio" name="q28" value="D"> D.  The mummies were fake.</label>
+</div>
+<div class="qitem"><span class="qnum">29.</span> Why was the discovery of tobacco in the body of Ramses II ignored?<span id="hint-q29"></span><br>
+<label class="opt-row"><input type="radio" name="q29" value="A"> A.  Contamination was suspected.</label>
+<label class="opt-row"><input type="radio" name="q29" value="B"> B.  The evidence raised difficult questions.</label>
+<label class="opt-row"><input type="radio" name="q29" value="C"> C.  The tests produced false results.</label>
+<label class="opt-row"><input type="radio" name="q29" value="D"> D.  The researcher was a woman.</label>
+</div>
+</div>
+<div class="qgroup">
+<h3>Questions 30–34</h3>
+<div class="instr">Match ONE of the researchers A–D to each of the statements below. There may be more than one correct answer.</div>
+<div class="headinglist"><b>List</b><br>
+<div>A.  Dr. Svetlana Balabanova</div>
+<div>B.  Dr. Michelle Lescot</div>
+<div>C.  Professor John Baines</div>
+<div>D.  Professor Martin Bernal</div>
+</div>
+<div class="qitem"><span class="qnum">30.</span> first to find a substance from the Americas in a mummy <select class="qselect" id="q30"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select></div>
+<div class="qitem"><span class="qnum">31.</span> argues against transoceanic trade because of lack of evidence <select class="qselect" id="q31"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select></div>
+<div class="qitem"><span class="qnum">32.</span> had to defend against attacks on research methodology <select class="qselect" id="q32"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select></div>
+<div class="qitem"><span class="qnum">33.</span> gives evidence of extensive Egyptian trade in ancient times <select class="qselect" id="q33"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select></div>
+<div class="qitem"><span class="qnum">34.</span> publication of research results was controversial <select class="qselect" id="q34"><option value="">-- chọn --</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select></div>
+</div>
+<div class="qgroup">
+<h3>Questions 35–39</h3>
+<div class="instr">Do the following statements reflect the opinions of the writer? Write YES, NO, or NOT GIVEN.</div>
+<div class="qitem"><span class="qnum">35.</span> There is proof that tobacco was grown in Ancient Egypt.<span id="hint-q35"></span><br>
+<label class="opt-row"><input type="radio" name="q35" value="YES"> YES</label>
+<label class="opt-row"><input type="radio" name="q35" value="NO"> NO</label>
+<label class="opt-row"><input type="radio" name="q35" value="NOT GIVEN"> NOT GIVEN</label>
+</div>
+<div class="qitem"><span class="qnum">36.</span> Trade routes across the Atlantic Ocean may have existed thousands of years ago.<span id="hint-q36"></span><br>
+<label class="opt-row"><input type="radio" name="q36" value="YES"> YES</label>
+<label class="opt-row"><input type="radio" name="q36" value="NO"> NO</label>
+<label class="opt-row"><input type="radio" name="q36" value="NOT GIVEN"> NOT GIVEN</label>
+</div>
+<div class="qitem"><span class="qnum">37.</span> Ancient Egyptians were great ship builders.<span id="hint-q37"></span><br>
+<label class="opt-row"><input type="radio" name="q37" value="YES"> YES</label>
+<label class="opt-row"><input type="radio" name="q37" value="NO"> NO</label>
+<label class="opt-row"><input type="radio" name="q37" value="NOT GIVEN"> NOT GIVEN</label>
+</div>
+<div class="qitem"><span class="qnum">38.</span> The scientific community generally rejects the idea of contact between Ancient Egypt and the Americas.<span id="hint-q38"></span><br>
+<label class="opt-row"><input type="radio" name="q38" value="YES"> YES</label>
+<label class="opt-row"><input type="radio" name="q38" value="NO"> NO</label>
+<label class="opt-row"><input type="radio" name="q38" value="NOT GIVEN"> NOT GIVEN</label>
+</div>
+<div class="qitem"><span class="qnum">39.</span> The unusual test results could have come from 'qat', a plant native to North Africa.<span id="hint-q39"></span><br>
+<label class="opt-row"><input type="radio" name="q39" value="YES"> YES</label>
+<label class="opt-row"><input type="radio" name="q39" value="NO"> NO</label>
+<label class="opt-row"><input type="radio" name="q39" value="NOT GIVEN"> NOT GIVEN</label>
+</div>
+</div>
+<div class="qgroup">
+<h3>Question 40</h3>
+<div class="instr">Choose the correct letter A–D.</div>
+<div class="qitem"><span class="qnum">40.</span> What is the main idea of this passage?<span id="hint-q40"></span><br>
+<label class="opt-row"><input type="radio" name="q40" value="A"> A.  Experimental research often gives false results.</label>
+<label class="opt-row"><input type="radio" name="q40" value="B"> B.  Long-held beliefs can be challenged by new information.</label>
+<label class="opt-row"><input type="radio" name="q40" value="C"> C.  The scientific community is conservative by nature.</label>
+<label class="opt-row"><input type="radio" name="q40" value="D"> D.  Ideas which don't fit our belief system must be wrong.</label>
+</div>
+</div>
+<div class="explain-panel" id="explainPanel-2"><h3>📘 Giải thích chi tiết đáp án</h3><div class="explain-item"><b class="eq">Câu 27.</b> Đáp án đúng: <span class="eans">D</span><span class="equote">&ldquo;If Balabanova was shocked by the results of her tests, she was even more shocked at the hostile response to her publication. She received many insulting letters, accusing her of fraud.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph 2 says that although she was shocked by her test results, she was even more shocked at the hostile response to her publication. 'What most surprised her' is therefore the hostile reaction of the scientific community (D). A, B and C were shocking but less so.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn 2 nói tuy bà sốc trước kết quả xét nghiệm, bà còn sốc hơn trước phản ứng thù địch với bài công bố. Vậy điều khiến bà ngạc nhiên nhất là phản ứng thù địch của giới khoa học (D). A, B, C cũng gây sốc nhưng ít hơn.</span></div><div class="explain-item"><b class="eq">Câu 28.</b> Đáp án đúng: <span class="eans">A</span><span class="equote">&ldquo;Dr. Lescot responded to this charge of contamination by carefully extracting new samples from the abdomen, with the entire process recorded on film. These samples, which could not be 'droppings', were then tested.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph 4 shows Lescot answered the accusation that tobacco had been dropped by an archaeologist by taking new samples from inside the body on film, and they still tested positive. So the 'dropped tobacco' explanation was ruled out (A). The fake-mummy and test-error ideas relate to Balabanova.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn 4 cho thấy Lescot đáp lại cáo buộc thuốc lá bị rơi vào bằng cách lấy mẫu mới từ bên trong xác ướp, quay phim toàn bộ quá trình, và kết quả vẫn dương tính. Vậy khả năng thuốc lá bị làm rơi vào đã bị loại trừ (A). Ý xác ướp giả và sai sót xét nghiệm thuộc về nghiên cứu của Balabanova.</span></div><div class="explain-item"><b class="eq">Câu 29.</b> Đáp án đúng: <span class="eans">B</span><span class="equote">&ldquo;It raised too many questions and was too far outside of commonly accepted scientific views.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph 4 says the finding in Ramses II was ignored because it raised too many questions and was too far outside accepted scientific views. Option B matches. Contamination had been disproved, and neither false tests nor the researcher's gender are given as reasons.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn 4 nói phát hiện ở xác ướp Ramses II bị phớt lờ vì nó đặt ra quá nhiều câu hỏi và nằm quá xa các quan điểm khoa học được chấp nhận. Phương án B khớp. Nghi ngờ nhiễm bẩn đã bị bác bỏ, còn kết quả sai hay giới tính nhà nghiên cứu không hề được nêu làm lý do.</span></div><div class="explain-item"><b class="eq">Câu 30.</b> Đáp án đúng: <span class="eans">B</span><span class="equote">&ldquo;In 1976, the mummified remains of Ramses II arrived in Paris for repair work. Dr. Michelle Lescot of the Natural History Museum (Paris) was looking at sections of bandages and within the fibres found a plant fragment.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph 4 says that in 1976 Dr. Lescot found tobacco, a New World plant, in Ramses II, which is earlier than Balabanova's 1992 discovery. So Lescot was the first to find a substance from the Americas in a mummy: B.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn 4 nói năm 1976 Tiến sĩ Lescot tìm thấy thuốc lá, một loài cây Tân Thế Giới, trong xác ướp Ramses II, sớm hơn phát hiện năm 1992 của Balabanova. Vậy Lescot là người đầu tiên tìm thấy chất từ châu Mỹ trong xác ướp: B.</span></div><div class="explain-item"><b class="eq">Câu 31.</b> Đáp án đúng: <span class="eans">C</span><span class="equote">&ldquo;The essential problem with any such idea is that there are no artefacts found either in Europe or in America.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph 6 quotes Professor Baines: he thinks trans-Atlantic trade is unlikely because no artefacts have been found in Europe or America. That is arguing against transoceanic trade for lack of evidence: C.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn 6 trích lời Giáo sư Baines: ông cho rằng thương mại xuyên Đại Tây Dương khó xảy ra vì không có hiện vật nào được tìm thấy ở châu Âu hay châu Mỹ. Đó là lập luận chống lại thương mại xuyên đại dương vì thiếu bằng chứng → C.</span></div><div class="explain-item"><b class="eq">Câu 32.</b> Đáp án đúng: <span class="eans">A (hoặc B)</span><span class="equote">&ldquo;She received many insulting letters, accusing her of fraud. ... Dr. Lescot responded to this charge of contamination by carefully extracting new samples from the abdomen&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Balabanova (Paragraph 2) was accused of fraud and had to repeat her tests, while Lescot (Paragraph 4) answered the charge of contamination by re-sampling on film. Both defended their methods, so A and B are both accepted.</span><span class="etext etext-vi"><b class="elang">VI:</b> Balabanova (đoạn 2) bị cáo buộc gian lận và phải lặp lại xét nghiệm, còn Lescot (đoạn 4) đáp trả cáo buộc nhiễm bẩn bằng cách lấy mẫu lại có quay phim. Cả hai đều phải bảo vệ phương pháp nên chấp nhận cả A và B.</span></div><div class="explain-item"><b class="eq">Câu 33.</b> Đáp án đúng: <span class="eans">D</span><span class="equote">&ldquo;We're getting more and more evidence of world trade at an earlier stage. You have the Chinese silk definitely arriving in Egypt by 1000 BC.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph 6 quotes Professor Bernal, who points to growing evidence of early world trade, such as Chinese silk reaching Egypt by 1000 BC. That is evidence of extensive ancient trade: D.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn 6 trích lời Giáo sư Bernal, người chỉ ra ngày càng nhiều bằng chứng về thương mại thế giới thời sớm, như lụa Trung Quốc đến Ai Cập trước năm 1000 TCN. Đó là bằng chứng về thương mại cổ đại rộng khắp → D.</span></div><div class="explain-item"><b class="eq">Câu 34.</b> Đáp án đúng: <span class="eans">A</span><span class="equote">&ldquo;If Balabanova was shocked by the results of her tests, she was even more shocked at the hostile response to her publication.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph 2 says Balabanova's paper drew a hostile response and insulting letters. The controversy over publishing her results points to Dr. Balabanova: A.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn 2 nói bài công bố của Balabanova gây phản ứng thù địch và nhiều thư lăng mạ. Việc công bố kết quả gây tranh cãi chỉ về Tiến sĩ Balabanova → A.</span></div><div class="explain-item"><b class="eq">Câu 35.</b> Đáp án đúng: <span class="eans">NO (hoặc NOT GIVEN)</span><span class="equote">&ldquo;Was it possible that coca – a plant from South America – had found its way to Egypt 3,000 years ago?&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> The passage says tobacco and coca are native to the Americas and treats their presence in Egypt as a puzzle; nothing proves tobacco grew in Egypt. NO is defensible because the text assumes these plants did not exist outside the Americas before European exploration; NOT GIVEN is equally defensible because growth in Egypt is never directly discussed, so both answers are accepted.</span><span class="etext etext-vi"><b class="elang">VI:</b> Bài đọc nói thuốc lá và coca có nguồn gốc châu Mỹ và coi sự có mặt của chúng ở Ai Cập là một bí ẩn; không có bằng chứng nào cho thấy thuốc lá được trồng ở Ai Cập. NO bảo vệ được vì bài cho rằng các cây này không tồn tại ngoài châu Mỹ trước thời kỳ khám phá của châu Âu; NOT GIVEN cũng hợp lệ vì việc trồng ở Ai Cập không được bàn trực tiếp, nên chấp nhận cả hai đáp án.</span></div><div class="explain-item"><b class="eq">Câu 36.</b> Đáp án đúng: <span class="eans">YES</span><span class="equote">&ldquo;It is no longer possible to exclude the hypothesis of transoceanic trade in ancient times.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph 7 states that it is no longer possible to exclude the hypothesis of transoceanic trade in ancient times. 'May have existed' paraphrases this, so the writer agrees: YES.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn 7 khẳng định không còn có thể loại trừ giả thuyết về thương mại xuyên đại dương thời cổ đại. 'May have existed' diễn đạt lại ý này nên tác giả đồng tình → đáp án YES.</span></div><div class="explain-item"><b class="eq">Câu 37.</b> Đáp án đúng: <span class="eans">NOT GIVEN</span><span class="equote">&ldquo;The Egyptians did make great efforts to obtain incense and other valuable plants used in religious ceremonies and herbal medicines, but to the majority of archaeologists, the idea is hardly worth talking about.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> The passage mentions Egyptian efforts to obtain valuable plants but says nothing about their shipbuilding skills. The statement that they were great ship builders cannot be verified: NOT GIVEN.</span><span class="etext etext-vi"><b class="elang">VI:</b> Bài đọc nhắc đến nỗ lực của người Ai Cập để có hương liệu và cây quý nhưng không nói gì về kỹ năng đóng tàu. Không thể xác minh câu 'người Ai Cập là thợ đóng tàu giỏi' → đáp án NOT GIVEN.</span></div><div class="explain-item"><b class="eq">Câu 38.</b> Đáp án đúng: <span class="eans">YES</span><span class="equote">&ldquo;The Egyptians did make great efforts to obtain incense and other valuable plants used in religious ceremonies and herbal medicines, but to the majority of archaeologists, the idea is hardly worth talking about.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph 6 says that to the majority of archaeologists the idea of a trade network with America is hardly worth talking about, and Paragraph 4 says the tobacco evidence was ignored because it was outside accepted views. So the scientific community generally rejects the idea: YES.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn 6 nói với đa số nhà khảo cổ, ý tưởng về mạng lưới thương mại với châu Mỹ hầu như không đáng bàn, và đoạn 4 nói bằng chứng thuốc lá bị phớt lờ vì nằm ngoài quan điểm được chấp nhận. Vậy giới khoa học nói chung bác bỏ ý tưởng này → đáp án YES.</span></div><div class="explain-item"><b class="eq">Câu 39.</b> Đáp án đúng: <span class="eans">NOT GIVEN</span><span class="equote">&ldquo;There were two explanations that came immediately to mind. One was that something in the tests could have given a false result. The second was that the mummies tested were not truly Ancient Egyptian.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> Paragraph 3 and 5 consider false test results, fake mummies and Egyptian plants containing cocaine, but 'qat' is never mentioned. Whether it could explain the results is not stated: NOT GIVEN.</span><span class="etext etext-vi"><b class="elang">VI:</b> Đoạn 3 và 5 xét các khả năng kết quả xét nghiệm sai, xác ướp giả và cây Ai Cập chứa cocaine, nhưng không hề nhắc đến 'qat'. Việc nó có thể giải thích kết quả hay không không được nêu → đáp án NOT GIVEN.</span></div><div class="explain-item"><b class="eq">Câu 40.</b> Đáp án đúng: <span class="eans">B</span><span class="equote">&ldquo;The tale of Henut-Taui and the story of Ramses II show that, in science, facts can be rejected if they don't fit with our beliefs, while what is believed to be proven, may actually be uncertain.&rdquo;</span><span class="etext etext-en"><b class="elang">EN:</b> The conclusion says the mummy discoveries challenged conventional beliefs and that facts may be rejected when they do not fit beliefs, while accepted 'proof' may be uncertain. So the main idea is that long-held beliefs can be challenged by new information (B). A and D are the opposite of the point, and C is too narrow.</span><span class="etext etext-vi"><b class="elang">VI:</b> Phần kết nói các phát hiện từ xác ướp thách thức những niềm tin quen thuộc, rằng sự thật có thể bị bác bỏ khi không hợp với niềm tin, còn điều tưởng đã được chứng minh có thể vẫn chưa chắc chắn. Ý chính là niềm tin lâu đời có thể bị thông tin mới thách thức (B). A và D ngược với ý bài, C quá hẹp.</span></div></div>
+  </div>
+</div>
+
+<button id="submitBtn" onclick="requestSubmit()">Nộp bài</button>
+
+<div class="modal-overlay hidden" id="confirmModal">
+  <div class="modal-box">
+    <h3>Xác nhận nộp bài</h3>
+    <p>Bạn có chắc muốn nộp bài? Sau khi nộp sẽ không thể sửa lại.</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="cancelSubmit()">Quay lại làm bài</button>
+      <button class="btn-confirm" onclick="confirmSubmit()">Xác nhận nộp</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="timeUpModal">
+  <div class="modal-box">
+    <h3>⏰ Hết giờ!</h3>
+    <p>Đã hết 60 phút làm bài. Bạn có 5 phút để nộp bài, sau đó bài sẽ tự động được nộp.</p>
+    <div class="modal-actions">
+      <button class="btn-confirm" style="flex:none;width:100%;" onclick="confirmSubmit()">Nộp bài ngay</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="resultModal">
+  <div class="modal-box" style="width:560px;">
+    <div id="resultBox"></div>
+    <div class="modal-actions"><button class="btn-cancel" style="flex:none;width:100%;" onclick="closeResult()">Đóng — Xem lại bài làm</button></div>
+  </div>
+</div>
+
+<script>
+var TEST_NUM = 44;
+var TOTAL_QUESTIONS = 40;
+var PASSAGE_COUNTS = [13, 13, 14];
+var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyZ4UJgI763vPb4TZhKbKgxl6p-lGCQCJnZDqgCL9mHCVQpUzb4sbJGg89GLWSI-sQj/exec";
+var ANS = {"1": "viii", "2": "ii", "3": "iv", "4": "iii", "5": "B", "6": "A", "7": "NO", "8": "YES", "9": "NOT GIVEN", "10": "NOT GIVEN", "11": "YES", "12": "NO", "13": "YES", "14": "plant", "15": "poisons", "16": "eats", "17": "disappears", "18": ["pollution"], "19": ["large numbers of"], "20": ["new kinds of"], "21": ["carried by ship", "carried by ships"], "22": "C", "23": "B", "24": "C", "25": "B", "26": "A", "27": "D", "28": "A", "29": "B", "30": "B", "31": "C", "32": ["A", "B"], "33": "D", "34": "A", "35": ["NO", "NOT GIVEN"], "36": "YES", "37": "NOT GIVEN", "38": "YES", "39": "NOT GIVEN", "40": "B"};
+var UNITS = [{"type": "select", "n": 1}, {"type": "select", "n": 2}, {"type": "select", "n": 3}, {"type": "select", "n": 4}, {"type": "radio", "n": 5}, {"type": "radio", "n": 6}, {"type": "radio", "n": 7}, {"type": "radio", "n": 8}, {"type": "radio", "n": 9}, {"type": "radio", "n": 10}, {"type": "radio", "n": 11}, {"type": "radio", "n": 12}, {"type": "radio", "n": 13}, {"type": "select", "n": 14}, {"type": "select", "n": 15}, {"type": "select", "n": 16}, {"type": "select", "n": 17}, {"type": "text", "n": 18}, {"type": "text", "n": 19}, {"type": "text", "n": 20}, {"type": "text", "n": 21}, {"type": "select", "n": 22}, {"type": "select", "n": 23}, {"type": "select", "n": 24}, {"type": "select", "n": 25}, {"type": "select", "n": 26}, {"type": "radio", "n": 27}, {"type": "radio", "n": 28}, {"type": "radio", "n": 29}, {"type": "select", "n": 30}, {"type": "select", "n": 31}, {"type": "select", "n": 32}, {"type": "select", "n": 33}, {"type": "select", "n": 34}, {"type": "radio", "n": 35}, {"type": "radio", "n": 36}, {"type": "radio", "n": 37}, {"type": "radio", "n": 38}, {"type": "radio", "n": 39}, {"type": "radio", "n": 40}];
+var CHECKBOX_GROUPS = [];
+</script>
+<script>
+/* ===================== READING TEST ENGINE (shared) ===================== */
+/* Requires globals defined in the per-test <script> block BEFORE this file:
+   TEST_NUM, TOTAL_QUESTIONS, PASSAGE_COUNTS ([n1,n2,n3]), ANS {}, UNITS [], APPS_SCRIPT_URL
+*/
+(function(){
+  'use strict';
+
+  function pad(n,len){ n=String(n); while(n.length<len) n='0'+n; return n; }
+  function qLabel(n){ return 'Q.'+pad(n,2)+'.TEST'+pad(TEST_NUM,3); }
+  function norm(s){ return String(s==null?'':s).toLowerCase().trim().replace(/\s+/g,' '); }
+  window.qLabel = qLabel;
+
+  /* ---------------- Popup / start ---------------- */
+  window._studentName = '';
+  window._studentClass = '';
+  window._testStartTime = null;
+  var submitted = false;
+  var timerStopped = false;
+
+  window.startExam = function(){
+    var nameEl = document.getElementById('stuName');
+    var classEl = document.getElementById('stuClass');
+    var errEl = document.getElementById('nameErr');
+    var name = nameEl.value.trim();
+    var cls = classEl.value.trim();
+    if(!name || !cls){
+      errEl.textContent = 'Vui lòng nhập đầy đủ Họ và tên và Lớp.';
+      return;
+    }
+    errEl.textContent = '';
+    window._studentName = name;
+    window._studentClass = cls;
+    window._testStartTime = Date.now();
+    document.getElementById('nameOverlay').classList.add('hidden');
+    window.enterFullscreen();
+  };
+
+  /* ---------------- Fullscreen / anti-cheat ---------------- */
+  var fsViolations = 0, tabViolations = 0, focusViolations = 0;
+  var violationLog = [];
+
+  window.enterFullscreen = function(){
+    var el = document.documentElement;
+    try{
+      if(el.requestFullscreen) el.requestFullscreen().catch(function(){});
+      else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    }catch(e){}
+    var ov = document.getElementById('fsOverlay');
+    if(ov) ov.style.display = 'none';
+  };
+
+  function isFullscreen(){
+    return !!(document.fullscreenElement || document.webkitFullscreenElement);
+  }
+
+  function onFsChange(){
+    if(submitted) return;
+    if(!window._testStartTime) return;
+    if(!isFullscreen()){
+      fsViolations++;
+      violationLog.push('Thoát fullscreen lúc ' + new Date().toLocaleTimeString());
+      var ov = document.getElementById('fsOverlay');
+      if(ov) ov.style.display = 'flex';
+    }
+  }
+  document.addEventListener('fullscreenchange', onFsChange);
+  document.addEventListener('webkitfullscreenchange', onFsChange);
+
+  document.addEventListener('visibilitychange', function(){
+    if(submitted || !window._testStartTime) return;
+    if(document.hidden){
+      tabViolations++;
+      violationLog.push('Chuyển tab lúc ' + new Date().toLocaleTimeString());
+      showBanner('⚠ Phát hiện chuyển tab! Vi phạm được ghi nhận.');
+    }
+  });
+
+  window.addEventListener('blur', function(){
+    if(submitted || !window._testStartTime) return;
+    focusViolations++;
+    violationLog.push('Mất focus cửa sổ lúc ' + new Date().toLocaleTimeString());
+    showBanner('⚠ Phát hiện mất focus cửa sổ! Vi phạm được ghi nhận.');
+  });
+
+  function showBanner(msg){
+    var b = document.getElementById('warnBanner');
+    if(!b) return;
+    b.textContent = msg;
+    b.style.display = 'block';
+    clearTimeout(b._t);
+    b._t = setTimeout(function(){ b.style.display = 'none'; }, 4000);
+  }
+
+  document.addEventListener('contextmenu', function(e){ if(submitted) return; e.preventDefault(); });
+  document.addEventListener('copy', function(e){ if(submitted) return; e.preventDefault(); });
+  document.addEventListener('paste', function(e){ if(submitted) return; e.preventDefault(); });
+  document.addEventListener('cut', function(e){ if(submitted) return; e.preventDefault(); });
+  document.addEventListener('dragstart', function(e){ if(submitted) return; e.preventDefault(); });
+  document.addEventListener('drop', function(e){ if(submitted) return; e.preventDefault(); });
+
+  document.addEventListener('keydown', function(e){
+    if(submitted) return;
+    var k = e.key;
+    if(k === 'F12'){ e.preventDefault(); return; }
+    if(e.ctrlKey && ['c','C','a','A','s','S','u','U','p','P','v','V'].indexOf(k) !== -1){ e.preventDefault(); return; }
+    if(e.ctrlKey && e.shiftKey && ['i','I','j','J','c','C','k','K'].indexOf(k) !== -1){ e.preventDefault(); return; }
+    if(k === 'Escape'){ e.preventDefault(); return; }
+  });
+
+  window.getViolationLog = function(){
+    submitted = true;
+    return { tabViolations: tabViolations, focusViolations: focusViolations, fsViolations: fsViolations, log: violationLog };
+  };
+  window.stopTimer = function(){ timerStopped = true; };
+
+  /* ---------------- Timer ---------------- */
+  (function(){
+    var DURATION = 60*60*1000, EXTRA = 5*60*1000;
+    var startTime = null, extraTriggered = false, autoSubmitted = false;
+    function fmt(ms){
+      if(ms<0) ms=0;
+      var s = Math.floor(ms/1000);
+      var m = Math.floor(s/60); s = s%60;
+      return pad(m,2)+':'+pad(s,2);
+    }
+    function tick(){
+      if(!startTime){
+        if(!window._testStartTime){ requestAnimationFrame(tick); return; }
+        startTime = window._testStartTime;
+      }
+      if(timerStopped) return;
+      var box = document.getElementById('timerBox');
+      var elapsed = Date.now() - startTime;
+      var remain = DURATION - elapsed;
+      if(remain <= 0 && !extraTriggered){
+        extraTriggered = true;
+        showTimeUpModal();
+        remain = 0 - (Date.now() - (startTime+DURATION));
+      }
+      if(remain <= -EXTRA && !autoSubmitted){
+        autoSubmitted = true;
+        doSubmit();
+        return;
+      }
+      if(box){
+        var showMs = extraTriggered ? (EXTRA + (DURATION - elapsed)) : remain;
+        box.textContent = fmt(Math.max(0,showMs));
+        box.classList.remove('warn','danger');
+        if(!extraTriggered){
+          if(remain <= 2*60*1000) box.classList.add('danger');
+          else if(remain <= 10*60*1000) box.classList.add('warn');
+        } else {
+          box.classList.add('danger');
+        }
+      }
+      setTimeout(tick, 500);
+    }
+    function showTimeUpModal(){
+      var m = document.getElementById('timeUpModal');
+      if(m) m.classList.remove('hidden');
+    }
+    window._timerTick = tick;
+    requestAnimationFrame(tick);
+  })();
+
+  /* ---------------- Tabs ---------------- */
+  window.showPassage = function(idx){
+    for(var i=0;i<3;i++){
+      var p = document.getElementById('passage-'+i);
+      var q = document.getElementById('questions-'+i);
+      var t = document.getElementById('tabBtn-'+i);
+      if(!p) continue;
+      if(i===idx){ p.classList.add('active'); q.classList.add('active'); t.classList.add('active'); }
+      else { p.classList.remove('active'); q.classList.remove('active'); t.classList.remove('active'); }
+    }
+  };
+
+  /* ---------------- Split divider ---------------- */
+  function initDivider(){
+    var dragging = false;
+    var divider = document.getElementById('divider');
+    var area = document.getElementById('examArea');
+    if(!divider) return;
+    function onMove(clientX){
+      var rect = area.getBoundingClientRect();
+      var pct = (clientX - rect.left) / rect.width * 100;
+      pct = Math.max(20, Math.min(80, pct));
+      document.querySelectorAll('.passage-panel').forEach(function(el){ el.style.width = pct+'%'; });
+      document.querySelectorAll('.question-panel').forEach(function(el){ el.style.width = (100-pct)+'%'; });
+    }
+    divider.addEventListener('mousedown', function(e){ dragging = true; e.preventDefault(); });
+    document.addEventListener('mousemove', function(e){ if(dragging) onMove(e.clientX); });
+    document.addEventListener('mouseup', function(){ dragging = false; });
+    divider.addEventListener('touchstart', function(e){ dragging = true; }, {passive:true});
+    document.addEventListener('touchmove', function(e){ if(dragging && e.touches[0]) onMove(e.touches[0].clientX); }, {passive:true});
+    document.addEventListener('touchend', function(){ dragging = false; });
+  }
+
+  /* ---------------- Highlight ---------------- */
+  var currentColor = 'yellow';
+  var eraserMode = false;
+  var penMode = false;
+  var penEraseMode = false;
+  var penColor = 'red';
+
+  function initHighlightToolbar(){
+    document.querySelectorAll('.hl-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        currentColor = btn.getAttribute('data-c');
+        eraserMode = false;
+        document.querySelectorAll('.hl-btn').forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active');
+        document.getElementById('eraserBtn').classList.remove('active');
+      });
+    });
+    var er = document.getElementById('eraserBtn');
+    if(er) er.addEventListener('click', function(){
+      eraserMode = !eraserMode;
+      er.classList.toggle('active', eraserMode);
+    });
+    var first = document.querySelector('.hl-btn[data-c="yellow"]');
+    if(first) first.classList.add('active');
+  }
+
+  function wrapRange(range, cls){
+    var frag = range.extractContents();
+    var span = document.createElement('span');
+    span.className = cls;
+    span.appendChild(frag);
+    range.insertNode(span);
+  }
+
+  function handleMouseUp(container){
+    var sel = window.getSelection();
+    if(!sel || sel.isCollapsed || sel.rangeCount===0) return;
+    var range = sel.getRangeAt(0);
+    if(!container.contains(range.commonAncestorContainer)) return;
+    var tag = range.commonAncestorContainer.nodeType===1 ? range.commonAncestorContainer.tagName : range.commonAncestorContainer.parentElement.tagName;
+    if(['INPUT','SELECT','TEXTAREA'].indexOf(tag)!==-1) return;
+    if(submitted){
+      var rect = range.getBoundingClientRect();
+      var text = sel.toString();
+      sel.removeAllRanges();
+      doDictLookup(text, rect);
+      return;
+    }
+    if(eraserMode || penMode) return;
+    try{
+      wrapRange(range, 'hl-'+currentColor);
+    }catch(e){}
+    sel.removeAllRanges();
+  }
+
+  function handleEraseClick(e){
+    if(!eraserMode) return;
+    var el = e.target;
+    if(el.classList && (el.classList.contains('hl-yellow')||el.classList.contains('hl-green')||el.classList.contains('hl-pink'))){
+      var parent = el.parentNode;
+      while(el.firstChild) parent.insertBefore(el.firstChild, el);
+      parent.removeChild(el);
+    }
+  }
+
+  function initHighlightZones(){
+    document.querySelectorAll('.passage-panel, .question-panel').forEach(function(zone){
+      zone.addEventListener('mouseup', function(){ handleMouseUp(zone); });
+      zone.addEventListener('click', function(e){ handleEraseClick(e); });
+      zone.addEventListener('touchend', function(){ handleMouseUp(zone); });
+      zone.addEventListener('dblclick', function(){
+        if(!submitted) return;
+        var sel = window.getSelection();
+        if(!sel || sel.isCollapsed || sel.rangeCount===0) return;
+        var range = sel.getRangeAt(0);
+        var rect = range.getBoundingClientRect();
+        var text = sel.toString();
+        doDictLookup(text, rect);
+      });
+    });
+  }
+
+  /* ---------------- Selected-answer highlight ---------------- */
+  function initSelectedAnswerHighlight(){
+    document.querySelectorAll('input[type=radio], input[type=checkbox]').forEach(function(inp){
+      inp.addEventListener('change', function(){
+        var label = inp.closest('.opt-row');
+        if(inp.type==='radio'){
+          document.querySelectorAll('input[name="'+inp.name+'"]').forEach(function(o){
+            var l = o.closest('.opt-row');
+            if(l) l.classList.remove('selected-answer');
+          });
+          if(inp.checked && label) label.classList.add('selected-answer');
+        } else {
+          if(label) label.classList.toggle('selected-answer', inp.checked);
+        }
+      });
+    });
+  }
+
+  /* ---------------- Checkbox group max-limit ---------------- */
+  window.wireCheckboxLimit = function(name, max){
+    function showLimit(){
+      var id = 'chk-limit-'+name;
+      var el = document.getElementById(id);
+      if(!el){
+        el = document.createElement('div');
+        el.id = id;
+        el.style.cssText = 'color:#e74c3c;font-size:12px;font-weight:bold;margin-top:4px;';
+        var grp = document.querySelector('input[name="'+name+'"]');
+        if(grp && grp.parentNode && grp.parentNode.parentNode) grp.parentNode.parentNode.appendChild(el);
+      }
+      el.textContent = '⚠ Chỉ được chọn tối đa ' + max + ' đáp án!';
+      clearTimeout(el._t);
+      el._t = setTimeout(function(){ el.textContent=''; }, 2500);
+    }
+    document.querySelectorAll('input[name="'+name+'"]').forEach(function(inp){
+      inp.addEventListener('change', function(){
+        if(inp.checked){
+          var n = document.querySelectorAll('input[name="'+name+'"]:checked').length;
+          if(n>max){ inp.checked=false; inp.dispatchEvent(new Event('_uncheck')); showLimit();
+            var label = inp.closest('.opt-row'); if(label) label.classList.remove('selected-answer');
+          }
+        }
+      });
+    });
+  };
+
+  /* ---------------- Pen (freehand drawing) tool ---------------- */
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+  var drawLayers = []; // {zone, svg}
+
+  function initDrawLayers(){
+    document.querySelectorAll('.passage-panel, .question-panel').forEach(function(zone){
+      var svg = document.createElementNS(SVG_NS, 'svg');
+      svg.setAttribute('class', 'draw-layer');
+      svg.style.height = Math.max(zone.scrollHeight, zone.clientHeight) + 'px';
+      zone.appendChild(svg);
+      drawLayers.push({zone: zone, svg: svg});
+      wireDrawing(zone, svg);
+    });
+  }
+
+  function resizeDrawLayer(entry){
+    entry.svg.style.height = Math.max(entry.zone.scrollHeight, entry.zone.clientHeight) + 'px';
+  }
+
+  function wireDrawing(zone, svg){
+    var drawing = false;
+    var curPath = null;
+    var pts = [];
+
+    function pos(ev){
+      var rect = zone.getBoundingClientRect();
+      var cx = (ev.touches ? ev.touches[0].clientX : ev.clientX);
+      var cy = (ev.touches ? ev.touches[0].clientY : ev.clientY);
+      return { x: cx - rect.left + zone.scrollLeft, y: cy - rect.top + zone.scrollTop };
+    }
+
+    function startDraw(ev){
+      if(!penMode || penEraseMode || submitted) return;
+      var tag = ev.target.tagName;
+      if(['INPUT','SELECT','TEXTAREA','A'].indexOf(tag)!==-1) return;
+      drawing = true;
+      pts = [];
+      var p = pos(ev);
+      pts.push(p.x.toFixed(1)+','+p.y.toFixed(1));
+      curPath = document.createElementNS(SVG_NS, 'polyline');
+      curPath.setAttribute('points', pts.join(' '));
+      curPath.setAttribute('fill', 'none');
+      curPath.setAttribute('stroke', penColor==='red' ? '#e53935' : (penColor==='blue' ? '#1e88e5' : '#222'));
+      curPath.setAttribute('stroke-width', '2.2');
+      curPath.setAttribute('stroke-linecap', 'round');
+      curPath.setAttribute('stroke-linejoin', 'round');
+      svg.appendChild(curPath);
+      ev.preventDefault();
+    }
+    function moveDraw(ev){
+      if(!drawing || !curPath) return;
+      var p = pos(ev);
+      pts.push(p.x.toFixed(1)+','+p.y.toFixed(1));
+      curPath.setAttribute('points', pts.join(' '));
+      ev.preventDefault();
+    }
+    function endDraw(){
+      drawing = false;
+      curPath = null;
+      pts = [];
+    }
+    function eraseAt(ev){
+      if(!penEraseMode || submitted) return;
+      var p = pos(ev);
+      var els = svg.querySelectorAll('polyline');
+      for(var i=0;i<els.length;i++){
+        var el = els[i];
+        var box = el.getBBox();
+        var pad = 8;
+        if(p.x >= box.x-pad && p.x <= box.x+box.width+pad && p.y >= box.y-pad && p.y <= box.y+box.height+pad){
+          el.remove();
+        }
+      }
+    }
+
+    svg.addEventListener('mousedown', function(ev){
+      if(penEraseMode){ eraseAt(ev); return; }
+      startDraw(ev);
+    });
+    svg.addEventListener('mousemove', moveDraw);
+    svg.addEventListener('mouseup', endDraw);
+    svg.addEventListener('mouseleave', endDraw);
+    svg.addEventListener('touchstart', function(ev){
+      if(penEraseMode){ eraseAt(ev); return; }
+      startDraw(ev);
+    }, {passive:false});
+    svg.addEventListener('touchmove', moveDraw, {passive:false});
+    svg.addEventListener('touchend', endDraw);
+  }
+
+  function updatePenLayers(){
+    drawLayers.forEach(function(entry){
+      resizeDrawLayer(entry);
+      entry.svg.classList.toggle('pen-active', penMode && !penEraseMode);
+      entry.svg.classList.toggle('pen-erase', penMode && penEraseMode);
+    });
+  }
+
+  function initPenTool(){
+    var btn = document.getElementById('penBtn');
+    var eraseBtn = document.getElementById('penEraserBtn');
+    var colorBtns = document.querySelectorAll('.pen-color-btn');
+    if(!btn) return;
+    function setColorBtnsVisible(show){
+      colorBtns.forEach(function(b){ b.classList.toggle('show', show); });
+      if(eraseBtn) eraseBtn.classList.toggle('show', show);
+    }
+    colorBtns.forEach(function(b){
+      if(b.getAttribute('data-pc')===penColor) b.classList.add('active');
+      b.addEventListener('click', function(){
+        penColor = b.getAttribute('data-pc');
+        penEraseMode = false;
+        if(eraseBtn) eraseBtn.classList.remove('active');
+        colorBtns.forEach(function(o){ o.classList.remove('active'); });
+        b.classList.add('active');
+        updatePenLayers();
+      });
+    });
+    btn.addEventListener('click', function(){
+      penMode = !penMode;
+      btn.classList.toggle('active', penMode);
+      document.body.classList.toggle('pen-mode', penMode);
+      setColorBtnsVisible(penMode);
+      if(penMode){
+        eraserMode = false;
+        var er = document.getElementById('eraserBtn');
+        if(er) er.classList.remove('active');
+      } else {
+        penEraseMode = false;
+        if(eraseBtn) eraseBtn.classList.remove('active');
+      }
+      updatePenLayers();
+    });
+    if(eraseBtn){
+      eraseBtn.addEventListener('click', function(){
+        penEraseMode = !penEraseMode;
+        eraseBtn.classList.toggle('active', penEraseMode);
+        updatePenLayers();
+      });
+    }
+  }
+
+  /* ---------------- Post-submit dictionary lookup ---------------- */
+  function dictEsc(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+  function removeDictPopup(){
+    var el = document.getElementById('dictPopup');
+    if(el) el.remove();
+  }
+  function showDictPopup(innerHtml, rect, wide){
+    // keep existing popup element in place if it already exists (avoids losing
+    // scroll position while a multi-chunk translation is progressively updated)
+    var el = document.getElementById('dictPopup');
+    var isNew = !el;
+    if(!el){
+      el = document.createElement('div');
+      el.className = 'dict-popup';
+      el.id = 'dictPopup';
+      document.body.appendChild(el);
+    }
+    el.classList.toggle('dict-popup-wide', !!wide);
+    el.innerHTML = '<span class="dict-close">✕</span><div class="dict-body">' + innerHtml + '</div>';
+    el.querySelector('.dict-close').addEventListener('click', removeDictPopup);
+    if(isNew){
+      var popW = wide ? 480 : 320;
+      var top = rect.bottom + 8;
+      var left = rect.left;
+      var maxLeft = window.innerWidth - popW - 16;
+      if(left > maxLeft) left = Math.max(8, maxLeft);
+      if(left < 8) left = 8;
+      var maxTop = window.innerHeight - 90;
+      if(top > maxTop) top = Math.max(8, rect.top - 90);
+      el.style.top = Math.max(8,top) + 'px';
+      el.style.left = left + 'px';
+    }
+  }
+  // MyMemory's free/anonymous endpoint truncates or degrades quality on long queries
+  // (roughly >450-500 chars), so long selections are split into sentence-sized chunks
+  // and translated sequentially, then re-assembled — this is what makes long-passage
+  // translation actually show the FULL translated text instead of one short fragment.
+  function splitIntoChunks(text, maxLen){
+    var sentences = text.match(/[^.!?]+[.!?]*(\s+|$)/g) || [text];
+    var chunks = [];
+    var cur = '';
+    sentences.forEach(function(s){
+      if(s.length > maxLen){
+        // a single "sentence" is itself too long (no punctuation) — hard-split it
+        if(cur){ chunks.push(cur); cur = ''; }
+        for(var i=0;i<s.length;i+=maxLen){ chunks.push(s.slice(i, i+maxLen)); }
+        return;
+      }
+      if((cur+s).length > maxLen){
+        chunks.push(cur);
+        cur = s;
+      } else {
+        cur += s;
+      }
+    });
+    if(cur) chunks.push(cur);
+    return chunks.map(function(c){ return c.trim(); }).filter(Boolean);
+  }
+  function translateChunk(chunk){
+    return fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(chunk)+'&langpair=en|vi')
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var t = data && data.responseData && data.responseData.translatedText;
+        return t || '(không dịch được đoạn này)';
+      })
+      .catch(function(){ return '⚠ Lỗi kết nối dịch đoạn này.'; });
+  }
+  function doDictLookup(text, rect){
+    if(!text) return;
+    text = text.trim().replace(/\s+/g,' ');
+    if(!text) return;
+    var MAX_LOOKUP = 3000;
+    if(text.length > MAX_LOOKUP) text = text.slice(0, MAX_LOOKUP);
+
+    var isLong = text.length > 70;
+    if(!isLong){
+      showDictPopup('<b>'+dictEsc(text)+'</b><br>Đang dịch…', rect, false);
+      translateChunk(text).then(function(t){
+        showDictPopup('<b>'+dictEsc(text)+'</b><br>→ '+dictEsc(t), rect, false);
+      });
+      return;
+    }
+
+    // Long passage: chunk it, translate sequentially, render full original +
+    // full translation (both scrollable) so nothing gets cut short.
+    var chunks = splitIntoChunks(text, 450);
+    var translated = new Array(chunks.length).fill('');
+    function render(progressIdx){
+      var status = (progressIdx < chunks.length)
+        ? '<div class="dict-progress">Đang dịch… ('+(progressIdx+1)+'/'+chunks.length+')</div>' : '';
+      var html = '<div class="dict-orig"><b>Đoạn gốc:</b><br>'+dictEsc(text)+'</div>'
+        + '<div class="dict-trans"><b>Bản dịch:</b><br>'+dictEsc(translated.join(' ').trim() || '…')+'</div>'
+        + status;
+      showDictPopup(html, rect, true);
+    }
+    render(0);
+    var chain = Promise.resolve();
+    chunks.forEach(function(chunk, idx){
+      chain = chain.then(function(){
+        return translateChunk(chunk).then(function(t){
+          translated[idx] = t;
+          render(idx+1);
+        });
+      });
+    });
+  }
+
+  function enablePostExamTools(){
+    var tag = document.getElementById('dictModeTag');
+    if(tag) tag.classList.add('show');
+    var hlbar = document.getElementById('hlToolbar');
+    if(hlbar) hlbar.style.display = 'none';
+    var b = document.getElementById('warnBanner');
+    if(b) b.style.display = 'none';
+    var ov = document.getElementById('fsOverlay');
+    if(ov) ov.style.display = 'none';
+    document.body.classList.remove('pen-mode');
+    penMode = false; penEraseMode = false;
+    var pb = document.getElementById('penBtn'); if(pb) pb.classList.remove('active');
+    document.querySelectorAll('.pen-color-btn, #penEraserBtn').forEach(function(b){ b.classList.remove('show','active'); });
+    drawLayers.forEach(function(entry){ entry.svg.classList.remove('pen-active','pen-erase'); });
+    document.querySelectorAll('.explain-panel').forEach(function(p){ p.style.display = 'block'; });
+  }
+
+  /* ---------------- Grading helpers ---------------- */
+  function getRadio(name){
+    var el = document.querySelector('input[name="'+name+'"]:checked');
+    return el ? el.value : '';
+  }
+  function getChecked(name){
+    var out = [];
+    document.querySelectorAll('input[name="'+name+'"]:checked').forEach(function(el){ out.push(el.value); });
+    return out;
+  }
+  function getSelect(name){
+    var el = document.getElementById(name);
+    return el ? el.value : '';
+  }
+  function getText(name){
+    var el = document.getElementById(name);
+    return el ? el.value : '';
+  }
+  function textMatches(val, ansArr){
+    var v = norm(val);
+    if(!v) return false;
+    for(var i=0;i<ansArr.length;i++){ if(norm(ansArr[i])===v) return true; }
+    return false;
+  }
+
+  /* ---------------- Submit flow ---------------- */
+  window.requestSubmit = function(){
+    document.getElementById('confirmModal').classList.remove('hidden');
+  };
+  window.cancelSubmit = function(){
+    document.getElementById('confirmModal').classList.add('hidden');
+  };
+  window.confirmSubmit = function(){
+    document.getElementById('confirmModal').classList.add('hidden');
+    doSubmit();
+  };
+
+  function passageIndexOfQ(n){
+    var c = PASSAGE_COUNTS, acc = 0;
+    for(var i=0;i<3;i++){ acc += c[i]; if(n<=acc) return i; }
+    return 2;
+  }
+
+  function doSubmit(){
+    if(submitted) return;
+    submitted = true;
+    window.getViolationLog();
+    window.stopTimer();
+    var box = document.getElementById('timerBox');
+    if(box) box.style.display = 'none';
+    var tuModal = document.getElementById('timeUpModal');
+    if(tuModal) tuModal.classList.add('hidden');
+
+    var pScore = [0,0,0], pTotal = PASSAGE_COUNTS.slice();
+    var totalCorrect = 0;
+    var detailsParts = [];
+    var doneGroups = {};
+
+    UNITS.forEach(function(u){
+      if(u.type==='checkboxGroup'){
+        if(doneGroups[u.group]) return;
+        doneGroups[u.group] = true;
+        var chosen = getChecked(u.group);
+        var correct = ANS[u.group];
+        var matched = chosen.filter(function(v){ return correct.indexOf(v)!==-1; });
+        var score = Math.min(matched.length, u.max);
+        var pIdx = passageIndexOfQ(u.members[0]);
+        pScore[pIdx] += score;
+        totalCorrect += score;
+        // color options
+        document.querySelectorAll('input[name="'+u.group+'"]').forEach(function(inp){
+          var label = inp.closest('.opt-row');
+          if(!label) return;
+          if(inp.checked && correct.indexOf(inp.value)!==-1) label.classList.add('correct');
+          else if(inp.checked && correct.indexOf(inp.value)===-1) label.classList.add('incorrect');
+          else if(!inp.checked && correct.indexOf(inp.value)!==-1) label.style.outline = '2px dashed #e8b800';
+        });
+        var parts = chosen.map(function(v){ return v + (correct.indexOf(v)>=0 ? '✔' : '✘'); });
+        var missed = correct.filter(function(v){ return chosen.indexOf(v)<0; }).map(function(v){ return v+'(đáp án)'; });
+        detailsParts.push('Q'+u.members.join('-')+':['+parts.concat(missed).join(' ')+']');
+        return;
+      }
+      var n = u.n;
+      var pIdx = passageIndexOfQ(n);
+      var ok = false, val = '';
+      if(u.type==='radio'){
+        val = getRadio('q'+n);
+        ok = Array.isArray(ANS[n]) ? ANS[n].indexOf(val)!==-1 : (val === ANS[n]);
+        document.querySelectorAll('input[name="q'+n+'"]').forEach(function(inp){
+          var label = inp.closest('.opt-row');
+          if(!label) return;
+          if(Array.isArray(ANS[n]) ? ANS[n].indexOf(inp.value)!==-1 : inp.value === ANS[n]) label.classList.add('correct');
+          else if(inp.checked) label.classList.add('incorrect');
+        });
+      } else if(u.type==='select'){
+        val = getSelect('q'+n);
+        ok = Array.isArray(ANS[n]) ? ANS[n].indexOf(val)!==-1 : (val === ANS[n]);
+        var sel = document.getElementById('q'+n);
+        if(sel) sel.classList.add(ok?'correct-cell':'incorrect-cell');
+      } else { // text
+        val = getText('q'+n);
+        ok = textMatches(val, ANS[n]);
+        var inp2 = document.getElementById('q'+n);
+        if(inp2) inp2.classList.add(ok?'correct-cell':'incorrect-cell');
+        if(!ok){
+          var hint = document.getElementById('hint-q'+n);
+          if(hint) hint.textContent = ' (Đáp án: ' + ANS[n][0] + ')';
+        }
+      }
+      if(ok){ pScore[pIdx]++; totalCorrect++; }
+      detailsParts.push('Q'+n+':'+(ok?'✔':'✘')+'('+val+')');
+    });
+
+    // lock inputs
+    document.querySelectorAll('input,select,textarea').forEach(function(el){
+      if(el.id==='stuName'||el.id==='stuClass') return;
+      el.disabled = true;
+    });
+
+    enablePostExamTools();
+
+    var total = TOTAL_QUESTIONS;
+    var band = computeBand(totalCorrect, total);
+    var elapsedMs = Date.now() - window._testStartTime;
+    var elapsedMin = Math.floor(elapsedMs/60000), elapsedSec = Math.floor((elapsedMs%60000)/1000);
+    var timeTaken = elapsedMin+' phút '+elapsedSec+' giây';
+
+    showResult(pScore, pTotal, totalCorrect, total, band, timeTaken);
+
+    var vlog = { tabViolations: tabViolations, focusViolations: focusViolations, fsViolations: fsViolations };
+    var payload = {
+      action: 'save_result',
+      timestamp: new Date().toISOString(),
+      student: window._studentName + ' — ' + window._studentClass,
+      test: 'Reading Test ' + TEST_NUM,
+      score: totalCorrect,
+      total: total,
+      band: band,
+      timeTaken: timeTaken,
+      p1score: pScore[0]+'/'+pTotal[0],
+      p2score: pScore[1]+'/'+pTotal[1],
+      p3score: pScore[2]+'/'+pTotal[2],
+      tabViol: vlog.tabViolations,
+      focusViol: vlog.focusViolations,
+      fsViol: vlog.fsViolations,
+      details: detailsParts.join(' | ')
+    };
+    fetch(APPS_SCRIPT_URL, {
+      method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify(payload)
+    }).catch(function(){});
+  }
+
+  function computeBand(score, total){
+    var s = Math.round(score/total*40);
+    if(s>=39) return '9';
+    if(s>=37) return '8.5';
+    if(s>=35) return '8';
+    if(s>=33) return '7.5';
+    if(s>=30) return '7';
+    if(s>=27) return '6.5';
+    if(s>=23) return '6';
+    if(s>=19) return '5.5';
+    if(s>=15) return '5';
+    if(s>=13) return '4.5';
+    if(s>=10) return '4';
+    return '< 4';
+  }
+
+  function showResult(pScore, pTotal, totalCorrect, total, band, timeTaken){
+    var box = document.getElementById('resultBox');
+    var html = '<h3>Kết quả bài thi</h3>';
+    html += '<p>Thí sinh: <b>'+esc(window._studentName)+'</b> — Lớp: <b>'+esc(window._studentClass)+'</b></p>';
+    html += '<p>Thời gian làm bài: <b>'+timeTaken+'</b></p>';
+    html += '<table><tr><th>Passage</th><th>Điểm</th></tr>';
+    for(var i=0;i<3;i++){ html += '<tr><td>Passage '+(i+1)+'</td><td>'+pScore[i]+'/'+pTotal[i]+'</td></tr>'; }
+    html += '<tr><td><b>Tổng điểm</b></td><td><b>'+totalCorrect+'/'+total+'</b></td></tr></table>';
+    html += '<p>Band ước tính: <span class="band-badge">Band '+band+'</span></p>';
+    html += '<p style="font-size:12.5px;color:#667;">Báo cáo vi phạm — Chuyển tab: '+tabViolations+' | Mất focus: '+focusViolations+' | Thoát fullscreen: '+fsViolations+'</p>';
+    html += '<p style="font-size:12.5px;color:#667;">Các ô được tô <span style="color:var(--green);font-weight:700;">xanh</span> là đáp án đúng, tô <span style="color:var(--red);font-weight:700;">đỏ</span> là sai. Đáp án đúng bị bỏ sót (checkbox) được viền nét đứt vàng.</p>';
+    box.innerHTML = html;
+    document.getElementById('resultModal').classList.remove('hidden');
+  }
+  window.closeResult = function(){
+    document.getElementById('resultModal').classList.add('hidden');
+  };
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  /* ---------------- Init (script is at end of body, DOM already ready — wire directly) ---------------- */
+  initHighlightToolbar();
+  initHighlightZones();
+  initSelectedAnswerHighlight();
+  initDrawLayers();
+  initPenTool();
+  initDivider();
+  if(window.CHECKBOX_GROUPS){
+    window.CHECKBOX_GROUPS.forEach(function(g){ window.wireCheckboxLimit(g.name, g.max); });
+  }
+
+})();
+
+</script>
+<script>GNAuth.verify()</script><script src="../../../../engine/feedback.js?v=1791025698"></script></body>
+</html>
