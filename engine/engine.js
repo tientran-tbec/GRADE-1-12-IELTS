@@ -72,7 +72,8 @@
   function showAnsText1(id, a) {
     var it = Q.items[id], el = qEl(id);
     if (it.t === 'mcq') {
-      var lab = $('input[value="' + a + '"]', el);
+      var lab = null, inps = el ? el.querySelectorAll('input') : [];
+      for (var li = 0; li < inps.length; li++) if (inps[li].value === a) { lab = inps[li]; break; }
       var txt = lab ? lab.parentNode.textContent.replace(/^\s*[A-D]\.\s*/, '').trim() : '';
       return txt && txt !== a ? a + '. ' + txt : a;
     }

@@ -104,4 +104,155 @@ U5 = {
           ("<p><b>Mary:</b> What's your hobby?<br><b>Tom:</b> It's singing. I like dancing, too.<br><b>Mary:</b> Me too!</p>",
            [('Tom\'s hobby is singing.', 'T', "It's singing."), ('Tom likes running.', 'F', 'Tom thích singing và dancing.'), ('Mary likes dancing, too.', 'T', 'Me too!')])],
 }
-UNITS = [U3, U4, U5]
+
+U6 = {
+ 'n': 6, 'title': 'Our school',
+ 'vocab': [('school', 'trường học', '🏫'), ('classroom', 'lớp học', '🏠'), ('playground', 'sân chơi', '🛝'), ('library', 'thư viện', '📚'), ('art room', 'phòng mỹ thuật', '🎨'),
+           ('computer room', 'phòng vi tính', '💻'), ('music room', 'phòng âm nhạc', '🎵'), ('gym', 'phòng tập thể dục', '🏋️'), ('our', 'của chúng ta', ''), ('Let\'s go', 'chúng ta hãy đi', '')],
+ 'pattern': ('<ul><li><b>Is this our school?</b> – Đây có phải trường của chúng ta không? &rarr; <b>Yes, it is.</b> / <b>No, it isn\'t.</b></li>'
+             '<li><b>Is that your classroom?</b> – Kia có phải lớp của bạn không? &rarr; <b>Yes, it is.</b></li>'
+             '<li><b>Let\'s go to the computer room!</b> – Chúng ta hãy đến phòng vi tính nhé! &rarr; <b>OK, let\'s go.</b></li><li><b>Welcome to our school!</b> – Chào mừng đến trường chúng mình!</li></ul>'),
+ 'qa': [('Is this our school?', 'Yes, it is.'), ('Is that your classroom?', "No, it isn't."), ("Let's go to the library!", "OK, let's go."), ('Welcome to our school!', 'Thank you.'), ("What's this?", "It's a nose.")],
+ 'odd': [(['library', 'gym', 'our'], 'our', 'library, gym là địa điểm trong trường; our là "của chúng ta".'), (['school', 'playground', 'Let\'s'], "Let's", "school, playground là nơi chốn; Let's dùng để rủ ai đó."),
+         (['music room', 'art room', 'nose'], 'nose', 'music room, art room là phòng học; nose là mũi.'), (['classroom', 'computer room', 'hand'], 'hand', 'hand là bàn tay, không phải nơi trong trường.')],
+ 'fills': [
+  ('Is {_} our school? – Yes, it is.', 'this', 'Is this our school? (ở gần)'), ('Is {_} your classroom? – Yes, it is. (ở xa)', 'that', 'Is that …? (ở xa)'),
+  ("Is this our library? – {_}, it is.", 'Yes', 'Yes, it is.'), ("Is that your gym? – {_}, it isn't.", 'No', "No, it isn't."),
+  ("Let's {_} to the computer room!", 'go', "Let's go to … = Chúng ta hãy đến …"), ("Let's go to the music {_}!", 'room', 'music room = phòng âm nhạc'),
+  ('Welcome to our {_}!', 'school', 'Welcome to our school!'), ("🏫 This is our {_}.", 'school', 'school = trường'), ("📚 Let's go to the {_}.", 'library', 'library = thư viện'),
+  ("🎨 Let's go to the {_} room.", 'art', 'art room = phòng mỹ thuật'), ("💻 Let's go to the {_} room.", 'computer', 'computer room = phòng vi tính'), ("🛝 Let's go to the {_}.", 'playground', 'playground = sân chơi'),
+  ("🏋️ Let's go to the {_}.", 'gym', 'gym = phòng thể dục'), ("🎵 Is this our {_} room? – Yes, it is.", 'music', 'music room = phòng âm nhạc')],
+ 'sents': ['This is our school.', 'Is this our school?', 'Yes, it is.', "No, it isn't.", "Let's go to the gym.", "OK, let's go.", 'Welcome to our school.', 'Is that your classroom?', 'This is the library.', "Let's go to the playground."],
+ 'mcq': [('Is this our school? – ___', ['Yes, it is.', 'Yes, I am.', "I'm fine."], 'Yes, it is.', 'Is this …? → Yes, it is.'),
+         ("Let's go to the ___.", ['library', 'nose', 'hand'], 'library', 'Chọn nơi chốn trong trường.'), ("___ go to the gym! – OK, let's go.", ["Let's", 'Is', 'This'], "Let's", "Let's go …"),
+         ("Is that your classroom? – No, it ___.", ["isn't", 'is', 'am'], "isn't", "No, it isn't."), ('Welcome to our ___.', ['school', 'eye', 'touch'], 'school', 'Welcome to our school!'),
+         ('Chọn từ nghĩa "thư viện":', ['library', 'gym', 'school'], 'library', 'library = thư viện.'), ('Chọn từ nghĩa "sân chơi":', ['playground', 'classroom', 'gym'], 'playground', 'playground = sân chơi.'),
+         ('Chọn từ nghĩa "phòng vi tính":', ['computer room', 'music room', 'art room'], 'computer room', 'computer room = phòng vi tính.'), ('Chọn từ nghĩa "phòng âm nhạc":', ['music room', 'art room', 'gym'], 'music room', 'music room = phòng âm nhạc.'),
+         ("Let's go to the art room. – ___", ["OK, let's go.", "I'm fine.", 'Yes, it is.'], "OK, let's go.", 'Đồng ý lời rủ: OK, let\'s go.'), ('Is ___ our gym? (ở gần)', ['this', 'that', 'those'], 'this', 'this = đây (ở gần).'),
+         ("📚 Let's go to the ___.", ['library', 'gym', 'playground'], 'library', '📚 = library'), ("🎨 This is the ___ room.", ['art', 'music', 'computer'], 'art', '🎨 = art room')],
+ 'dlg': ['Lan: Hi, Hoa. Welcome to our school.', 'Hoa: Thank you, Lan. Is this our classroom?', "Lan: Yes, it is. Let's go to the library!", "Hoa: OK, let's go.", 'Lan: Wow, it is very nice!'],
+ 'read': [("<p>Hello. I'm Lan. This is my school. This is my classroom. That is the library. I like my school very much.</p>",
+           [('Lan likes her school.', 'T', 'I like my school very much.'), ('That is the gym.', 'F', 'That is the library.'), ('This is Lan\'s classroom.', 'T', 'This is my classroom.')]),
+          ("<p><b>Nam:</b> Is that your classroom?<br><b>Mai:</b> No, it isn't. It's the music room.<br><b>Nam:</b> Let's go to the music room!<br><b>Mai:</b> OK, let's go.</p>",
+           [('That is Mai\'s classroom.', 'F', "No, it isn't. It's the music room."), ('They go to the music room.', 'T', "Let's go – OK, let's go."), ('Nam says "No" to Mai.', 'F', 'Nam rủ Mai: Let\'s go!')])],
+}
+
+U7 = {
+ 'n': 7, 'title': 'Classroom instructions',
+ 'vocab': [('sit down', 'ngồi xuống', '🪑'), ('stand up', 'đứng lên', '🧍'), ('open your book', 'mở sách ra', '📖'), ('close your book', 'gấp sách lại', '📕'),
+           ('come in', 'đi vào', '🚪'), ('go out', 'đi ra ngoài', '🚶'), ('speak', 'nói', '🗣️'), ('please', 'xin vui lòng', ''), ('May I …?', 'Tôi có thể … không?', ''), ('can', 'có thể', '')],
+ 'pattern': ('<ul><li><b>Sit down, please.</b> – Xin hãy ngồi xuống. / <b>Stand up, please.</b> – Xin hãy đứng lên.</li>'
+             '<li><b>Open your book, please.</b> / <b>Close your book, please.</b></li>'
+             '<li><b>May I come in?</b> – Em vào được không ạ? &rarr; <b>Yes, you can.</b> / <b>No, you can\'t.</b></li>'
+             '<li><b>May I go out? / May I speak?</b> – Em ra ngoài / nói được không ạ?</li></ul>'),
+ 'qa': [('May I come in?', 'Yes, you can.'), ('May I go out?', "No, you can't."), ('May I speak Vietnamese?', "No, you can't."), ('Sit down, please.', 'Thank you.'), ('Is this our school?', 'Yes, it is.')],
+ 'odd': [(['sit down', 'stand up', 'please'], 'please', 'sit down, stand up là lệnh; please là "xin vui lòng".'), (['come in', 'go out', 'speak'], 'speak', 'come in, go out chỉ di chuyển; speak là "nói".'),
+         (['open', 'close', 'library'], 'library', 'open, close là động từ; library là thư viện.'), (['May I', 'Yes, you can', 'gym'], 'gym', 'gym là nơi chốn; hai cái kia dùng để xin phép/trả lời.')],
+ 'fills': [
+  ('{_} down, please.', 'Sit', 'Sit down = ngồi xuống'), ('{_} up, please.', 'Stand', 'Stand up = đứng lên'), ('Open your {_}, please.', 'book', 'Open your book = mở sách ra'),
+  ('Close your {_}, please.', 'book', 'Close your book = gấp sách lại'), ('May I come {_}?', 'in', 'come in = đi vào'), ('May I go {_}?', 'out', 'go out = đi ra ngoài'),
+  ('May I {_} Vietnamese?', 'speak', 'speak = nói'), ('May I come in? – Yes, you {_}.', 'can', 'Yes, you can.'), ("May I go out? – No, you {_}.", "can't", "No, you can't."),
+  ('Sit down, {_}.', 'please', 'please = xin vui lòng'), ('🪑 {_} down, please.', 'Sit', '🪑 = sit down'), ('🧍 {_} up, please.', 'Stand', '🧍 = stand up'),
+  ('📖 {_} your book.', 'Open', '📖 = open your book'), ('📕 {_} your book.', 'Close', '📕 = close your book')],
+ 'sents': ['Sit down, please.', 'Stand up, please.', 'Open your book, please.', 'Close your book, please.', 'May I come in?', 'May I go out?', 'May I speak Vietnamese?', 'Yes, you can.', "No, you can't.", 'Come in, please.'],
+ 'mcq': [('May I come in? – ___', ['Yes, you can.', "I'm fine.", 'Yes, it is.'], 'Yes, you can.', 'May I …? → Yes, you can.'), ('May I go out? – No, you ___.', ["can't", 'is', 'am'], "can't", "No, you can't."),
+         ('___ down, please.', ['Sit', 'Stand', 'Open'], 'Sit', 'Sit down = ngồi xuống.'), ('___ up, please.', ['Stand', 'Sit', 'Close'], 'Stand', 'Stand up = đứng lên.'),
+         ('___ your book, please. (mở)', ['Open', 'Close', 'Sit'], 'Open', 'Open = mở.'), ('___ your book, please. (gấp lại)', ['Close', 'Open', 'Stand'], 'Close', 'Close = đóng / gấp.'),
+         ('Chọn từ nghĩa "đi vào":', ['come in', 'go out', 'sit down'], 'come in', 'come in = đi vào.'), ('Chọn từ nghĩa "đi ra ngoài":', ['go out', 'come in', 'stand up'], 'go out', 'go out = đi ra ngoài.'),
+         ('Chọn từ nghĩa "nói":', ['speak', 'open', 'close'], 'speak', 'speak = nói.'), ('May I speak Vietnamese? – No, you ___.', ["can't", 'can', 'are'], "can't", 'Trong giờ tiếng Anh: không nói tiếng Việt.'),
+         ('Sit ___, please.', ['down', 'up', 'out'], 'down', 'Sit down.'), ('May I ___ in?', ['come', 'sit', 'open'], 'come', 'May I come in?')],
+ 'dlg': ['Ms Hoa: Good morning, class. Sit down, please.', 'Nam: May I come in, Ms Hoa?', 'Ms Hoa: Yes, you can. Come in, please.', 'Nam: Thank you, Ms Hoa.', 'Ms Hoa: Open your book, please.'],
+ 'read': [("<p>It is English class. Ms Hoa says: \"Stand up, please. Sit down, please. Open your book. Close your book.\" The students do it. Nam says: \"May I go out?\" Ms Hoa says: \"Yes, you can.\"</p>",
+           [('Ms Hoa is the teacher.', 'T', 'Ms Hoa giao lệnh – cô là giáo viên.'), ('Nam can go out.', 'T', 'Yes, you can.'), ('The students open their notebooks.', 'F', 'Họ mở sách (book), không nói là notebook.')]),
+          ("<p><b>Mai:</b> May I speak Vietnamese?<br><b>Ms Hoa:</b> No, you can't. Speak English, please.<br><b>Mai:</b> May I come in?<br><b>Ms Hoa:</b> Yes, you can.</p>",
+           [('Mai can speak Vietnamese.', 'F', "No, you can't."), ('Mai can come in.', 'T', 'Yes, you can.'), ('Ms Hoa says "Speak English".', 'T', 'Speak English, please.')])],
+}
+
+U8 = {
+ 'n': 8, 'title': 'My school things',
+ 'vocab': [('pen', 'bút mực', '🖊️'), ('pencil', 'bút chì', '✏️'), ('school bag', 'cặp sách', '🎒'), ('notebook', 'quyển vở', '📓'), ('book', 'quyển sách', '📘'),
+           ('rubber', 'cục tẩy', '🧽'), ('ruler', 'thước kẻ', '📏'), ('pencil case', 'hộp bút', '👝'), ('school things', 'đồ dùng học tập', '🎒'), ('have', 'có', '')],
+ 'pattern': ('<ul><li><b>I have a pen.</b> – Mình có một cây bút. / <b>I have a book and a ruler.</b></li>'
+             '<li><b>Do you have a rubber?</b> – Bạn có cục tẩy không? &rarr; <b>Yes, I do.</b> / <b>No, I don\'t.</b></li>'
+             '<li><b>She/He has a pencil.</b> – Bạn ấy có một cây bút chì. (ngôi thứ ba: <i>has</i>)</li><li><b>I have some school things.</b> – Mình có một vài đồ dùng học tập.</li></ul>'),
+ 'qa': [('Do you have a rubber?', 'Yes, I do.'), ('Do you have a ruler?', "No, I don't."), ('Do you have a pencil case?', 'Yes, I do.'), ('What colour is it?', "It's red."), ('May I come in?', 'Yes, you can.')],
+ 'odd': [(['pen', 'pencil', 'gym'], 'gym', 'pen, pencil là đồ dùng học tập; gym là phòng thể dục.'), (['ruler', 'rubber', 'library'], 'library', 'ruler, rubber là đồ dùng; library là thư viện.'),
+         (['book', 'notebook', 'stand up'], 'stand up', 'book, notebook là đồ vật; stand up là động tác.'), (['school bag', 'pencil case', 'speak'], 'speak', 'speak là động từ.')],
+ 'fills': [
+  ('I {_} a pen.', 'have', 'I have a pen.'), ('{_} you have a rubber? – Yes, I do.', 'Do', 'Do you have …?'), ('Do you have a ruler? – No, I {_}.', "don't", "No, I don't."),
+  ('Do you have a pencil? – Yes, I {_}.', 'do', 'Yes, I do.'), ('She {_} a school bag.', 'has', 'She + has'), ('He {_} a notebook.', 'has', 'He + has'),
+  ('I have a book {_} a pen.', 'and', 'and = và'), ('I have some school {_}.', 'things', 'school things = đồ dùng học tập'), ('🖊️ I have a {_}.', 'pen', 'pen = bút mực'),
+  ('✏️ I have a {_}.', 'pencil', 'pencil = bút chì'), ('🎒 I have a school {_}.', 'bag', 'school bag = cặp'), ('📏 I have a {_}.', 'ruler', 'ruler = thước kẻ'),
+  ('🧽 I have a {_}.', 'rubber', 'rubber = cục tẩy'), ('👝 I have a pencil {_}.', 'case', 'pencil case = hộp bút'), ('📓 I have a {_}.', 'notebook', 'notebook = vở')],
+ 'sents': ['I have a pen.', 'I have a ruler.', 'Do you have a rubber?', 'Yes, I do.', "No, I don't.", 'She has a school bag.', 'He has a pencil case.', 'I have a book and a notebook.', 'I have some school things.', 'Do you have a pencil?'],
+ 'mcq': [('Do you have a rubber? – ___', ['Yes, I do.', 'Yes, it is.', "I'm fine."], 'Yes, I do.', 'Do you have …? → Yes, I do.'), ('I ___ a ruler.', ['have', 'has', 'is'], 'have', 'I have'),
+         ('She ___ a pen.', ['has', 'have', 'am'], 'has', 'She has'), ('___ you have a pencil?', ['Do', 'Is', 'Are'], 'Do', 'Do you have …?'),
+         ('Do you have a pen? – No, I ___.', ["don't", 'do', 'is'], "don't", "No, I don't."), ('Chọn từ nghĩa "cục tẩy":', ['rubber', 'ruler', 'pencil'], 'rubber', 'rubber = cục tẩy.'),
+         ('Chọn từ nghĩa "thước kẻ":', ['ruler', 'rubber', 'book'], 'ruler', 'ruler = thước kẻ.'), ('Chọn từ nghĩa "cặp sách":', ['school bag', 'pencil case', 'notebook'], 'school bag', 'school bag = cặp.'),
+         ('Chọn từ nghĩa "hộp bút":', ['pencil case', 'school bag', 'pen'], 'pencil case', 'pencil case = hộp bút.'), ('I have some school ___.', ['things', 'thing', 'has'], 'things', 'some + số nhiều.'),
+         ('✏️ I have a ___.', ['pencil', 'pen', 'ruler'], 'pencil', '✏️ = pencil'), ('📓 I have a ___.', ['notebook', 'book', 'rubber'], 'notebook', '📓 = notebook')],
+ 'dlg': ['Minh: Do you have any school things, Linh?', 'Linh: Yes, I do. I have a ruler and a rubber.', 'Minh: I have a pencil case.', 'Linh: Wow, it is nice!', 'Minh: Thank you.'],
+ 'read': [("<p>Hello. I'm Nam. I have some school things. I have a school bag, a notebook, a pen and a ruler. My friend Mai has a pencil case and two rubbers.</p>",
+           [('Nam has a ruler.', 'T', 'I have … a ruler.'), ('Nam has a pencil case.', 'F', 'Mai mới có pencil case.'), ('Mai has two rubbers.', 'T', 'Mai has … two rubbers.')]),
+          ("<p><b>Tom:</b> Do you have a pencil?<br><b>Lan:</b> No, I don't. I have a pen.<br><b>Tom:</b> Do you have a ruler?<br><b>Lan:</b> Yes, I do.</p>",
+           [('Lan has a pencil.', 'F', "No, I don't."), ('Lan has a pen.', 'T', 'I have a pen.'), ('Lan has a ruler.', 'T', 'Yes, I do.')])],
+}
+
+U9 = {
+ 'n': 9, 'title': 'Colours',
+ 'vocab': [('blue', 'xanh dương', '🔵'), ('red', 'đỏ', '🔴'), ('yellow', 'vàng', '🟡'), ('green', 'xanh lá', '🟢'), ('orange', 'cam', '🟠'),
+           ('brown', 'nâu', '🟤'), ('black', 'đen', '⚫'), ('white', 'trắng', '⚪'), ('colour', 'màu sắc', '🎨'), ('they are', 'chúng là', '')],
+ 'pattern': ('<ul><li><b>What colour is it?</b> – Nó màu gì? &rarr; <b>It\'s red.</b> – Nó màu đỏ.</li><li><b>What colour are they?</b> – Chúng màu gì? &rarr; <b>They\'re blue.</b></li>'
+             '<li><b>What colour is your pen?</b> &rarr; <b>It\'s black.</b></li><li>It\'s = It is &nbsp; | &nbsp; They\'re = They are</li></ul>'),
+ 'qa': [('What colour is it?', "It's red."), ('What colour are they?', "They're blue."), ('What colour is your ruler?', "It's yellow."), ('Do you have a pen?', 'Yes, I do.'), ("What's your hobby?", "It's singing.")],
+ 'odd': [(['red', 'blue', 'pen'], 'pen', 'red, blue là màu; pen là bút.'), (['green', 'yellow', 'book'], 'book', 'green, yellow là màu; book là sách.'),
+         (['black', 'white', 'ruler'], 'ruler', 'black, white là màu; ruler là thước.'), (['orange', 'brown', 'gym'], 'gym', 'orange, brown là màu; gym là phòng tập.')],
+ 'fills': [
+  ('What {_} is it? – It\'s red.', 'colour', 'colour = màu sắc'), ("What colour is it? – {_} blue.", "It's", "It's blue."), ("What colour {_} they? – They're green.", 'are', 'they → are'),
+  ("What colour are they? – {_} yellow.", "They're", "They're yellow."), ('What colour is your pen? – It\'s {_}. (🖤)', 'black', '🖤 = black'), ('🔴 It\'s {_}.', 'red', 'red = đỏ'),
+  ('🔵 It\'s {_}.', 'blue', 'blue = xanh dương'), ('🟡 It\'s {_}.', 'yellow', 'yellow = vàng'), ('🟢 It\'s {_}.', 'green', 'green = xanh lá'), ('🟠 It\'s {_}.', 'orange', 'orange = cam'),
+  ('🟤 It\'s {_}.', 'brown', 'brown = nâu'), ('⚪ It\'s {_}.', 'white', 'white = trắng'), ('My school bag is black {_} white.', 'and', 'and = và'), ('What colour is the ruler? – It\'s {_}. (🔴)', 'red', '🔴 = red')],
+ 'sents': ['What colour is it?', "It's red.", "It's blue.", 'What colour are they?', "They're green.", 'What colour is your pen?', 'My ruler is yellow.', 'My bag is black and white.', "They're brown.", "It's orange."],
+ 'mcq': [('What colour is it? – ___', ["It's red.", 'Yes, it is.', "I'm fine."], "It's red.", 'Hỏi màu → It\'s + màu.'), ('What colour ___ they? – They\'re blue.', ['are', 'is', 'am'], 'are', 'they → are'),
+         ('What colour ___ it? – It\'s green.', ['is', 'are', 'am'], 'is', 'it → is'), ('Chọn từ nghĩa "màu đỏ":', ['red', 'blue', 'green'], 'red', 'red = đỏ.'),
+         ('Chọn từ nghĩa "màu vàng":', ['yellow', 'orange', 'brown'], 'yellow', 'yellow = vàng.'), ('Chọn từ nghĩa "màu đen":', ['black', 'white', 'blue'], 'black', 'black = đen.'),
+         ('Chọn từ nghĩa "màu nâu":', ['brown', 'orange', 'green'], 'brown', 'brown = nâu.'), ('Chọn từ nghĩa "màu trắng":', ['white', 'black', 'red'], 'white', 'white = trắng.'),
+         ('🟢 What colour is it? – It\'s ___.', ['green', 'blue', 'red'], 'green', '🟢 = green'), ('🟠 What colour is it? – It\'s ___.', ['orange', 'yellow', 'brown'], 'orange', '🟠 = orange'),
+         ('What colour are the pens? – ___ black.', ["They're", "It's", 'This'], "They're", 'số nhiều → They\'re'), ('My pencil is yellow ___ green.', ['and', 'is', 'a'], 'and', 'and = và')],
+ 'dlg': ['Nam: Do you have any pencils?', 'Quan: Yes, I do.', 'Nam: What colour is it?', "Quan: It's orange. What about your ruler?", "Nam: My ruler is brown."],
+ 'read': [("<p>Hello. I'm Mai. This is my school bag. It's blue. I have a pen and a pencil. The pen is black. The pencil is yellow. I have two rulers. They're green.</p>",
+           [('Mai\'s school bag is blue.', 'T', "It's blue."), ('The pencil is black.', 'F', 'The pen is black; the pencil is yellow.'), ('The rulers are green.', 'T', "They're green.")]),
+          ("<p><b>Tom:</b> What colour is your notebook?<br><b>Lan:</b> It's red.<br><b>Tom:</b> What colour are your pens?<br><b>Lan:</b> They're blue.</p>",
+           [('Lan\'s notebook is red.', 'T', "It's red."), ('Lan\'s pens are red.', 'F', "They're blue."), ('Tom asks about colours.', 'T', 'What colour …?')])],
+}
+
+U10 = {
+ 'n': 10, 'title': 'Break time activities',
+ 'vocab': [('break time', 'giờ ra chơi', '🔔'), ('football', 'bóng đá', '⚽'), ('basketball', 'bóng rổ', '🏀'), ('volleyball', 'bóng chuyền', '🏐'), ('badminton', 'cầu lông', '🏸'),
+           ('table tennis', 'bóng bàn', '🏓'), ('chess', 'cờ vua', '♟️'), ('skipping', 'nhảy dây', '🪢'), ('skating', 'trượt patin', '⛸️'), ('hide-and-seek', 'trốn tìm', '🙈'), ('word puzzles', 'trò chơi ô chữ', '🧩')],
+ 'pattern': ('<ul><li><b>What do you do at break time?</b> – Bạn làm gì vào giờ ra chơi? &rarr; <b>I play football.</b> / <b>I play chess.</b></li>'
+             '<li><b>We play volleyball at break time.</b> – Chúng mình chơi bóng chuyền vào giờ ra chơi.</li>'
+             '<li><b>She is skating. / She\'s skipping.</b> – Bạn ấy đang trượt patin / nhảy dây.</li><li><b>It\'s break time!</b> – Đến giờ ra chơi rồi!</li></ul>'),
+ 'qa': [('What do you do at break time?', 'I play football.'), ('What do you do at break time?', 'I play chess.'), ("It's break time!", "Let's play hide-and-seek."), ('What colour is it?', "It's blue."), ('Do you have a ruler?', 'Yes, I do.')],
+ 'odd': [(['football', 'chess', 'blue'], 'blue', 'football, chess là trò chơi; blue là màu.'), (['skating', 'skipping', 'pen'], 'pen', 'skating, skipping là hoạt động; pen là bút.'),
+         (['volleyball', 'badminton', 'ruler'], 'ruler', 'volleyball, badminton là môn thể thao; ruler là thước.'), (['basketball', 'table tennis', 'gym'], 'gym', 'gym là phòng tập; hai cái kia là môn chơi.')],
+ 'fills': [
+  ('What do you do at {_} time? – I play football.', 'break', 'break time = giờ ra chơi'), ('What do you {_} at break time?', 'do', 'What do you do at break time?'), ('I {_} chess at break time.', 'play', 'I play …'),
+  ('We {_} volleyball at break time.', 'play', 'We play …'), ('⚽ I play {_}.', 'football', 'football = bóng đá'), ('🏀 I play {_}.', 'basketball', 'basketball = bóng rổ'),
+  ('🏐 I play {_}.', 'volleyball', 'volleyball = bóng chuyền'), ('🏸 I play {_}.', 'badminton', 'badminton = cầu lông'), ('🏓 I play table {_}.', 'tennis', 'table tennis = bóng bàn'),
+  ('♟️ I play {_}.', 'chess', 'chess = cờ vua'), ('🧩 I play word {_}.', 'puzzles', 'word puzzles = ô chữ'), ('🙈 We play hide-and-{_}.', 'seek', 'hide-and-seek = trốn tìm'),
+  ('🪢 She is {_}.', 'skipping', 'skipping = nhảy dây'), ('⛸️ He is {_}.', 'skating', 'skating = trượt patin')],
+ 'sents': ['What do you do at break time?', 'I play football.', 'I play chess.', 'We play volleyball.', 'We play hide-and-seek.', "It's break time.", 'I play word puzzles.', 'She is skipping.', 'I play table tennis.', 'We play basketball at break time.'],
+ 'mcq': [('What do you do at break time? – ___', ['I play football.', "I'm fine.", 'Yes, it is.'], 'I play football.', 'Trả lời: I play + môn chơi.'), ('I ___ chess.', ['play', 'plays', 'is'], 'play', 'I play'),
+         ('We ___ volleyball at break time.', ['play', 'plays', 'are'], 'play', 'We play'), ('What do you do ___ break time?', ['at', 'in', 'to'], 'at', 'at break time'),
+         ('Chọn từ nghĩa "bóng đá":', ['football', 'basketball', 'chess'], 'football', 'football = bóng đá.'), ('Chọn từ nghĩa "cờ vua":', ['chess', 'badminton', 'skipping'], 'chess', 'chess = cờ vua.'),
+         ('Chọn từ nghĩa "cầu lông":', ['badminton', 'volleyball', 'table tennis'], 'badminton', 'badminton = cầu lông.'), ('Chọn từ nghĩa "nhảy dây":', ['skipping', 'skating', 'chess'], 'skipping', 'skipping = nhảy dây.'),
+         ('Chọn từ nghĩa "trốn tìm":', ['hide-and-seek', 'chess', 'football'], 'hide-and-seek', 'hide-and-seek = trốn tìm.'), ('🏀 I play ___.', ['basketball', 'volleyball', 'football'], 'basketball', '🏀 = basketball'),
+         ('🏓 I play ___.', ['table tennis', 'badminton', 'chess'], 'table tennis', '🏓 = table tennis'), ('I play word ___.', ['puzzles', 'chess', 'skating'], 'puzzles', 'word puzzles = trò chơi ô chữ')],
+ 'dlg': ['Ms Hoa: What do you do at break time?', 'Nam: I play football.', 'Lucy: I play volleyball.', 'Minh: I play word puzzles.', 'Bill: I play hide-and-seek.'],
+ 'read': [("<p>It's break time. Nam and Bill play football. Lucy and Mary play volleyball. Minh plays word puzzles. Mai is skipping. We all like break time.</p>",
+           [('Nam plays football.', 'T', 'Nam and Bill play football.'), ('Mai is skating.', 'F', 'Mai is skipping.'), ('Lucy plays volleyball.', 'T', 'Lucy and Mary play volleyball.')]),
+          ("<p><b>Ms Hoa:</b> What do you do at break time?<br><b>Tom:</b> I play chess.<br><b>Lan:</b> I play badminton.<br><b>Ms Hoa:</b> Nice!</p>",
+           [('Tom plays chess.', 'T', 'I play chess.'), ('Lan plays chess.', 'F', 'Lan plays badminton.'), ('Ms Hoa asks about break time.', 'T', 'What do you do at break time?')])],
+}
+UNITS = [U3, U4, U5, U6, U7, U8, U9, U10]

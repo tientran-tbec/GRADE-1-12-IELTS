@@ -1,0 +1,36 @@
+# -*- coding: utf-8 -*-
+"""Sinh bởi tools/g4_exam.py"""
+
+ANS = {'l1.1': 'B',
+ 'l1.2': 'C',
+ 'l1.3': 'B',
+ 'l1.4': 'A',
+ 'l2.5': '4',
+ 'l2.6': '5',
+ 'l2.7': '2',
+ 'l2.8': '3',
+ 'r1.10': 'B',
+ 'r1.11': 'A',
+ 'r1.12': 'B',
+ 'r1.9': 'B',
+ 'r2.13': ['get up'],
+ 'r2.14': ['have breakfast'],
+ 'r2.15': ['jam'],
+ 'r2.16': ['milk']}
+
+EXPLANATIONS = {'l1.1': 'Đáp án: B. get',
+ 'l1.2': 'Đáp án: C. water',
+ 'l1.3': 'Đáp án: B. juice',
+ 'l1.4': 'Đáp án: A. yes',
+ 'l2.5': 'Tranh b ứng với câu 4 (theo đáp án của đề).',
+ 'l2.6': 'Tranh c ứng với câu 5 (theo đáp án của đề).',
+ 'l2.7': 'Tranh d ứng với câu 2 (theo đáp án của đề).',
+ 'l2.8': 'Tranh e ứng với câu 3 (theo đáp án của đề).',
+ 'r1.10': 'Đáp án: B. I do housework.',
+ 'r1.11': 'Đáp án: A. I want some grapes.',
+ 'r1.12': 'Đáp án: B. No, she can’t.',
+ 'r1.9': 'Đáp án: B. I go to bed at nine o’clock.',
+ 'r2.13': 'Đáp án: get up',
+ 'r2.14': 'Đáp án: have breakfast',
+ 'r2.15': 'Đáp án: jam',
+ 'r2.16': 'Đáp án: milk'}

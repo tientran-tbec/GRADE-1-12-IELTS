@@ -1,0 +1,70 @@
+# -*- coding: utf-8 -*-
+"""Sinh bởi tools/g4_exam.py"""
+
+SET = {'grade': 4,
+ 'id': 'lop4-gk2-de7',
+ 'pages': [{'audio': True,
+            'audio_max_plays': 3,
+            'groups': [{'id': 'l1',
+                        'instr': 'A. Listening. Listen and complete (nghe và điền từ).',
+                        'items': [{'id': 'l1.1', 'q': 'Chỗ trống (1): {_}', 't': 'fill'},
+                                  {'id': 'l1.2', 'q': 'Chỗ trống (2): {_}', 't': 'fill'},
+                                  {'id': 'l1.3', 'q': 'Chỗ trống (3): {_}', 't': 'fill'},
+                                  {'id': 'l1.4', 'q': 'Chỗ trống (4): {_}', 't': 'fill'},
+                                  {'id': 'l1.5', 'q': 'Chỗ trống (5): {_}', 't': 'fill'}],
+                        'passage': '<p>Today I go to the market with my <b>(1) ______</b> We buy fruits and vegetables. First we go to the fruits <b>(2) '
+                                   '______</b> Here we buy apples, bananas, watermelons, oranges and <b>(3) ______</b> After that, we go to the vegetable '
+                                   'mall. Mum buys cabbage, <b>(4) ______</b> Next, we buy some snacks and soft drinks such as biscuits, yogurts, (5) and '
+                                   'pancake. We also buy rice, noodles and bread before we go home.</p>'},
+                       {'id': 'v1',
+                        'instr': 'B. Vocabulary & Grammar. I. Odd one out (chọn từ khác loại).',
+                        'items': [{'id': 'v1.6', 'o': ['snake', 'dog', 'teacher', 'kangaroo'], 'q': '1. Chọn từ khác loại:', 't': 'mcq'},
+                                  {'id': 'v1.7', 'o': ['second', 'thirteen', 'eight', 'twelve'], 'q': '2. Chọn từ khác loại:', 't': 'mcq'},
+                                  {'id': 'v1.8', 'o': ['cheap', 'much', 'expensive', 'long'], 'q': '3. Chọn từ khác loại:', 't': 'mcq'},
+                                  {'id': 'v1.9', 'o': ['toy store', 'bakery', 'hospital', 'near'], 'q': '4. Chọn từ khác loại:', 't': 'mcq'},
+                                  {'id': 'v1.10', 'o': ['secretary', 'lawyer', 'airport', 'postman'], 'q': '5. Chọn từ khác loại:', 't': 'mcq'}]},
+                       {'id': 'v2',
+                        'instr': 'II. Choose the correct answer (chọn đáp án đúng).',
+                        'items': [{'id': 'v2.11', 'o': ['What', 'Where', 'What time'], 'q': '1. ____ do you have dinner? – 7 p.m.', 't': 'mcq'},
+                                  {'id': 'v2.12', 'o': ['at', 'to', 'with'], 'q': '2. I have lunch ____ twelve o’clock.', 't': 'mcq'},
+                                  {'id': 'v2.13', 'o': ['do', 'does', 'is'], 'q': '3. What ____ her brother do?', 't': 'mcq'},
+                                  {'id': 'v2.14', 'o': ['X', 'an', 'a'], 'q': '4. He is ____ engineer.', 't': 'mcq'},
+                                  {'id': 'v2.15', 'o': ['many', 'a', 'some'], 'q': '5. Would you like ____ milk?', 't': 'mcq'}]},
+                       {'bank': ['writes', 'houses', 'presents', 'letters', 'brings'],
+                        'id': 'v3',
+                        'instr': 'III. Read and complete the passage. Use available words (chọn từ trong khung).',
+                        'items': [{'id': 'v3.16', 'q': 'Chỗ trống (1): {_}', 't': 'fill'},
+                                  {'id': 'v3.17', 'q': 'Chỗ trống (2): {_}', 't': 'fill'},
+                                  {'id': 'v3.18', 'q': 'Chỗ trống (3): {_}', 't': 'fill'},
+                                  {'id': 'v3.19', 'q': 'Chỗ trống (4): {_}', 't': 'fill'},
+                                  {'id': 'v3.20', 'q': 'Chỗ trống (5): {_}', 't': 'fill'}],
+                        'passage': '<p>December is always a very busy period of time for Santa Claus. He does a lot of things. He opens and reads many (1) '
+                                   'from children all over the world. He (2) long lists of toys and children’s names. He buys lots of (3) for the children and '
+                                   'wraps them. He puts them on his sleigh and (4) them to the children’s (5) all around the world.</p>'},
+                       {'id': 'v4',
+                        'instr': 'IV. Read and answer questions (đọc và trả lời câu hỏi).',
+                        'items': [{'id': 'v4.21', 'q': 'Where is Anna from? – {_}', 't': 'fill'},
+                                  {'id': 'v4.22', 'q': 'What’s Laura’s favourite food? – {_}', 't': 'fill'},
+                                  {'id': 'v4.23', 'q': 'What’s Peter’s favourite food? – {_}', 't': 'fill'},
+                                  {'id': 'v4.24', 'q': 'How many people are there in Anna’s family? – {_}', 't': 'fill'},
+                                  {'id': 'v4.25', 'q': 'What’s Anna’s favourite food? – {_}', 't': 'fill'}],
+                        'passage': '<p>Hello. My name is Anna. I come from the USA. These are my parents. My mother is Laura and she loves vegetables and '
+                                   "fruits. She doesn't like beef. My father is Peter. He loves meat and he dislikes vegetables and fruits. My parents have "
+                                   'two children: me and my little sister Nina. This is Nina. Nina is five years old. She is playing with a yo yo and eating '
+                                   "some biscuits. She loves biscuits. Finally, I am a student at the International School. I don't like bananas and fish. I "
+                                   'love pork and chicken.</p>'},
+                       {'id': 'v5',
+                        'instr': 'V. Rearrange to make correct sentences (sắp xếp từ thành câu đúng).',
+                        'items': [{'id': 'v5.26', 'q': 'Sắp xếp thành câu đúng:', 't': 'order', 'words': ['is', 'than', 'her', 'taller', 'sister.', 'Anna']},
+                                  {'id': 'v5.27', 'q': 'Sắp xếp thành câu đúng:', 't': 'order', 'words': ['wears', 'at', 'new', 'She', 'clothes', 'Tet.']},
+                                  {'id': 'v5.28', 'q': 'Sắp xếp thành câu đúng:', 't': 'order', 'words': ['does', 'her', 'look', 'like?', 'What', 'mother']},
+                                  {'id': 'v5.29', 'q': 'Sắp xếp thành câu đúng:', 't': 'order', 'words': ['your', 'work?', 'brother', 'Where', 'does']},
+                                  {'id': 'v5.30', 'q': 'Sắp xếp thành câu đúng:', 't': 'order', 'words': ['day?', 'is', 'When', 'Children’s', 'the']}]}],
+            'id': 'kiem-tra',
+            'minutes': 35,
+            'mode': 'test',
+            'title': 'Làm bài',
+            'warn_at': 5}],
+ 'theory': '',
+ 'title': 'Giữa kỳ 2 – Đề 7',
+ 'unit': 'GiuaKy2'}

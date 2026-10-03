@@ -1,0 +1,36 @@
+# -*- coding: utf-8 -*-
+"""Sinh bởi tools/g4_exam.py"""
+
+ANS = {'l1.1': 'C',
+ 'l1.2': 'A',
+ 'l1.3': 'A',
+ 'l1.4': 'C',
+ 'l2.5': 'T',
+ 'l2.6': 'F',
+ 'l2.7': 'F',
+ 'l2.8': 'T',
+ 'r1.10': 'A',
+ 'r1.11': 'B',
+ 'r1.12': 'A',
+ 'r1.9': 'A',
+ 'r2.13': ['Singapore'],
+ 'r2.14': ['play football'],
+ 'r2.15': ['chips'],
+ 'r2.16': ['lemonade']}
+
+EXPLANATIONS = {'l1.1': 'Đáp án: C. music',
+ 'l1.2': 'Đáp án: A. water',
+ 'l1.3': 'Đáp án: A. yes',
+ 'l1.4': 'Đáp án: C. get',
+ 'l2.5': 'Đáp án: True (theo đáp án của đề).',
+ 'l2.6': 'Đáp án: False (theo đáp án của đề).',
+ 'l2.7': 'Đáp án: False (theo đáp án của đề).',
+ 'l2.8': 'Đáp án: True (theo đáp án của đề).',
+ 'r1.10': 'Đáp án: A. Can he cook?',
+ 'r1.11': 'Đáp án: B. What do you want to drink?',
+ 'r1.12': 'Đáp án: A. What do you do on Sundays?',
+ 'r1.9': 'Đáp án: A. When’s your birthday?',
+ 'r2.13': 'Đáp án: Singapore',
+ 'r2.14': 'Đáp án: play football',
+ 'r2.15': 'Đáp án: chips',
+ 'r2.16': 'Đáp án: lemonade'}

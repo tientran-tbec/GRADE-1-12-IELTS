@@ -35,6 +35,31 @@ REGISTRY = [
     ('lop3-u5-test01', 'units/lop3_u5_test01.py', 'units/lop3_u5_test01_dapan.py', 'Lop3', 'Unit5', 'test01', 'assets/lop3_u5/test01', ''),
     ('lop3-u5-test02', 'units/lop3_u5_test02.py', 'units/lop3_u5_test02_dapan.py', 'Lop3', 'Unit5', 'test02', 'assets/lop3_u5/test02', ''),
     ('lop3-u5-test03', 'units/lop3_u5_test03.py', 'units/lop3_u5_test03_dapan.py', 'Lop3', 'Unit5', 'test03', 'assets/lop3_u5/test03', ''),
+    ('lop3-u6-luyentap', 'units/lop3_u6_luyentap.py', 'units/lop3_u6_luyentap_dapan.py', 'Lop3', 'Unit6', 'luyentap', 'assets/lop3_u6/luyentap', ''),
+    ('lop3-u6-test01', 'units/lop3_u6_test01.py', 'units/lop3_u6_test01_dapan.py', 'Lop3', 'Unit6', 'test01', 'assets/lop3_u6/test01', ''),
+    ('lop3-u6-test02', 'units/lop3_u6_test02.py', 'units/lop3_u6_test02_dapan.py', 'Lop3', 'Unit6', 'test02', 'assets/lop3_u6/test02', ''),
+    ('lop3-u6-test03', 'units/lop3_u6_test03.py', 'units/lop3_u6_test03_dapan.py', 'Lop3', 'Unit6', 'test03', 'assets/lop3_u6/test03', ''),
+    ('lop3-u7-luyentap', 'units/lop3_u7_luyentap.py', 'units/lop3_u7_luyentap_dapan.py', 'Lop3', 'Unit7', 'luyentap', 'assets/lop3_u7/luyentap', ''),
+    ('lop3-u7-test01', 'units/lop3_u7_test01.py', 'units/lop3_u7_test01_dapan.py', 'Lop3', 'Unit7', 'test01', 'assets/lop3_u7/test01', ''),
+    ('lop3-u7-test02', 'units/lop3_u7_test02.py', 'units/lop3_u7_test02_dapan.py', 'Lop3', 'Unit7', 'test02', 'assets/lop3_u7/test02', ''),
+    ('lop3-u7-test03', 'units/lop3_u7_test03.py', 'units/lop3_u7_test03_dapan.py', 'Lop3', 'Unit7', 'test03', 'assets/lop3_u7/test03', ''),
+    ('lop3-u8-luyentap', 'units/lop3_u8_luyentap.py', 'units/lop3_u8_luyentap_dapan.py', 'Lop3', 'Unit8', 'luyentap', 'assets/lop3_u8/luyentap', ''),
+    ('lop3-u8-test01', 'units/lop3_u8_test01.py', 'units/lop3_u8_test01_dapan.py', 'Lop3', 'Unit8', 'test01', 'assets/lop3_u8/test01', ''),
+    ('lop3-u8-test02', 'units/lop3_u8_test02.py', 'units/lop3_u8_test02_dapan.py', 'Lop3', 'Unit8', 'test02', 'assets/lop3_u8/test02', ''),
+    ('lop3-u8-test03', 'units/lop3_u8_test03.py', 'units/lop3_u8_test03_dapan.py', 'Lop3', 'Unit8', 'test03', 'assets/lop3_u8/test03', ''),
+    ('lop3-u9-luyentap', 'units/lop3_u9_luyentap.py', 'units/lop3_u9_luyentap_dapan.py', 'Lop3', 'Unit9', 'luyentap', 'assets/lop3_u9/luyentap', ''),
+    ('lop3-u9-test01', 'units/lop3_u9_test01.py', 'units/lop3_u9_test01_dapan.py', 'Lop3', 'Unit9', 'test01', 'assets/lop3_u9/test01', ''),
+    ('lop3-u9-test02', 'units/lop3_u9_test02.py', 'units/lop3_u9_test02_dapan.py', 'Lop3', 'Unit9', 'test02', 'assets/lop3_u9/test02', ''),
+    ('lop3-u9-test03', 'units/lop3_u9_test03.py', 'units/lop3_u9_test03_dapan.py', 'Lop3', 'Unit9', 'test03', 'assets/lop3_u9/test03', ''),
+    ('lop3-u10-luyentap', 'units/lop3_u10_luyentap.py', 'units/lop3_u10_luyentap_dapan.py', 'Lop3', 'Unit10', 'luyentap', 'assets/lop3_u10/luyentap', ''),
+    ('lop3-u10-test01', 'units/lop3_u10_test01.py', 'units/lop3_u10_test01_dapan.py', 'Lop3', 'Unit10', 'test01', 'assets/lop3_u10/test01', ''),
+    ('lop3-u10-test02', 'units/lop3_u10_test02.py', 'units/lop3_u10_test02_dapan.py', 'Lop3', 'Unit10', 'test02', 'assets/lop3_u10/test02', ''),
+    ('lop3-u10-test03', 'units/lop3_u10_test03.py', 'units/lop3_u10_test03_dapan.py', 'Lop3', 'Unit10', 'test03', 'assets/lop3_u10/test03', ''),
+    ('lop3-hk1-de01', 'units/lop3_hk1_de01.py', 'units/lop3_hk1_de01_dapan.py', 'Lop3', 'CuoiKy1', 'test01', 'assets/lop3_hk1/de01', 'audio/lop3_hk1_de01.mp3'),
+    ('lop3-hk1-de02', 'units/lop3_hk1_de02.py', 'units/lop3_hk1_de02_dapan.py', 'Lop3', 'CuoiKy1', 'test02', 'assets/lop3_hk1/de02', 'audio/lop3_hk1_de02.mp3'),
+    ('lop3-hk1-de03', 'units/lop3_hk1_de03.py', 'units/lop3_hk1_de03_dapan.py', 'Lop3', 'CuoiKy1', 'test03', 'assets/lop3_hk1/de03', 'audio/lop3_hk1_de03.mp3'),
+    ('lop3-hk1-de04', 'units/lop3_hk1_de04.py', 'units/lop3_hk1_de04_dapan.py', 'Lop3', 'CuoiKy1', 'test04', 'assets/lop3_hk1/de04', 'audio/lop3_hk1_de04.mp3'),
+    ('lop3-hk1-de05', 'units/lop3_hk1_de05.py', 'units/lop3_hk1_de05_dapan.py', 'Lop3', 'CuoiKy1', 'test05', 'assets/lop3_hk1/de05', 'audio/lop3_hk1_de05.mp3'),
     # --- Lớp 10 · Unit 1 ---
     ('lop10-u1-luyentap', 'units/lop10_u1_luyentap.py', 'units/lop10_u1_luyentap_dapan.py', 'Lop10', 'Unit1', 'luyentap', 'assets/lop10_u1/luyentap', 'audio/lop10_u1_luyentap_nghe.mp3'),
     ('lop10-u1-botro', 'units/lop10_u1_botro.py', 'units/lop10_u1_botro_dapan.py', 'Lop10', 'Unit1', 'botro', 'assets/lop10_u1/botro', 'audio/lop10_u1_botro_nghe.mp3'),
@@ -67,6 +92,15 @@ REGISTRY = [
     ('lop11-mt1-test12', 'units/mt1_test12.py', 'units/mt1_test12_dapan.py', 'Lop11', 'MidTerm1', 'test12', 'assets/mt1/test12', 'audio/mt1_test12.mp3'),
     ('lop11-mt1-test13', 'units/mt1_test13.py', 'units/mt1_test13_dapan.py', 'Lop11', 'MidTerm1', 'test13', 'assets/mt1/test13', 'audio/mt1_test13.mp3'),
 ]
+
+try:
+    exec(open(os.path.join(ROOT, 'units/registry_lop4.py'), encoding='utf8').read(), globals())
+    REGISTRY += ENTRIES
+except FileNotFoundError:
+    pass
+import json as _json, glob as _glob
+for _f in sorted(_glob.glob(os.path.join(ROOT, 'units/reg/*.json'))):
+    REGISTRY.append(tuple(_json.load(open(_f, encoding='utf8'))))
 
 
 def load_py(path, attr):
@@ -205,7 +239,7 @@ def render_item(it, num, test_mode, imgbase):
     if it.get('say'):   # nút nghe: trình duyệt đọc to (không cần file mp3)
         body += '<button type="button" class="say" data-say="%s">🔊 Nghe</button> ' % esc_attr(it['say'])
     if it.get('img'):
-        body += '<img class="pic" src="%s/%s" alt="Hình minh hoạ câu %s">' % (imgbase, it['img'], num)
+        body += '<img class="pic%s" src="%s/%s" alt="Hình minh hoạ câu %s">' % (' wide' if it.get('wide') else '', imgbase, it['img'], num)
     if t == 'mcq':
         if it.get('q'):
             body += '<div class="stem">%s</div>' % it['q']
@@ -402,6 +436,7 @@ main{padding:22px 24px 60px;max-width:1100px;width:100%}
 
 INDEX_JS = """
 (function(){
+var LBL=@@LBL@@;
 var st={g:'',u:'',k:'',m:'',q:''};
 try{var sv=JSON.parse(localStorage.getItem('gn_idx')||'{}');for(var k in st)if(sv[k]!==undefined)st[k]=sv[k]}catch(e){}
 var cards=[].slice.call(document.querySelectorAll('.setcard'));
@@ -441,7 +476,7 @@ function apply(){
   document.getElementById('empty').hidden=shown>0||(document.getElementById('nobai')&&!document.getElementById('nobai').hidden);
   document.getElementById('cnt').textContent=shown+' bộ bài';
   [].forEach.call(document.querySelectorAll('.f[data-f]'),function(b){b.classList.toggle('on',(st[b.dataset.f]||'')===b.dataset.v)});
-  var t=[];if(st.g)t.push(st.g==='IELTS'?'IELTS':'Lớp '+st.g);if(st.u)t.push(st.u==='MidTerm1'?'Mid-term 1':/^\\d+$/.test(st.u)?'Unit '+st.u:st.u);
+  var t=[];if(st.g)t.push(st.g==='IELTS'?'IELTS':'Lớp '+st.g);if(st.u)t.push((LBL[st.u]||(/^\\d+$/.test(st.u)?'Unit '+st.u:/^Review\\d$/.test(st.u)?'Review '+st.u.slice(6):st.u)));
   document.getElementById('ttl').textContent=t.length?t.join(' · '):'Tất cả bài học';
   save();
 }
@@ -464,13 +499,23 @@ def unum(udir):
     return udir[4:] if udir.startswith('Unit') else udir
 
 
+UNIT_LABELS = {'MidTerm1': 'Mid-term 1', 'CuoiKy1': 'Cuối kỳ 1', 'GiuaKy1': 'Giữa kỳ 1', 'GiuaKy2': 'Giữa kỳ 2', 'CuoiKy2': 'Cuối kỳ 2', 'Start': 'Bài mở đầu',
+               'OnHK1': 'Ôn tập HK1', 'OnHK2': 'Ôn tập HK2', 'DeCuongHK1': 'Đề cương HK1', 'DeCuongHK2': 'Đề cương HK2', 'HSG': 'Học sinh giỏi'}
+UNIT_ORDER = ['Start', 'Review1', 'GiuaKy1', 'MidTerm1', 'Review2', 'CuoiKy1', 'OnHK1', 'DeCuongHK1', 'Review3', 'GiuaKy2', 'Review4', 'CuoiKy2', 'OnHK2', 'DeCuongHK2', 'HSG']
+# nhóm đề riêng (không có bài luyện tập) xếp ngay sau mục nào: (lớp, thư mục) -> (thư mục mốc, thứ tự phụ)
+AFTER = {('Lop3', 'CuoiKy1'): ('Unit10', 6), ('Lop4', 'GiuaKy1'): ('Review1', 6), ('Lop4', 'CuoiKy1'): ('Review2', 6), ('Lop4', 'OnHK1'): ('Review2', 7), ('Lop4', 'DeCuongHK1'): ('Review2', 8),
+         ('Lop4', 'GiuaKy2'): ('Review3', 6), ('Lop4', 'CuoiKy2'): ('Review4', 6), ('Lop4', 'OnHK2'): ('Review4', 7), ('Lop4', 'DeCuongHK2'): ('Review4', 8), ('Lop4', 'HSG'): ('Review4', 9)}
+
+
 def ulabel(u):
-    return 'Mid-term 1' if u == 'MidTerm1' else 'Unit ' + u
+    if u in UNIT_LABELS: return UNIT_LABELS[u]
+    m = re.match(r'^Review(\d)$', u)
+    return ('Review ' + m.group(1)) if m else 'Unit ' + u
 
 
 def build_index(done):
     grades = sorted({e[3][3:] for e, _, _ in done}, key=int)
-    units = sorted({(e[3][3:], unum(e[4])) for e, _, _ in done}, key=lambda x: (int(x[0]), 0 if x[1].isdigit() else 1, int(x[1]) if x[1].isdigit() else 0))
+    units = sorted({(e[3][3:], unum(e[4])) for e, _, _ in done}, key=lambda x: (int(x[0]), 0 if x[1].isdigit() else 1, int(x[1]) if x[1].isdigit() else (UNIT_ORDER.index(x[1]) if x[1] in UNIT_ORDER else 99)))
     def cnt(fn):
         return sum(1 for e, _, _ in done if fn(e))
     o = ['<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
@@ -509,7 +554,7 @@ def build_index(done):
         gdir, udir, slug = entry[3], entry[4], entry[5]
         mark_o = len(o)
         g, u = gdir[3:], unum(udir)
-        kind = 'test' if slug.startswith('test') else slug
+        kind = 'test' if slug.startswith('test') else ('luyentap' if slug.startswith('luyentap') else slug)
         o.append('<section class="card setcard" data-g="%s" data-u="%s" data-k="%s" data-sid="%s"><div class="settitle"><span class="chip">Lớp %s · %s</span><h3>%s</h3></div><div class="tiles">'
                  % (g, u, kind, S['id'], g, ulabel(u), html.escape(S['title'])))
         if S.get('theory'):
@@ -540,13 +585,21 @@ def build_index(done):
             o.append('<a class="tile t-test" data-m="test" data-sid="%s" href="WebBaiTap/%s/%s/%s/%s.html"><span class="ic">%s</span><b>%s</b><small>%d câu · %d phút%s</small></a>'
                      % (S['id'], entry[3], entry[4], entry[5], pid, '🎧' if P0.get('audio') else '📝', html.escape(num), n, P0.get('minutes', 0), ' · có nghe' if P0.get('audio') else ''))
         o.append('</div></section>')
-        cards.append((last_pos.get((gdir, udir), 10**6) + 5, ''.join(o[mark_o:]))); del o[mark_o:]
+        pp = last_pos.get((gdir, udir))
+        if pp is not None:
+            pos_t = pp + 5
+        elif (gdir, udir) in AFTER:
+            anc, off = AFTER[(gdir, udir)]
+            pos_t = last_pos.get((gdir, anc), 10**6) + off
+        else:
+            pos_t = 10**6
+        cards.append((pos_t, ''.join(o[mark_o:]))); del o[mark_o:]
     for _, h in sorted(cards, key=lambda c: c[0]):
         o.append(h)
     o.extend(IELTS['cards'])
     o.append('<div class="empty" id="nobai" hidden>Chưa có bài nào được giao cho lớp của bạn. Hãy nhờ giáo viên giao bài.</div><div class="empty" id="denied" hidden>Bài đó chưa được giao cho lớp của bạn.</div><div class="empty" id="empty" hidden>Không có bộ bài phù hợp. Hãy bấm “Xoá bộ lọc”.</div>'
              '<div class="foot">Học sinh làm bài trên điện thoại hoặc máy tính · Kết quả ghi tự động về giáo viên</div></main></div>'
-             '<script>GNAuth.chip("#chip");</script><script>%s</script><script>GNAuth.verify(function(){window.gnApply&&gnApply()});if(/denied=1/.test(location.search)){var d=document.getElementById("denied");if(d)d.hidden=false}</script><script src="engine/feedback.js?v=%s"></script></body></html>' % (INDEX_JS, BV))
+             '<script>GNAuth.chip("#chip");</script><script>%s</script><script>GNAuth.verify(function(){window.gnApply&&gnApply()});if(/denied=1/.test(location.search)){var d=document.getElementById("denied");if(d)d.hidden=false}</script><script src="engine/feedback.js?v=%s"></script></body></html>' % (INDEX_JS.replace('@@LBL@@', json.dumps(UNIT_LABELS, ensure_ascii=False)), BV))
     open(os.path.join(ROOT, 'index.html'), 'w', encoding='utf8').write(''.join(o))
     build_site_pages(done)
 

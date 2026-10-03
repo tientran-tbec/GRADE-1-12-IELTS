@@ -1,0 +1,36 @@
+# -*- coding: utf-8 -*-
+"""Sinh bởi tools/g4_exam.py"""
+
+ANS = {'l1.1': 'B',
+ 'l1.2': 'C',
+ 'l1.3': 'A',
+ 'l1.4': 'B',
+ 'l2.5': 'A',
+ 'l2.6': 'C',
+ 'l2.7': 'A',
+ 'l2.8': 'C',
+ 'r1.10': 'A',
+ 'r1.11': 'B',
+ 'r1.12': 'C',
+ 'r1.9': 'A',
+ 'r2.13': ['America'],
+ 'r2.14': ['cake'],
+ 'r2.15': ['chips'],
+ 'r2.16': ['milk']}
+
+EXPLANATIONS = {'l1.1': 'Đáp án: B. yes',
+ 'l1.2': 'Đáp án: C. Sunday',
+ 'l1.3': 'Đáp án: A. Malaysia',
+ 'l1.4': 'Đáp án: B. juice',
+ 'l2.5': 'Đáp án A (theo đáp án của đề). Nghe lại file âm thanh và đối chiếu với tranh.',
+ 'l2.6': 'Đáp án C (theo đáp án của đề). Nghe lại file âm thanh và đối chiếu với tranh.',
+ 'l2.7': 'Đáp án A (theo đáp án của đề). Nghe lại file âm thanh và đối chiếu với tranh.',
+ 'l2.8': 'Đáp án C (theo đáp án của đề). Nghe lại file âm thanh và đối chiếu với tranh.',
+ 'r1.10': 'Đáp án: A. It’s ten fifteen.',
+ 'r1.11': 'Đáp án: B. I want some juice.',
+ 'r1.12': 'Đáp án: C. Yes, he can.',
+ 'r1.9': 'Đáp án: A. I listen to music.',
+ 'r2.13': 'Đáp án: America',
+ 'r2.14': 'Đáp án: cake',
+ 'r2.15': 'Đáp án: chips',
+ 'r2.16': 'Đáp án: milk'}

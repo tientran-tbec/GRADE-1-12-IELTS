@@ -227,3 +227,8 @@ body.testmode .wrap{-webkit-user-select:text;user-select:text}
 .say:active{transform:translateY(2px);box-shadow:0 1px 0 #c2410c}
 .emo{display:inline-block;font-size:3.2rem;line-height:1.15}
 .stem .emo{margin-right:6px}
+
+.qb img.pic.wide{max-width:min(100%,480px);max-height:240px}
+.passage img.wide{max-width:100%;height:auto;display:block;margin:4px 0}
+.mrow .mpic{height:84px}
+.theory table.tb{border-collapse:collapse;width:100%;margin:8px 0}.theory table.tb td{border:1px solid var(--line);padding:6px 8px;vertical-align:top}

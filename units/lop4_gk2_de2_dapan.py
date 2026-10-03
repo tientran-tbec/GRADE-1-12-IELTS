@@ -1,0 +1,36 @@
+# -*- coding: utf-8 -*-
+"""Sinh bởi tools/g4_exam.py"""
+
+ANS = {'l1.1': 'A',
+ 'l1.2': 'C',
+ 'l1.3': 'A',
+ 'l1.4': 'B',
+ 'l2.5': 'B',
+ 'l2.6': 'A',
+ 'l2.7': 'C',
+ 'l2.8': 'B',
+ 'r1.10': 'C',
+ 'r1.11': 'B',
+ 'r1.12': 'A',
+ 'r1.9': 'A',
+ 'r2.13': ['hair'],
+ 'r2.14': ['tall'],
+ 'r2.15': ['long'],
+ 'r2.16': ['slim']}
+
+EXPLANATIONS = {'l1.1': 'Đáp án: A. nurse',
+ 'l1.2': 'Đáp án: C. wash',
+ 'l1.3': 'Đáp án: A. street',
+ 'l1.4': 'Đáp án: B. television',
+ 'l2.5': 'Đáp án B (theo đáp án của đề). Nghe lại file âm thanh và đối chiếu với tranh.',
+ 'l2.6': 'Đáp án A (theo đáp án của đề). Nghe lại file âm thanh và đối chiếu với tranh.',
+ 'l2.7': 'Đáp án C (theo đáp án của đề). Nghe lại file âm thanh và đối chiếu với tranh.',
+ 'l2.8': 'Đáp án B (theo đáp án của đề). Nghe lại file âm thanh và đối chiếu với tranh.',
+ 'r1.10': 'Đáp án: C. She has long hair.',
+ 'r1.11': 'Đáp án: B. He goes to the shopping centre.',
+ 'r1.12': 'Đáp án: A. I help my mum with the cooking.',
+ 'r1.9': 'Đáp án: A. He’s an office worker.',
+ 'r2.13': 'hair = tóc.',
+ 'r2.14': 'tall = cao.',
+ 'r2.15': 'long hair = tóc dài.',
+ 'r2.16': 'slim = mảnh mai, thon thả.'}

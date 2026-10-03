@@ -1,0 +1,36 @@
+# -*- coding: utf-8 -*-
+"""Sinh bởi tools/g4_exam.py"""
+
+ANS = {'l1.1': 'C',
+ 'l1.2': 'A',
+ 'l1.3': 'A',
+ 'l1.4': 'C',
+ 'l2.5': 'C',
+ 'l2.6': 'A',
+ 'l2.7': 'B',
+ 'l2.8': 'C',
+ 'r1.10': 'C',
+ 'r1.11': 'A',
+ 'r1.12': 'A',
+ 'r1.9': 'B',
+ 'r2.13': ['street'],
+ 'r2.14': ['swimming pool'],
+ 'r2.15': ['shopping centre'],
+ 'r2.16': ['cinema']}
+
+EXPLANATIONS = {'l1.1': 'Đáp án: C. go',
+ 'l1.2': 'Đáp án: A. wash',
+ 'l1.3': 'Đáp án: A. big',
+ 'l1.4': 'Đáp án: C. long',
+ 'l2.5': 'Đáp án C (theo đáp án của đề). Nghe lại file âm thanh và đối chiếu với tranh.',
+ 'l2.6': 'Đáp án: A. In the afternoon',
+ 'l2.7': 'Đáp án B (theo đáp án của đề). Nghe lại file âm thanh và đối chiếu với tranh.',
+ 'l2.8': 'Đáp án C (theo đáp án của đề). Nghe lại file âm thanh và đối chiếu với tranh.',
+ 'r1.10': 'Đáp án: C. I read books in the morning.',
+ 'r1.11': 'Đáp án: A. He goes to the swimming pool.',
+ 'r1.12': 'Đáp án: A. I wash the clothes.',
+ 'r1.9': 'Đáp án: B. She’s a nurse.',
+ 'r2.13': 'Đáp án: street',
+ 'r2.14': 'Đáp án: swimming pool',
+ 'r2.15': 'Đáp án: shopping centre',
+ 'r2.16': 'Đáp án: cinema'}
