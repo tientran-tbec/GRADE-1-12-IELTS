@@ -633,7 +633,7 @@ def build_tree(done):
     return ''.join(o)
 
 
-TT_INDEX_JS = r'''(function(){var A=window.GNAuth,u=A&&A.user&&A.user();if(!u||u.role!=="student"||u.tt!=="thuthach")return;fetch("thuthach/index.json").then(function(r){return r.json()}).then(function(ix){var P=ix.paths||{},mine=(u.sets||[]).filter(function(s){return P[s]});if(!mine.length)return;if(!/[?&]free=1/.test(location.search)){location.replace("tt_home.html");return}[].forEach.call(document.querySelectorAll("[data-sid]"),function(n){if(P[n.getAttribute("data-sid")])n.remove()});[].forEach.call(document.querySelectorAll(".setcard"),function(c){if(!c.querySelector(".tile"))c.remove()});var h=document.getElementById("hint");if(h)h.innerHTML="<b>🚀</b>Các bài thuộc lộ trình Thử thách nằm trong <a href=\"tt_home.html\">🏠 Trang chủ Thử thách</a>.";window.gnApply&&window.gnApply()}).catch(function(){})})();'''
+TT_INDEX_JS = r'''(function(){var A=window.GNAuth,u=A&&A.user&&A.user();if(!u||u.role!=="student"||u.tt!=="thuthach")return;fetch("thuthach/index.json").then(function(r){return r.json()}).then(function(ix){var P=ix.paths||{},mine=(u.sets||[]).filter(function(s){return P[s]});if(!mine.length)return;var fr=(u.sets||[]).filter(function(s){return !P[s]});if(!/[?&]free=1/.test(location.search)||!fr.length){location.replace("tt_home.html");return}[].forEach.call(document.querySelectorAll("[data-sid]"),function(n){if(P[n.getAttribute("data-sid")])n.remove()});[].forEach.call(document.querySelectorAll(".setcard"),function(c){if(!c.querySelector(".tile"))c.remove()});var h=document.getElementById("hint");if(h)h.innerHTML="<b>🚀</b>Các bài thuộc lộ trình Thử thách nằm trong <a href=\"tt_home.html\">🏠 Trang chủ Thử thách</a>.";window.gnApply&&window.gnApply()}).catch(function(){})})();'''
 
 
 def build_index(done):
@@ -748,6 +748,6 @@ if __name__ == '__main__':
         print('Vật lí 11 ->', LY['n'], 'bộ,', len(LY['cards']), 'thẻ')
         IELTS.update(ielts.build(ROOT, APPS_SCRIPT_URL, AUTH_HEAD, BV))
         print('IELTS Reading ->', IELTS['n'], 'bộ,', len(IELTS['cards']), 'thẻ')
-        TT = tt.build(ROOT, done, ulabel, unum)
+        TT = tt.build(ROOT, done, ulabel, unum, LY, IELTS)
         print('Thử thách ->', TT['n'], 'lộ trình,', len(TT['paths']), 'bộ bài')
         build_index(done)

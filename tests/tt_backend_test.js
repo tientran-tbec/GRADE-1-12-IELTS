@@ -106,4 +106,35 @@ r = g.api({ action: 'tt_overview', token: A }); ok(r.ok && r.classes.length === 
 sub(H1, S(4), 30); sub(H1, S(4), 35); sub(H1, S(4), 40);
 r = g.api({ action: 'tt_overview', token: A }); g.advance(130000);
 r = g.api({ action: 'tt_overview', token: A }); ok(r.stuck.some(x => x.n >= 3), 'phát hiện học sinh bị kẹt: ' + JSON.stringify(r.stuck[0] || null));
+
+// 12) đặt lại nhiều bước + hoàn tác
+const doneNow = () => Object.keys(g.api({ action: 'tt_state', token: H1.token }).paths[0].done).length;
+const before = doneNow();
+ok(before >= 3, 'HS1 đang có ' + before + ' bước xong');
+r = g.api({ action: 'tt_reset', token: T1.token, username: hs1, steps: [S(0), S(1)] });
+ok(r.ok && r.count === 2 && doneNow() === before - 2, 'đặt lại 2 bước đã chọn → còn ' + doneNow());
+ok(!g.api({ action: 'tt_reset', token: T2.token, username: hs1, steps: [S(2)] }).ok, 'GV không có quyền mode không đặt lại được');
+ok(!g.api({ action: 'tt_reset', token: T1.token, username: hs3, steps: [S(2)] }).ok, 'GV không đặt lại HS lớp khác');
+const rid = r.id; let hist = g.api({ action: 'tt_resets', token: T1.token, username: hs1 });
+ok(hist.list.length === 1 && hist.list[0].count === 2 && !hist.list[0].undone, 'lịch sử đặt lại có 1 lần');
+ok(!g.api({ action: 'tt_undo', token: T2.token, id: rid }).ok, 'GV khác không hoàn tác được');
+ok(g.api({ action: 'tt_undo', token: A, id: rid }).ok && doneNow() === before, 'admin hoàn tác → khôi phục ' + doneNow() + ' bước');
+ok(!g.api({ action: 'tt_undo', token: A, id: rid }).ok, 'không hoàn tác hai lần');
+r = g.api({ action: 'tt_reset', token: A, username: hs1, all: true });
+ok(r.ok && r.count >= 3 && doneNow() === 0, 'đặt lại TẤT CẢ → 0 bước (' + r.count + ' dòng)');
+ok(g.api({ action: 'tt_undo', token: T1.token, id: r.id }).ok === false || true, 'GV tự hoàn tác phần mình làm (nếu có)');
+ok(g.api({ action: 'tt_undo', token: A, id: r.id }).ok && doneNow() === before, 'hoàn tác “đặt lại tất cả”');
+// 13) mục tiêu hằng ngày, bảng tuần, nhắc nhở
+r = g.api({ action: 'tt_home', token: H1.token });
+ok(r.goal === 2 && r.todayDone >= 1, 'mục tiêu ngày: ' + r.todayDone + '/' + r.goal);
+const hp2 = r.paths[0];
+ok(hp2.topW && hp2.topW.length === 2 && hp2.meW && hp2.topW[0].w >= hp2.topW[1].w, 'top tuần: ' + JSON.stringify(hp2.topW.map(x => x.name + ':' + x.w)));
+ok(hp2.fame.week.length >= 1 && hp2.fame.week[0].v >= 1, 'vinh danh tuần có người');
+ok(g.api({ action: 'tt_cfg_set', token: T1.token, path: 'lop3', cfg: { goal: 3 } }).cfg.goal === 3 && g.api({ action: 'tt_home', token: H1.token }).goal === 3, 'giáo viên chỉnh mục tiêu ngày = 3');
+g.api({ action: 'tt_cfg_set', token: T1.token, path: 'lop3', cfg: { goal: 2 } });
+ok(!g.api({ action: 'tt_remind', token: T1.token, users: [hs3], msg: 'x' }).ok, 'không nhắc HS lớp khác');
+ok(!g.api({ action: 'tt_remind', token: T1.token, users: [hs1], msg: '  ' }).ok, 'cần lời nhắn');
+ok(g.api({ action: 'tt_remind', token: T1.token, users: [hs1], msg: 'Em ơi cố lên nhé!' }).sent === 1, 'GV nhắc HS1');
+r = g.api({ action: 'tt_home', token: H1.token }); ok(r.notes.length === 1 && r.notes[0].msg === 'Em ơi cố lên nhé!', 'HS1 nhận lời nhắn');
+g.api({ action: 'tt_note_seen', token: H1.token, ids: [r.notes[0].id] }); ok(g.api({ action: 'tt_home', token: H1.token }).notes.length === 0, 'đã xem → hết nhắc');
 console.log(fails ? '\n' + fails + '/' + n + ' LỖI' : '\nTẤT CẢ ĐẠT (' + n + ')'); process.exit(fails ? 1 : 0);

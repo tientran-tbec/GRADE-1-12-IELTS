@@ -52,7 +52,7 @@ function loadGas(file, opts) {
       base64DecodeWebSafe: s => toArr(Buffer.from(s.replace(/-/g, '+').replace(/_/g, '/'), 'base64')),
       getUuid: () => crypto.randomUUID(),
       newBlob: s => ({ getBytes: () => toArr(Buffer.from(typeof s === 'string' ? s : String(s), 'utf8')) }),
-      formatDate: (d, tz, pat) => { const o = {}; new Intl.DateTimeFormat('en-GB', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).formatToParts(new Date(d.getTime())).forEach(p => o[p.type] = p.value);
+      formatDate: (d, tz, pat) => { if (pat === 'u') { const wd = new Intl.DateTimeFormat('en-US', { timeZone: tz, weekday: 'short' }).format(new Date(d.getTime())); return String(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].indexOf(wd) + 1); } const o = {}; new Intl.DateTimeFormat('en-GB', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).formatToParts(new Date(d.getTime())).forEach(p => o[p.type] = p.value);
         return String(pat).replace('yyyy', o.year).replace('MM', o.month).replace('dd', o.day).replace('HH', o.hour).replace('mm', o.minute).replace('ss', o.second); },
     },
   };

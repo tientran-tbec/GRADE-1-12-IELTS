@@ -16,6 +16,7 @@
       o.action = 'grade_save_result'; o.mode = 'ielts-reading'; o.score = sc; o.total = tot; o.pct = pct; o.score10 = tot ? Math.round(sc / tot * 100) / 10 : 0;
       o.time_spent = secs(d.timeTaken); o.tab_switch = +d.tabViol || 0; o.blur = +d.focusViol || 0; o.fullscreen_exit = +d.fsViol || 0; o.audio_plays = 0;
       o.answers = 'Band ' + (d.band || '?') + ' | ' + (d.details || '');
+      try { window.dispatchEvent(new CustomEvent('gn:result', { detail: { pct: pct } })); } catch (e) {}   // cho chế độ Thử thách báo kết quả
     }
     return JSON.stringify(o);
   }

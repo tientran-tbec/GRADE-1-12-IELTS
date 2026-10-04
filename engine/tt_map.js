@@ -27,7 +27,7 @@
   function render(st) {
     DATA = st;
     if (!PREVIEW && st.mode !== 'thuthach') { fail('<b>Lớp của em đang học ở chế độ Tự do.</b><p><a class="btn" href="index.html">Vào trang bài tập</a></p>'); return; }
-    if (!st.paths.length) { fail('<b>Chưa có lộ trình nào dành cho em.</b><p>Nhờ thầy/cô giao bài để mở lộ trình nhé.</p><p><a class="btn sec" href="index.html?free=1">Xem bài tự do</a></p>'); return; }
+    if (!st.paths.length) { fail('<b>Chưa có lộ trình nào dành cho em.</b><p>Nhờ thầy/cô giao bài để mở lộ trình nhé.</p>'); return; }
     Promise.all(st.paths.map(function (p) { return T.meta(p.id); })).then(function (metas) {
       var n = rowsPerLine(), html = '', sideHtml = '', sum = { done: 0, total: 0, stars: 0, theory: 0, three: 0 }, chapStat = [], next = null, badges = [], banner = '';
       st.paths.forEach(function (p, pi) {

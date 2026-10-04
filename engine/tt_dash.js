@@ -20,7 +20,16 @@
     return '<div class="hm-fame">' +
       '<div class="hm-f a"><h5>🏆 Thành tích cao nhất<small>Tổng số ⭐ đạt được</small></h5>' + list(f.stars, function (v) { return v + ' ⭐'; }, 'Chưa có ai — cơ hội của em!') + '</div>' +
       '<div class="hm-f b"><h5>💪 Làm nhiều nhất<small>Số bước đã chinh phục</small></h5>' + list(f.count, function (v) { return v + ' bước'; }, 'Chưa có ai — cơ hội của em!') + '</div>' +
-      '<div class="hm-f c"><h5>⚡ Nhanh nhất<small>Thời gian làm trung bình mỗi bước (từ ' + (fastMin || 8) + ' bước)</small></h5>' + list(f.fast, secTxt, 'Chưa ai đủ ' + (fastMin || 8) + ' bước.') + '</div></div>';
+      '<div class="hm-f c"><h5>⚡ Nhanh nhất<small>Thời gian làm trung bình mỗi bước (từ ' + (fastMin || 8) + ' bước)</small></h5>' + list(f.fast, secTxt, 'Chưa ai đủ ' + (fastMin || 8) + ' bước.') + '</div>' +
+      (f.week ? '<div class="hm-f d"><h5>🔥 Nổi bật tuần này<small>Số bước xong từ thứ Hai · tính lại mỗi tuần</small></h5>' + list(f.week, function (v) { return v + ' bước'; }, 'Tuần mới — ai sẽ dẫn đầu?') + '</div>' : '') + '</div>';
   }
-  window.TTDash = { E: E, ring: ring, fame: fame, secTxt: secTxt, GRAD: GRAD, ICON: ICON, MEDAL: MEDAL };
+  /* tải bảng tính: CSV UTF-8 có BOM (Excel mở được tiếng Việt) */
+  function csv(name, head, rows) {
+    var q = function (v) { v = String(v == null ? '' : v); return /[",\n;]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+    var txt = '\ufeff' + [head].concat(rows).map(function (r) { return r.map(q).join(','); }).join('\r\n');
+    var b = new Blob([txt], { type: 'text/csv;charset=utf-8' }), a = document.createElement('a');
+    a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+  window.TTDash = { csv: csv, E: E, ring: ring, fame: fame, secTxt: secTxt, GRAD: GRAD, ICON: ICON, MEDAL: MEDAL };
 })();

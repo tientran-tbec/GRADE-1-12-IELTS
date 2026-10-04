@@ -199,6 +199,7 @@ def build(root, apps_url, auth_head, bv):
         open(os.path.join(out, name), 'w', encoding='utf8').write(finish(t))
 
     cards, cat, npages = [], [], 0
+    tts = []   # dữ liệu cho lộ trình Thử thách (tt.py)
     icon_of = {k: ic for k, _, _, ic, _ in KINDS}
     # ---------- theo từng bài ----------
     for bai in sorted({i['bai'] or 0 for i in items}):
@@ -250,6 +251,7 @@ def build(root, apps_url, auth_head, bv):
         cards.append('<section class="card setcard" data-g="11" data-s="Lý" data-u="%s" data-k="luyentap" data-sid="%s"><div class="settitle"><span class="chip">Lớp 11 · Vật lí</span><h3>%s</h3></div><div class="tiles">%s</div></section>'
                      % (udir, sid, html.escape(ttl), ''.join(tiles)))
         cat.append({'id': sid, 'title': 'Vật lí 11 · ' + ttl, 'grade': 11, 'unit': UNIT_LABELS[udir], 'kind': 'luyentap'})
+        tts.append({'sid': sid, 'bai': bai, 'title': ttl, 'theory': has_th, 'pages': [(pid, label, kind, len(ch)) for pid, label, kind, ch in pages if kind != 'essay']})   # tự luận chấm bằng AI: không tính vào Thử thách
     # ---------- đề thi ----------
     byexam = {}
     for it in items:
@@ -287,4 +289,4 @@ def build(root, apps_url, auth_head, bv):
     for f in os.listdir(os.path.join(out, 'img')):
         if f not in used:
             os.remove(os.path.join(out, 'img', f))
-    return {'cards': cards, 'catalog': cat, 'n': len(cat), 'pages': npages, 'labels': UNIT_LABELS, 'order': LABEL_ORDER}
+    return {'cards': cards, 'catalog': cat, 'n': len(cat), 'pages': npages, 'labels': UNIT_LABELS, 'order': LABEL_ORDER, 'tt': tts, 'dirs': (GRADE_DIR, SUBJ_DIR)}

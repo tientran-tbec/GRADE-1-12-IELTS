@@ -144,17 +144,68 @@
   }
 
   /* ----- luyện tập / kiểm tra: báo kết quả sau khi nộp ----- */
+  /* ----- lưu bài làm dở (trên máy này, 7 ngày): mở lại đúng chỗ đang làm ----- */
+  function draft(id) {
+    var key = 'gn_ttd_' + U.username + '|' + id, submitted = false, tm = 0;
+    function qsa(sel, root) { return [].slice.call((root || document).querySelectorAll(sel)); }
+    function collect() {
+      var o = {}, any = false;
+      qsa('.q[data-id]').forEach(function (q) {
+        var arr = [];
+        qsa('input,select,textarea', q).forEach(function (c, i) {
+          if (c.type === 'radio' || c.type === 'checkbox') { if (c.checked) arr.push([i, 1]); }
+          else if (c.type !== 'button' && c.type !== 'submit' && c.value) arr.push([i, c.value]);
+        });
+        if (arr.length) { o[q.getAttribute('data-id')] = arr; any = true; }
+      });
+      return any ? o : null;
+    }
+    function save() {
+      if (submitted) return;
+      var o = collect();
+      try { if (o) localStorage.setItem(key, JSON.stringify({ t: Date.now(), a: o })); else localStorage.removeItem(key); } catch (e) {}
+    }
+    function sched() { clearTimeout(tm); tm = setTimeout(save, 700); }
+    function restore() {
+      var d = null; try { d = JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) {}
+      if (!d || !d.a || Date.now() - d.t > 7 * 86400000) { try { localStorage.removeItem(key); } catch (e) {} return; }
+      if (window.__quiz && window.__quiz.isSubmitted && window.__quiz.isSubmitted()) return;
+      var n = 0;
+      Object.keys(d.a).forEach(function (qid) {
+        var q = document.querySelector('.q[data-id="' + qid + '"]'); if (!q) return;
+        var ctrls = qsa('input,select,textarea', q);
+        d.a[qid].forEach(function (it) {
+          var c = ctrls[it[0]]; if (!c) return;
+          if (c.type === 'radio' || c.type === 'checkbox') { if (!c.checked) c.click(); }
+          else { c.value = it[1]; c.dispatchEvent(new Event('input', { bubbles: true })); c.dispatchEvent(new Event('change', { bubbles: true })); }
+          n++;
+        });
+      });
+      if (n) toast('↩ Đã khôi phục ' + Object.keys(d.a).length + ' câu em làm dở trước đó.');
+    }
+    document.addEventListener('input', sched, true); document.addEventListener('change', sched, true);
+    document.addEventListener('quiz:submitted', function () { submitted = true; clearTimeout(tm); try { localStorage.removeItem(key); } catch (e) {} });
+    whenDom(function () { setTimeout(restore, 900); });
+  }
+
   function practice(st, id, loc, step, done, href, next) {
     var need = T.need(loc.p.cfg, step.kind), best = loc.p.done[id];
     if (done) {
       var sub = document.querySelector('header .sub') || document.querySelector('header h1');
       if (sub) { var c = document.createElement('span'); c.className = 'tt-chip'; c.textContent = '✔ Đã qua' + (best ? ' · tốt nhất ' + best + '%' : ''); sub.appendChild(c); }
     }
-    document.addEventListener('quiz:submitted', function () {
-      var t = window.__quiz && window.__quiz.tally ? window.__quiz.tally() : null; if (!t || !t.total) return;
-      var pct = Math.round(t.ok / t.total * 1000) / 10, pass = pct >= need, nodes = [];
+    if (step.kind !== 'theory') draft(id);
+    function onSubmitted(pct0) {
+      var pct = pct0;
+      if (pct === undefined) { var t = window.__quiz && window.__quiz.tally ? window.__quiz.tally() : null; if (!t || !t.total) return; pct = Math.round(t.ok / t.total * 1000) / 10; }
+      var pass = pct >= need, nodes = [];
       function put(cls, html, acts) {
         var hosts = [document.getElementById('resultBox'), document.getElementById('result')].filter(Boolean);
+        if (!hosts.length) {   /* trang không có khung kết quả (IELTS Reading): hiện thanh nổi cuối trang */
+          var fx = document.getElementById('tt-fixed');
+          if (!fx) { fx = document.createElement('div'); fx.id = 'tt-fixed'; fx.style.cssText = 'position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:99999;width:min(560px,94vw);max-height:80vh;overflow:auto;box-shadow:0 10px 40px rgba(0,0,0,.35);border-radius:16px'; document.body.appendChild(fx); }
+          hosts = [fx];
+        }
         if (!nodes.length) hosts.forEach(function (h) { var d = document.createElement('div'); d.className = 'tt-res'; h.appendChild(d); nodes.push(d); });
         nodes.forEach(function (d) { d.className = 'tt-res ' + cls; d.innerHTML = html + (acts ? '<div class="acts">' + acts + '</div>' : ''); });
         [].forEach.call(document.querySelectorAll('.tt-res [data-tt=again]'), function (b) { b.onclick = function () { location.reload(); }; });
@@ -177,7 +228,9 @@
         put('pass', '<h3>Tuyệt vời! 🎉 ' + star + '</h3>Em đạt <b>' + pct + '%</b> (cần ≥ ' + need + '%).' + (next ? ' Bước tiếp theo đã mở: <b>' + esc(next.title) + '</b>.' : ' Em đã hoàn thành bước cuối cùng!') + (soft ? ' <small>(đang cập nhật, nếu bước sau chưa mở hãy tải lại lộ trình)</small>' : ''),
           '<a class="tt-btn" href="' + esc(href) + '">' + (next ? 'Làm tiếp ▶' : '🏆 Xem lộ trình') + '</a><a class="tt-btn sec" href="' + ROOT + 'thuthach.html">🗺 Về lộ trình</a>');
       }
-    });
+    }
+    document.addEventListener('quiz:submitted', function () { onSubmitted(); });
+    window.addEventListener('gn:result', function (e) { if (e.detail && e.detail.pct !== undefined) onSubmitted(+e.detail.pct); });
   }
 
   if (A._ttSet) T.guard(A._ttSet);

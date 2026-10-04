@@ -38,6 +38,7 @@ def build(root, apps_url, auth_head, bv):
     base = os.path.join(root, 'ielts_src', 'reading')
     out_base = os.path.join(root, 'WebBaiTap', 'IELTS', 'Reading')
     cards, cat = [], []
+    ttfull, ttdang = [], []   # dữ liệu cho lộ trình Thử thách (tt.py)
     # --- Full Test ---
     tiles = []
     files = sorted(glob.glob(os.path.join(base, 'FullTest', 'Test*_Reading.html')), key=lambda p: _natural(os.path.basename(p)))
@@ -47,6 +48,7 @@ def build(root, apps_url, auth_head, bv):
         t = _wrap(f, os.path.join(out_base, 'FullTest', os.path.basename(f)), '../../../../', sid, pid, 'full', apps_url, auth_head, bv)
         m = re.search(r'thời gian: (\d+) phút, (\d+) câu', t)
         mins, q = (m.group(1), m.group(2)) if m else ('60', '40')
+        ttfull.append((sid, pid, 'Full Test %d' % n, 'WebBaiTap/IELTS/Reading/FullTest/' + os.path.basename(f), int(q) if str(q).isdigit() else 40))
         tiles.append('<a class="tile t-test" data-m="test" data-sid="%s" href="WebBaiTap/IELTS/Reading/FullTest/%s"><span class="ic">📖</span><b>Test %d</b><small>%s câu · %s phút</small></a>' % (sid, os.path.basename(f), n, q, mins))
         cat.append({'id': sid, 'title': 'IELTS Reading · Full Test %d' % n, 'grade': 'IELTS', 'unit': 'Reading', 'kind': 'full'})
     cards.append('<section class="card setcard" data-g="IELTS" data-u="Reading" data-k="full"><div class="settitle"><span class="chip">IELTS · Reading</span><h3>Full Test (%d đề · 40 câu · 60 phút)</h3></div><div class="tiles">%s</div></section>' % (len(files), ''.join(tiles)))
@@ -54,7 +56,7 @@ def build(root, apps_url, auth_head, bv):
     for d, code, label in TYPES:
         sid = 'ielts-rd-' + code
         fs = sorted(glob.glob(os.path.join(base, 'TheoDang', d, '*.html')), key=lambda p: _natural(os.path.basename(p)))
-        tl = []
+        tl = []; ttp = []
         for f in fs:
             name = os.path.basename(f)
             m = re.match(r'Test(\d+)_Passage(\d+)_', name)
@@ -62,11 +64,13 @@ def build(root, apps_url, auth_head, bv):
             tt = re.search(r'<title>([^<]*)</title>', t)
             mm = re.search(r'thời gian: (\d+) phút, (\d+) câu', t)
             mins, q = (mm.group(1), mm.group(2)) if mm else ('30', '?')
+            ttp.append((os.path.splitext(name)[0], 'Test %s · Passage %s' % (m.group(1), m.group(2)), 'WebBaiTap/IELTS/Reading/TheoDang/%s/%s' % (d, name), int(q) if str(q).isdigit() else 13))
             tl.append('<a class="tile t-test" data-m="test" data-sid="%s" title="%s" href="WebBaiTap/IELTS/Reading/TheoDang/%s/%s"><span class="ic">📖</span><b>Test %s · P%s</b><small>%s câu · %s phút</small></a>'
                       % (sid, html.escape(tt.group(1) if tt else name), d, name, m.group(1), m.group(2), q, mins))
         cards.append('<section class="card setcard" data-g="IELTS" data-u="Reading" data-k="dang"><div class="settitle"><span class="chip">IELTS · Reading</span><h3>Theo dạng bài: %s (%d trang)</h3></div><div class="tiles">%s</div></section>' % (html.escape(label), len(fs), ''.join(tl)))
         cat.append({'id': sid, 'title': 'IELTS Reading · %s (%d trang)' % (label, len(fs)), 'grade': 'IELTS', 'unit': 'Reading', 'kind': 'dang'})
+        ttdang.append({'sid': sid, 'code': code, 'label': label, 'pages': ttp})
     # --- Kỹ năng sắp có (chỉ admin/giáo viên thấy) ---
     for sk, ic in SOON:
         cards.append('<section class="card setcard" data-g="IELTS" data-u="%s" data-k="soon" data-sid="__soon"><div class="settitle"><span class="chip">IELTS · %s</span><h3>%s %s</h3></div><p style="color:var(--mut,#667);margin:6px 0 0">Sắp có.</p></section>' % (sk, sk, ic, sk))
-    return {'cards': cards, 'catalog': cat, 'n': len(cat)}
+    return {'cards': cards, 'catalog': cat, 'n': len(cat), 'tt': {'full': ttfull, 'dang': ttdang}}
