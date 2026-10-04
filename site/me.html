@@ -12,6 +12,7 @@
   <div id="nrem" hidden style="margin-top:10px"><b>Nhắc nộp bài</b><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"><select id="nset" style="max-width:100%"></select><input id="nnote" maxlength="120" placeholder="Lời nhắn thêm (không bắt buộc)" style="flex:1;min-width:180px"><button class="btn sm" id="nsend">Nhắc các bạn chưa nộp</button></div><p class="mut" style="margin:4px 0 0">Mỗi bạn chỉ được nhắc một lần cho mỗi bộ bài trong 6 giờ.</p></div></div>
  <div id="nfb" hidden style="margin-top:12px"><b>Góp ý thay cả nhóm cho giáo viên</b><div id="nfbm" style="margin:6px 0"></div><textarea id="nfbt" rows="3" maxlength="1000" placeholder="Ý kiến chung của nhóm…"></textarea><div class="row"><span class="err" id="nfbe"></span><button class="btn sm" id="nfbs">Gửi cho giáo viên</button></div></div>
  <p class="err" id="nerr"></p></div>
+<div class="card" id="ttme" style="margin-top:12px" hidden><b>🚀 Thử thách</b> <span class="mut">Lớp của em đang học theo lộ trình.</span> <a class="btn sm" href="thuthach.html" style="text-decoration:none;margin-left:8px">🗺 Vào lộ trình</a></div>
 <div class="card" id="lyes" style="margin-top:12px" hidden><b>Tự luận Vật lí</b><p class="mut" style="margin:4px 0 8px">Điểm AI chỉ là tạm tính; điểm chính thức do giáo viên duyệt.</p><div class="lyb"></div></div>
 <div class="card" id="gopy" style="margin-top:12px"><b>Góp ý của tôi</b><p class="mut" style="margin:4px 0 8px">Mở bài tương ứng và bấm nút “💬 Góp ý” để xem hoặc trả lời giáo viên.</p><div id="fbl">Đang tải…</div></div></div>
 <script>
@@ -73,4 +74,4 @@ GNAuth.api('my_reminders').then(function(j){setTimeout(function(){GNAuth.unread&
     GNAuth.api('team_fb',{cls:$('ncls').value,text:v}).then(function(){$('nfbt').value='';$('nfbe').textContent='';$('nfbs').disabled=false;fbLoad()}).catch(function(e){$('nfbe').textContent=e.message;$('nfbs').disabled=false})};
   load();
 })();
-</script><script src="engine/ly_essay_ui.js"></script><script>if(window.LyMe)LyMe.mount(document.getElementById("lyes"))</script><script src="engine/feedback.js"></script></body></html>
+</script><script>try{var _u=GNAuth.user();if(_u&&_u.tt==="thuthach")document.getElementById("ttme").hidden=false}catch(e){}</script><script src="engine/ly_essay_ui.js"></script><script>if(window.LyMe)LyMe.mount(document.getElementById("lyes"))</script><script src="engine/feedback.js"></script></body></html>

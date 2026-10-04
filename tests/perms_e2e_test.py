@@ -41,7 +41,7 @@ try:
         # --- admin cấp quyền qua giao diện
         pa, e2 = newpage(); login(pa, 'admin', 'Admin@123'); pa.goto(U('admin.html')); pa.wait_for_selector('#tabs button')
         pa.click('#tabs button[data-t=teachers]'); pa.wait_for_selector('#tbT button[data-a=tperm]'); pa.click('#tbT button[data-a=tperm]')
-        pa.wait_for_selector('#tpl input'); chk('hộp quyền GV có 6 mục (gồm Toàn quyền)', pa.locator('#tpl input').count() == 6)
+        pa.wait_for_selector('#tpl input'); chk('hộp quyền GV có 7 mục (gồm Toàn quyền)', pa.locator('#tpl input').count() == 7)
         pa.check('#tpl input[value=assign]'); pa.check('#tpl input[value=classes]'); pa.click('#tps'); pa.wait_for_function("document.querySelector('#tbT').innerText.indexOf('Giao bài')>=0")
         chk('bảng GV hiện quyền đã cấp', 'Quản lý lớp' in pa.inner_text('#tbT'))
         # --- GV đăng nhập lại -> có tab Giao bài + nút thêm lớp

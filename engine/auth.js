@@ -17,7 +17,7 @@
     ROLE: ROLE,
     get: function () { var s = load(); return s && s.token && tokenExp(s.token) > Date.now() ? s : null; },
     set: function (token, user) { ls(KEY, JSON.stringify({ token: token, user: user })); try { window.dispatchEvent(new CustomEvent('gn-user')); } catch (e) {} },
-    clear: function () { ls(KEY, null); ls('gn_ping', null); try { Object.keys(localStorage).forEach(function (k) { if (k.indexOf('gn_adm_') === 0 || k.indexOf('gn_ai_') === 0) localStorage.removeItem(k); }); } catch (e) {} },
+    clear: function () { ls(KEY, null); ls('gn_ping', null); try { Object.keys(localStorage).forEach(function (k) { if (k.indexOf('gn_adm_') === 0 || k.indexOf('gn_ai_') === 0 || k.indexOf('gn_tt') === 0) localStorage.removeItem(k); }); } catch (e) {} },
     user: function () { var s = A.get(); return s ? s.user : null; },
     loginUrl: function (next) { return ROOT + 'login.html' + (next ? '?next=' + encodeURIComponent(next) : ''); },
     logout: function () {
@@ -42,8 +42,16 @@
       return z(d.getUTCDate()) + '/' + z(d.getUTCMonth() + 1) + '/' + d.getUTCFullYear() + ' ' + z(d.getUTCHours()) + ':' + z(d.getUTCMinutes()) + ':' + z(d.getUTCSeconds());
     },
     requireSet: function (setId) {
-      if (!A.get() || A.allowed(setId)) return true;
+      if (!A.get() || A.allowed(setId)) { A._ttBoot(setId); return true; }
       document.documentElement.style.visibility = 'hidden'; location.replace(ROOT + 'index.html?denied=1'); return false;
+    },
+    /* Chế độ THỬ THÁCH: học sinh bị khoá bước nào thì không vào được trang bài đó (engine/thuthach.js quyết định). */
+    _ttBoot: function (setId) {
+      var s = A.get(); if (!s || s.user.role !== 'student' || s.user.tt !== 'thuthach') return;
+      A._ttSet = setId; document.documentElement.style.visibility = 'hidden';
+      setTimeout(function () { document.documentElement.style.visibility = ''; }, 9000);
+      var sc = document.querySelector('script[src*="engine/auth.js"]'), v = sc ? (sc.getAttribute('src').split('?')[1] || '') : '';
+      document.write('<script src="' + ROOT + 'engine/thuthach.js' + (v ? '?' + v : '') + '"><\/script>');
     },
     /* Bắt buộc đăng nhập (và đúng vai trò). Gọi sớm trong <head>. */
     require: function (roles) {
@@ -103,7 +111,7 @@
         if (A._busy) return; A._busy = true;
         A.api('auth_ping').then(function (j) {
           A._busy = false;
-          var s = load(); if (!s) return; var sig = function (u) { return JSON.stringify(u.sets || null) + JSON.stringify(u.due || null) + u.cls + JSON.stringify(u.perms || null) + JSON.stringify(u.ranks || null) + (u.ai ? 1 : 0); }, before = sig(s.user);
+          var s = load(); if (!s) return; var sig = function (u) { return JSON.stringify(u.sets || null) + JSON.stringify(u.due || null) + u.cls + JSON.stringify(u.perms || null) + JSON.stringify(u.ranks || null) + (u.ai ? 1 : 0) + (u.tt || ''); }, before = sig(s.user);
           A.set(s.token, j.user);
           A.unread = +j.unread || 0; A._bell(); try { window.dispatchEvent(new CustomEvent('gn-unread', { detail: A.unread })); } catch (e) {}
           ls('gn_ping', JSON.stringify({ u: j.user.username, t: Date.now(), n: A.unread }));

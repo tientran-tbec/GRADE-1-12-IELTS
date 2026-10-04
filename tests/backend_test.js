@@ -245,7 +245,7 @@ r = L('anlt', 'sai'); ok(!r.ok && /quá nhiều/.test(r.error), 'khoá sau 5 l�
   ok(g.api({ action: 'adm_users', token: A, role: 'student' }).users.find(u => u.username === a1.user.username).perms.length === 0, 'gỡ hết chức vụ → xoá quyền');
   // ---- toàn quyền (ngang admin) ----
   const tf = mk('Gv Full', 'teacher'); r = g.api({ action: 'adm_teacher_perms', token: A, username: tf.user.username, perms: ['full'] });
-  ok(r.ok && r.perms.length === 6, 'cấp toàn quyền = tích đủ 6 quyền');
+  ok(r.ok && r.perms.length === 7, 'cấp toàn quyền = tích đủ 7 quyền (gồm mode)');
   const F = L(tf.user.username, tf.password, 'f').token;
   ok(g.api({ action: 'adm_users', token: F, role: 'teacher' }).users.length >= 3 && g.api({ action: 'adm_users', token: F, role: 'teacher' }).users.every(u => u.role === 'teacher'), 'GV toàn quyền xem được danh sách giáo viên');
   ok(g.api({ action: 'adm_users', token: F }).users.every(u => u.role !== 'admin'), 'GV toàn quyền không thấy tài khoản admin');

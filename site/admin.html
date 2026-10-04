@@ -1,6 +1,6 @@
 <!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Quản trị – GRADE 1-12-IELTS</title><link rel="stylesheet" href="engine/app.css">
-<script>window.GN_URL="%GN_URL%";window.GN_ROOT="";window.GN_CATALOG=%CATALOG%;window.GN_PAGES=%PAGES%;</script><script src="engine/auth.js"></script><script>GNAuth.require(['admin','teacher'])</script><script src="engine/review.js"></script><script src="engine/ly_essay_ui.js"></script></head><body>
+<script>window.GN_URL="%GN_URL%";window.GN_ROOT="";window.GN_CATALOG=%CATALOG%;window.GN_PAGES=%PAGES%;</script><script src="engine/auth.js"></script><script>GNAuth.require(['admin','teacher'])</script><script src="engine/review.js"></script><script src="engine/ly_essay_ui.js"></script><script src="engine/tt_admin.js"></script></head><body>
 <div class="top"><h1>Quản trị · <span id="role"></span></h1><a href="index.html">⌂ Trang bài tập</a><span id="chip"></span></div>
 <div class="wrapp">
  <div class="tabs" id="tabs"></div>
@@ -86,6 +86,7 @@
  </section>
 
  <section id="p-essay" hidden></section>
+ <section id="p-tt" hidden></section>
  <section id="p-me" hidden>
   <div class="card" style="max-width:420px"><h3>Đổi mật khẩu</h3>
    <form id="cf"><label>Mật khẩu hiện tại<input id="op" type="password" required></label><label>Mật khẩu mới (≥ 6 ký tự)<input id="np" type="password" minlength="6" required></label>
@@ -97,7 +98,7 @@
 (function(){
 var E=GNAuth.esc, me=GNAuth.user(), isAdmin=me.role==='admin';
 var P=function(k){return isAdmin||(me.perms||[]).indexOf(k)>=0};   /* quyền cấp thêm */
-var TP=[['full','⭐ Toàn quyền (ngang admin)','Làm được mọi việc như quản trị viên: quản lý giáo viên, phân quyền, mọi lớp, mọi học sinh, giao bài, góp ý. Chỉ không tạo/sửa được tài khoản admin.'],['assign','Giao bài','Giao / bỏ giao bộ bài, đặt hạn nộp, giao theo từng học sinh (cho các lớp mình phụ trách)'],['viewall','Xem lớp khác (chỉ đọc)','Xem danh sách học sinh, kết quả và tiến độ của mọi lớp'],['fball','Góp ý mọi lớp','Xem và trả lời góp ý của học sinh ở mọi lớp'],['classes','Quản lý lớp','Tạo, sửa, xoá lớp và gán giáo viên phụ trách'],['anystudent','Học sinh ngoài lớp mình','Thêm, sửa, đặt lại mật khẩu, khoá học sinh ở bất kỳ lớp nào']];
+var TP=[['full','⭐ Toàn quyền (ngang admin)','Làm được mọi việc như quản trị viên: quản lý giáo viên, phân quyền, mọi lớp, mọi học sinh, giao bài, góp ý. Chỉ không tạo/sửa được tài khoản admin.'],['assign','Giao bài','Giao / bỏ giao bộ bài, đặt hạn nộp, giao theo từng học sinh (cho các lớp mình phụ trách)'],['viewall','Xem lớp khác (chỉ đọc)','Xem danh sách học sinh, kết quả và tiến độ của mọi lớp'],['fball','Góp ý mọi lớp','Xem và trả lời góp ý của học sinh ở mọi lớp'],['classes','Quản lý lớp','Tạo, sửa, xoá lớp và gán giáo viên phụ trách'],['anystudent','Học sinh ngoài lớp mình','Thêm, sửa, đặt lại mật khẩu, khoá học sinh ở bất kỳ lớp nào'],['mode','🚀 Chế độ Thử thách','Đặt chế độ Thử thách / Tự do cho lớp và học sinh mình phụ trách, đổi luật qua bước, cho học sinh bị kẹt qua bước']];
 var SP=[['tview','Xem tiến độ cả lớp','Xem bạn nào đã nộp bộ nào (không xem đáp án)'],['tscores','Xem điểm từng bạn','Hiện thêm điểm trung bình (thang 10) của từng bạn'],['tremind','Nhắc nộp bài','Gửi lời nhắc tới các bạn chưa nộp bài'],['tfb','Góp ý thay nhóm','Gửi ý kiến chung của cả nhóm cho giáo viên']];
 var RANK={T:'Trưởng nhóm',P:'Phó nhóm'},RDEF={T:['tview','tscores','tremind','tfb'],P:['tview','tremind']};
 function label(list,k){var x=list.filter(function(a){return a[0]===k})[0];return x?x[1]:k}
@@ -532,7 +533,7 @@ $('bkReset').onclick=function(){
 document.addEventListener('click',function(e){var b=e.target.closest('button[data-all],button[data-none]');if(!b)return;var id=b.dataset.all||b.dataset.none;[].forEach.call($(id).querySelectorAll('input'),function(c){c.checked=!!b.dataset.all})});
 
 /* ---------- tab ---------- */
-var TABS=[['students','Học sinh'],['teachers','Giáo viên',1],['classes','Lớp'],['assign','Giao bài'],['results','Kết quả'],['progress','Tiến độ'],['fb','Góp ý'],['ai','Trợ lý AI','admin'],['backup','Sao lưu · Reset','admin'],['essay','Tự luận Lý'],['me','Tài khoản của tôi']].filter(function(t){return (!t[2]||(t[2]==='admin'?isAdmin:P('full')))&&(t[0]!=='assign'||P('assign'))});
+var TABS=[['students','Học sinh'],['teachers','Giáo viên',1],['classes','Lớp'],['assign','Giao bài'],['results','Kết quả'],['progress','Tiến độ'],['tt','Thử thách'],['fb','Góp ý'],['ai','Trợ lý AI','admin'],['backup','Sao lưu · Reset','admin'],['essay','Tự luận Lý'],['me','Tài khoản của tôi']].filter(function(t){return (!t[2]||(t[2]==='admin'?isAdmin:P('full')))&&(t[0]!=='assign'||P('assign'))});
 $('tabs').innerHTML=TABS.map(function(t){return '<button data-t="'+t[0]+'">'+t[1]+(t[0]==='fb'?'<b class="gn-n" id="fbn"></b>':'')+'</button>'}).join('');
 function show(t){
   TABS.forEach(function(x){$('p-'+x[0]).hidden=x[0]!==t});
@@ -542,6 +543,7 @@ function show(t){
   if(t==='assign')loadAssign();
   if(t==='backup')loadBackupInfo();
   if(t==='ai')loadAI();
+  if(t==='tt'&&window.TTAdmin)TTAdmin.show($('p-tt'),S);
   if(t==='essay'&&window.LyAdmin){if(!window.__lyb){window.__lyb=1;LyAdmin.bind($('p-essay'))}LyAdmin.show($('p-essay'),S)}
   if(t==='progress'&&!PG.length)loadProgress();
   clearInterval(FB.timer);if(t==='fb'){loadInbox();FB.timer=setInterval(loadInbox,45000)}
