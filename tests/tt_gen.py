@@ -29,7 +29,7 @@ for udir in sorted(os.listdir(base)):
 print(len(done), 'bộ lớp 3')
 r = tt.build(ROOT, done, ulabel, unum); print(r['n'], 'lộ trình', len(r['paths']), 'bộ')
 # trang đăng nhập / quản trị / điểm của tôi / bản đồ (chỉ để thử): thay giữ chỗ như build.build_site_pages
-for n in ('login.html', 'admin.html', 'me.html', 'student.html', 'thuthach.html'):
+for n in ('login.html', 'admin.html', 'me.html', 'student.html', 'thuthach.html', 'tt_home.html'):
     f = os.path.join(ROOT, 'site', n)
     if not os.path.exists(f): continue
     t = open(f, encoding='utf8').read().replace('%GN_URL%', 'https://script.google.com/macros/s/TEST/exec').replace('%PAGES%', '{}').replace('%CATALOG%', '[]')

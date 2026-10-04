@@ -8,7 +8,7 @@ const dir = path.join(__dirname, '..', 'thuthach');
 g.setFetch(url => { const f = path.join(dir, path.basename(url)); return fs.existsSync(f) ? { getResponseCode: () => 200, getContentText: () => fs.readFileSync(f, 'utf8') } : { getResponseCode: () => 404, getContentText: () => '' }; });
 g.run("ADMIN_PASS='Admin@123'"); g.run('setupAdmin()');
 const A = g.api({ action: 'auth_login', username: 'admin', password: 'Admin@123', device: 'a' }).token;
-const P = JSON.parse(fs.readFileSync(path.join(dir, 'lop3.json'), 'utf8')), SETS = Object.keys(JSON.parse(fs.readFileSync(path.join(dir, 'index.json'), 'utf8')).paths);
+const P = JSON.parse(fs.readFileSync(path.join(dir, 'lop3.json'), 'utf8')), IX = JSON.parse(fs.readFileSync(path.join(dir, 'index.json'), 'utf8')).paths, SETS = Object.keys(IX).filter(k => IX[k] === 'lop3');
 const steps = P.chapters.flatMap(c => c.steps), S = i => steps[i].id;
 g.api({ action: 'adm_class_save', token: A, cls: { id: '3A', name: '3A', grade: 3 } });
 g.api({ action: 'adm_class_save', token: A, cls: { id: '3B', name: '3B', grade: 3 } });
@@ -86,4 +86,24 @@ g.api({ action: 'tt_cfg_set', token: T1.token, path: 'lop3', cfg: { theory_min: 
 // 10) bảng lớp + chuỗi ngày
 r = g.api({ action: 'tt_board', token: H1.token }); ok(r.ok && r.rows.length === 2 && r.rows.some(x => x.me) && r.rows[0].pct >= r.rows[1].pct, 'bảng lớp: ' + JSON.stringify(r.rows.map(x => x.name + ':' + x.pct)));
 st = g.api({ action: 'tt_state', token: H1.token }); ok(st.streak >= 1, 'chuỗi ngày = ' + st.streak);
+
+// 11) trang chủ học sinh (lối tắt + top 5 + vinh danh) và tổng quan giáo viên
+r = g.api({ action: 'tt_home', token: H1.token });
+const hp = r.paths && r.paths[0];
+ok(r.ok && r.mode === 'thuthach' && r.paths.length === 1 && hp.id === 'lop3', 'tt_home: 1 lộ trình → 1 lối tắt');
+ok(hp.current && hp.current.url && /^WebBaiTap\//.test(hp.current.url) && hp.current.pos >= 1, 'lối tắt trỏ thẳng bước đang làm: ' + (hp.current && hp.current.url));
+ok(hp.me && hp.me.me && hp.top.length <= 5 && hp.top.length === 2 && hp.classTotal === 2, 'top 5 lớp + dòng của mình ở cuối (rank ' + (hp.me && hp.me.rank) + ')');
+ok(hp.top.some(x => x.me) && hp.me.rank >= 1, 'em nằm trong top → xuất hiện 2 chỗ (top + hàng cuối)');
+ok(hp.fame && hp.fame.stars.length >= 1 && hp.fame.count.length >= 1 && hp.fame.stars.length <= 3 && hp.fame.fast.length === 0, 'vinh danh: sao/chăm chỉ có người; nhanh nhất cần ≥ ' + hp.fastMin + ' bước');
+ok(g.api({ action: 'tt_home', token: H3.token }).paths.length === 1, 'HS3 (Thử thách cá nhân, lớp khác) cũng có lối tắt');
+ok(g.api({ action: 'tt_home', token: login(hs2, 'hs1234', 'd2').token }).paths.length === 0, 'HS2 (Tự do) không có lối tắt');
+ok(!g.api({ action: 'tt_home', token: T1.token }).ok, 'giáo viên không gọi được tt_home');
+r = g.api({ action: 'tt_overview', token: T1.token });
+ok(r.ok && r.kpi.students === 2 && r.kpi.tt === 1 && r.classes.length === 1 && r.classes[0].id === '3A' && r.classes[0].mode === 'thuthach', 'tt_overview GV1: chỉ lớp 3A, 2 HS, 1 đang Thử thách');
+ok(r.paths.length === 1 && r.paths[0].fame && r.attention.length >= 0, 'tt_overview có vinh danh mọi lớp');
+r = g.api({ action: 'tt_overview', token: A }); ok(r.ok && r.classes.length === 2 && r.kpi.students === 3, 'tt_overview admin: mọi lớp');
+// nộp nhiều lần chưa qua -> "bị kẹt"
+sub(H1, S(4), 30); sub(H1, S(4), 35); sub(H1, S(4), 40);
+r = g.api({ action: 'tt_overview', token: A }); g.advance(130000);
+r = g.api({ action: 'tt_overview', token: A }); ok(r.stuck.some(x => x.n >= 3), 'phát hiện học sinh bị kẹt: ' + JSON.stringify(r.stuck[0] || null));
 console.log(fails ? '\n' + fails + '/' + n + ' LỖI' : '\nTẤT CẢ ĐẠT (' + n + ')'); process.exit(fails ? 1 : 0);
