@@ -179,7 +179,8 @@ def build(root, apps_url, auth_head, bv):
     out = os.path.join(root, OUT_REL)
     if os.path.isdir(out):
         for f in glob.glob(os.path.join(out, '*.html')) + glob.glob(os.path.join(out, '*.json')):
-            os.remove(f)
+            try: os.remove(f)
+            except OSError: pass   # không xoá được thì trang mới sẽ ghi đè
     os.makedirs(os.path.join(out, 'img'), exist_ok=True)
     imgs = {}
     for f in os.listdir(os.path.join(src, 'img')):

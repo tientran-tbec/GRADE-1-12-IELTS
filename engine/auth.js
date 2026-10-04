@@ -17,7 +17,7 @@
     ROLE: ROLE,
     get: function () { var s = load(); return s && s.token && tokenExp(s.token) > Date.now() ? s : null; },
     set: function (token, user) { ls(KEY, JSON.stringify({ token: token, user: user })); try { window.dispatchEvent(new CustomEvent('gn-user')); } catch (e) {} },
-    clear: function () { ls(KEY, null); ls('gn_ping', null); try { Object.keys(localStorage).forEach(function (k) { if (k.indexOf('gn_adm_') === 0) localStorage.removeItem(k); }); } catch (e) {} },
+    clear: function () { ls(KEY, null); ls('gn_ping', null); try { Object.keys(localStorage).forEach(function (k) { if (k.indexOf('gn_adm_') === 0 || k.indexOf('gn_ai_') === 0) localStorage.removeItem(k); }); } catch (e) {} },
     user: function () { var s = A.get(); return s ? s.user : null; },
     loginUrl: function (next) { return ROOT + 'login.html' + (next ? '?next=' + encodeURIComponent(next) : ''); },
     logout: function () {

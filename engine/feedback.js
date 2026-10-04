@@ -83,9 +83,20 @@
   });
 
   /* ---------- tab Trợ lý AI ---------- */
-  var AK = 'gn_ai_' + set + '|' + page, hist = [], ai = { loaded: false, enabled: true, left: null, busy: false };
-  try { hist = JSON.parse(sessionStorage.getItem(AK) || '[]'); } catch (e) { hist = []; }
-  function saveH() { try { sessionStorage.setItem(AK, JSON.stringify(hist.slice(-20))); } catch (e) {} }
+  /* Lịch sử chat AI: giữ trong localStorage theo tài khoản + trang, đến khi đăng xuất (auth.js xoá gn_ai_*) hoặc quá 3 ngày. */
+  var _u = ''; try { _u = (A.user() || {}).username || ''; } catch (e) {}
+  var AK = 'gn_ai_' + _u + '|' + set + '|' + page, hist = [], ai = { loaded: false, enabled: true, left: null, busy: false };
+  try {
+    var _o = JSON.parse(localStorage.getItem(AK) || 'null');
+    if (_o && _u && Array.isArray(_o.h) && Date.now() - (_o.t || 0) < 3 * 864e5) hist = _o.h;
+  } catch (e) { hist = []; }
+  function saveH() {
+    if (!_u) return;
+    var d = JSON.stringify({ t: Date.now(), h: hist.slice(-30) });
+    try { localStorage.setItem(AK, d); } catch (e) {
+      try { Object.keys(localStorage).filter(function (k) { return k.indexOf('gn_ai_') === 0 && k !== AK; }).forEach(function (k) { localStorage.removeItem(k); }); localStorage.setItem(AK, d); } catch (e2) {}
+    }
+  }
   function fmt(t) {   /* chat: bỏ dòng ---, gộp dòng trống, in đậm **, gạch đầu dòng → • */
     t = String(t || '').replace(/\r/g, '').replace(/^\s*[-*_]{3,}\s*$/gm, '').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
     t = t.replace(/\\\(([^\n]+?)\\\)/g, '$$$1$$').replace(/\\\[([\s\S]+?)\\\]/g, '$$$$$1$$$$');
