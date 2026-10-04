@@ -1,6 +1,6 @@
 // Máy chủ giả lập Apps Script cho test Thử thách: đọc thuthach/*.json từ đĩa
 const http = require('http'), path = require('path'), fs = require('fs');
-const { loadGas } = require('./gas_mock');
+const { loadGas } = require(process.env.RT ? './rt_mock' : './gas_mock');
 const g = loadGas(path.join(__dirname, '..', 'code.gs'));
 g.run("ADMIN_PASS='Admin@123'"); g.run('setupAdmin()');
 const dir = path.join(__dirname, '..', 'thuthach');

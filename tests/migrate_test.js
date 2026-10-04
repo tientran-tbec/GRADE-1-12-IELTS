@@ -1,0 +1,31 @@
+// Giả lập: Apps Script (gas_mock) có dữ liệu thật → migrate.js → Firestore giả → bộ chạy mới phục vụ đúng (đăng nhập bằng mật khẩu cũ!).
+const http = require('http'), path = require('path'), { execFile } = require('child_process');
+const { loadGas } = require('./gas_mock'), { Fake } = require('./fake_firestore');
+const { FsStore } = require('../firebase/functions/fsstore'), { Runtime } = require('../firebase/functions/gasrt');
+let n = 0; const ok = (c, m) => { n++; if (!c) { console.log('FAIL:', m); process.exitCode = 1; } };
+const serve = (h, port) => new Promise(r => { const s = http.createServer((q, s2) => { let b = ''; q.on('data', c => b += c); q.on('end', async () => { s2.end(await h(b)); }); }).listen(port, () => r(s)); });
+(async () => {
+  const g = loadGas(path.join(__dirname, '..', 'code.gs'));
+  g.run("ADMIN_PASS='Admin@123'"); g.run('setupAdmin()'); g.props['EXPORT_KEY'] = 'EK'; g.props['GEMINI_API_KEY'] = 'secret-gk';
+  const A = g.api({ action: 'auth_login', username: 'admin', password: 'Admin@123', device: 'A' }).token;
+  g.api({ action: 'adm_class_save', token: A, cls: { id: '11A1', name: 'Lớp 11A1', grade: 11 } });
+  const u = g.api({ action: 'adm_user_save', token: A, user: { name: 'Học Sinh Một', role: 'student', cls: '11A1' } });
+  g.api({ action: 'adm_assign_save', token: A, cls: '11A1', sets: ['setA'] });
+  const S = g.api({ action: 'auth_login', username: u.user.username, password: u.password, device: 'S' }).token;
+  for (let i = 0; i < 30; i++) g.post({ action: 'grade_save_result', token: S, set_id: 'setA', page_id: 'p' + i, mode: 'test', score: i % 10, total: 10, student_name: 'Học Sinh Một', student_class: '11A1', ts: Date.now() });
+  const fake = new Fake(), st = new FsStore(fake);
+  const s1 = await serve(async b => g.post(JSON.parse(b)), 18801);
+  const s2 = await serve(async b => { const d = JSON.parse(b); if (d.key !== 'IK') return 'forbidden'; if (d.op === 'sheet') await st.replaceSheet(d.sheet.replace(/[^A-Za-z0-9_-]/g, '_'), d.rows.map(r => r.map(x => (x && typeof x === 'object' && '$d' in x) ? new Date(x.$d) : x))); else await st.setProps(d.props); return 'ok'; }, 18802);
+  const p = await new Promise(res => execFile('node', [path.join(__dirname, '..', 'firebase/tools/migrate.js'), 'http://localhost:18801', 'EK', 'http://localhost:18802', 'IK'], { encoding: 'utf8' }, (e, so, se) => res({ stdout: so, stderr: se })));
+  console.log(p.stdout.trim().split('\n').slice(-4).join('\n'), p.stderr);
+  ok(/Số dòng khớp/.test(p.stdout), 'số dòng khớp');
+  ok(!/secret/.test(JSON.stringify(Object.keys(fake.data).filter(k => k.includes('EXPORT')))), 'ok');
+  const rt = new Runtime(st, path.join(__dirname, '..', 'code.gs'));
+  const call = async o => { const t = await rt.handle(JSON.stringify(o)); try { return JSON.parse(t); } catch (e) { return { raw: t }; } };
+  let r = await call({ action: 'auth_login', username: 'admin', password: 'Admin@123', device: 'Z' }); ok(r.ok, 'admin cũ đăng nhập được trên Firebase');
+  r = await call({ action: 'auth_me', token: S }); ok(r.ok, 'token cũ vẫn hợp lệ (cùng GN_SECRET): ' + JSON.stringify(r).slice(0, 100));
+  r = await call({ action: 'my_results', token: S }); ok(r.ok && (r.rows || []).length >= 30, 'kết quả cũ còn: ' + JSON.stringify(r).slice(0, 120));
+  r = await call({ action: 'auth_login', username: u.user.username, password: u.password, device: 'S2' }); ok(r.ok || /thiết bị khác/.test(r.error || ''), 'hs cũ đăng nhập bằng MK cũ: ' + JSON.stringify(r).slice(0, 100));
+  ok((await st.getProps()).GEMINI_API_KEY === 'secret-gk' && !(await st.getProps()).EXPORT_KEY, 'khoá AI đã chuyển, EXPORT_KEY không chuyển');
+  s1.close(); s2.close(); console.log('Migrate: ' + n + ' kiểm tra');
+})().catch(e => { console.error(e); process.exit(1); });

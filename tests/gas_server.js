@@ -1,6 +1,6 @@
 // Máy chủ giả lập Apps Script cho test e2e: node tests/gas_server.js <port>
 const http = require('http'), path = require('path');
-const { loadGas } = require('./gas_mock');
+const { loadGas } = require(process.env.RT ? './rt_mock' : './gas_mock');
 const g = loadGas(path.join(__dirname, '..', 'code.gs'));
 g.run("ADMIN_PASS='Admin@123'"); g.run('setupAdmin()');
 if (process.env.AI_FAKE) { g.props['GEMINI_API_KEY'] = 'gk-test'; g.setFetch((url, o) => { const p = JSON.parse(o.payload); const parts = p.contents[p.contents.length - 1].parts; const last = parts[parts.length - 1].text; return { getResponseCode: () => 200, getContentText: () => JSON.stringify({ candidates: [{ content: { parts: [{ text: 'AI trả lời: ' + last.slice(-40) + ' |ctx=' + (p.systemInstruction.parts[0].text.indexOf('NỘI DUNG TRANG') >= 0 ? p.systemInstruction.parts[0].text.length : 0) }] } }], usageMetadata: { promptTokenCount: 10, candidatesTokenCount: 5 } }) }; }); }

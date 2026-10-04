@@ -1,6 +1,6 @@
 // Máy chủ giả lập Apps Script cho test Vật lí: đọc essay_key.json từ đĩa, AI giả trả JSON chấm / văn bản chat
 const http = require('http'), path = require('path'), fs = require('fs');
-const { loadGas } = require('./gas_mock');
+const { loadGas } = require(process.env.RT ? './rt_mock' : './gas_mock');
 const g = loadGas(path.join(__dirname, '..', 'code.gs'));
 g.run("ADMIN_PASS='Admin@123'"); g.run('setupAdmin()');
 g.props['GEMINI_API_KEY'] = 'gk-test';

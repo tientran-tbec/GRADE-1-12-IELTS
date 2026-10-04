@@ -1,0 +1,7 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Toàn bộ dữ liệu chỉ truy cập qua Cloud Functions (Admin SDK). Trình duyệt không đọc/ghi trực tiếp.
+    match /{document=**} { allow read, write: if false; }
+  }
+}

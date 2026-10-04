@@ -1,0 +1,1 @@
+{"indexes": [], "fieldOverrides": [{"collectionGroup": "gn_cache", "fieldPath": "expAt", "ttl": true, "indexes": []}]}

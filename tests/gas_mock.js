@@ -31,6 +31,7 @@ function loadGas(file, opts) {
     getSpreadsheetTimeZone: () => 'Asia/Ho_Chi_Minh',
     getSheetByName: n => sheets[n] || null,
     insertSheet: n => (sheets[n] = new Sheet(n)),
+    getSheets: () => Object.values(sheets).map(s => Object.assign(s, { getName: () => s.name })),
   };
   const bytes = x => typeof x === 'string' ? Buffer.from(x, 'utf8') : Buffer.from(x.map(b => (b + 256) % 256));
   const toArr = b => Array.from(b).map(v => v > 127 ? v - 256 : v);
@@ -38,7 +39,7 @@ function loadGas(file, opts) {
     console, Date: FDate, Math, JSON, String, Number, Array, Object, RegExp, Error, isNaN, parseInt,
     Logger: { log: m => { if (opts.verbose) console.log('[Logger]', m); } },
     SpreadsheetApp: { openById: () => ss },
-    PropertiesService: { getScriptProperties: () => ({ getProperty: k => props[k] || null, setProperty: (k, v) => { props[k] = v; } }) },
+    PropertiesService: { getScriptProperties: () => ({ getProperties: () => Object.assign({}, props), getProperty: k => props[k] || null, setProperty: (k, v) => { props[k] = v; } }) },
     CacheService: { getScriptCache: () => ({ get: k => (cache[k] && cache[k].exp > nowMs()) ? cache[k].v : null, put: (k, v, ttl) => { cache[k] = { v: String(v), exp: nowMs() + (ttl || 600) * 1000 }; }, remove: k => { delete cache[k]; } }) },
     UrlFetchApp: { fetch: (url, o) => fetchImpl ? fetchImpl(url, o) : { getResponseCode: () => 500, getContentText: () => '{}' } },
     LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },

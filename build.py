@@ -12,7 +12,7 @@ IELTS = {'cards': [], 'catalog': [], 'n': 0}   # nạp bởi ielts.build() trong
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(ROOT, 'WebBaiTap')
-APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyZ4UJgI763vPb4TZhKbKgxl6p-lGCQCJnZDqgCL9mHCVQpUzb4sbJGg89GLWSI-sQj/exec'   # update_links.py sẽ thay giá trị này
+APPS_SCRIPT_URL = 'https://asia-southeast1-lms-learning-36841.cloudfunctions.net/api'   # update_links.py sẽ thay giá trị này
 PAGES_URL = 'https://tientran-tbec.github.io/GRADE-1-12-IELTS/'
 
 # (id bộ, file dữ liệu, file đáp án, thư mục lớp, thư mục unit, slug thư mục, ảnh)
