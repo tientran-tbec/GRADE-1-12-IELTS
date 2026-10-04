@@ -5,6 +5,8 @@ Chạy:  python3 build.py            (sinh toàn bộ WebBaiTap/ + index.html)
 """
 import os, sys, json, re, html, importlib.util
 import ielts
+import ly
+LY = {'cards': [], 'catalog': [], 'n': 0, 'labels': {}, 'order': []}   # nạp bởi ly.build() trong main
 IELTS = {'cards': [], 'catalog': [], 'n': 0}   # nạp bởi ielts.build() trong main
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -581,6 +583,7 @@ IELTS_SKILLS = [('Reading', [('full', 'Full Test'), ('dang', 'Theo dạng bài')
 
 
 def subj(sid):
+    if sid.startswith('ly11-'): return 'Lý'
     return SUBJECT_BY_SET.get(sid, 'Tiếng Anh')
 
 
@@ -593,13 +596,19 @@ def build_tree(done):
     o = ['<nav class="tree" id="tree">']
     for g in range(1, 13):
         gs = str(g)
-        n = sum(1 for e, S, _ in done if e[3][3:] == gs)
+        n = sum(1 for e, S, _ in done if e[3][3:] == gs) + (LY['n'] if gs == '11' else 0)
         if not n:
             o.append('<div class="tg" data-g="%s" data-n="0"><button class="tb l1" disabled>Lớp %d <small>sắp có</small></button><div class="tk" hidden></div></div>' % (gs, g))
             continue
         o.append('<div class="tg" data-g="%s"><button class="tb l1" data-lv="g" data-g="%s"><i>▸</i>Lớp %d <small>%d bộ</small></button><div class="tk" hidden>' % (gs, gs, g, n))
         for sb in GRADE_SUBJECTS.get(gs, ['Tiếng Anh']):
             us = sorted(units.get((gs, sb), []), key=ukey)
+            if gs == '11' and sb == 'Lý' and LY['cards']:
+                o.append('<div class="ts" data-g="11" data-s="Lý"><button class="tb l2" data-lv="s" data-g="11" data-s="Lý"><i>▸</i>Lý<small></small></button><div class="tk" hidden>')
+                for u in LY['order']:
+                    o.append('<button class="tb l3" data-lv="u" data-g="11" data-s="Lý" data-u="%s">%s</button>' % (u, html.escape(LY['labels'].get(u, u))))
+                o.append('</div></div>')
+                continue
             if not us:
                 o.append('<div class="ts" data-g="%s" data-s="%s" data-n="0"><button class="tb l2" disabled>%s <small>sắp có</small></button><div class="tk" hidden></div></div>' % (gs, sb, html.escape(sb)))
                 continue
@@ -692,6 +701,7 @@ def build_index(done):
         cards.append((pos_t, ''.join(o[mark_o:]))); del o[mark_o:]
     for _, h in sorted(cards, key=lambda c: c[0]):
         o.append(h)
+    o.extend(LY['cards'])
     o.extend(IELTS['cards'])
     o.append('<div class="empty" id="nobai" hidden>Chưa có bài nào được giao cho lớp của bạn. Hãy nhờ giáo viên giao bài.</div><div class="empty" id="denied" hidden>Bài đó chưa được giao cho lớp của bạn.</div><div class="empty" id="empty" hidden>Không có bộ bài phù hợp. Hãy bấm “Xoá lựa chọn”.</div>'
              '<div class="foot">Học sinh làm bài trên điện thoại hoặc máy tính · Kết quả ghi tự động về giáo viên</div></main></div>'
@@ -705,7 +715,7 @@ def catalog(done):
     for e, S, pages in done:
         slug = e[5]
         out.append({'id': S['id'], 'title': S['title'], 'grade': int(e[3][3:]), 'unit': ulabel(unum(e[4])), 'kind': 'test' if slug.startswith('test') else slug})
-    return out + IELTS['catalog']
+    return out + LY['catalog'] + IELTS['catalog']
 
 
 def build_site_pages(done=None):
@@ -728,6 +738,9 @@ if __name__ == '__main__':
         done.append((e, S, pages))
         print(e[0], '->', len(pages), 'trang,', sum(p[3] for p in pages), 'câu')
     if not want:
+        LY.update(ly.build(ROOT, APPS_SCRIPT_URL, AUTH_HEAD, BV))
+        UNIT_LABELS.update(LY['labels'])
+        print('Vật lí 11 ->', LY['n'], 'bộ,', len(LY['cards']), 'thẻ')
         IELTS.update(ielts.build(ROOT, APPS_SCRIPT_URL, AUTH_HEAD, BV))
         print('IELTS Reading ->', IELTS['n'], 'bộ,', len(IELTS['cards']), 'thẻ')
         build_index(done)

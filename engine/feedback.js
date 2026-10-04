@@ -31,12 +31,21 @@
     '.gnfb-f textarea{width:100%;box-sizing:border-box;height:58px;resize:none;border:1px solid #cbd5e1;border-radius:8px;padding:6px;font:inherit;background:#fff;color:#111}' +
     '.gnfb-row{display:flex;gap:6px;justify-content:space-between;align-items:center}.gnfb-row small{color:#64748b}' +
     '.gnfb-f button,.gnfb-sel{background:#1d4ed8;color:#fff;border:0;border-radius:8px;padding:6px 14px;cursor:pointer;font:inherit}.gnfb-sel{background:#e2e8f0;color:#334155;padding:3px 8px;font-size:12px}.gnfb-f button:disabled{opacity:.5}' +
-    '.gnfb-err{color:#be123c;font-size:12px}@media print{.gnfb-btn,.gnfb-box{display:none!important}}';
+    '.gnfb-err{color:#be123c;font-size:12px}@media print{.gnfb-btn,.gnfb-box{display:none!important}}' +
+    '.gnfb-box{min-width:300px;min-height:260px;max-width:calc(100vw - 8px);max-height:calc(100vh - 8px)}.gnfb-h{cursor:move;user-select:none;-webkit-user-select:none;touch-action:none}.gnfb-h button{cursor:pointer}' +
+    '.gnfb-hb{display:flex;gap:4px;align-items:center}.gnfb-mx{background:none;border:0;font-size:16px;cursor:pointer;color:#64748b;padding:0 4px}.gnfb-mx:hover,.gnfb-x:hover{color:#1d4ed8}' +
+    '.gnfb-g{position:absolute;width:18px;height:18px;z-index:3;touch-action:none}.gnfb-g::after{content:"";position:absolute;width:9px;height:9px;border:0 solid #94a3b8}' +
+    '.gnfb-g[data-d="br"]{right:0;bottom:0;cursor:nwse-resize}.gnfb-g[data-d="br"]::after{right:3px;bottom:3px;border-right-width:3px;border-bottom-width:3px}' +
+    '.gnfb-g[data-d="bl"]{left:0;bottom:0;cursor:nesw-resize}.gnfb-g[data-d="bl"]::after{left:3px;bottom:3px;border-left-width:3px;border-bottom-width:3px}' +
+    '.gnfb-g[data-d="tl"]{left:0;top:0;cursor:nwse-resize}.gnfb-g[data-d="tl"]::after{left:3px;top:3px;border-left-width:3px;border-top-width:3px}' +
+    '.gnfb-g[data-d="tr"]{right:0;top:0;cursor:nesw-resize}.gnfb-g[data-d="tr"]::after{right:3px;top:3px;border-right-width:3px;border-top-width:3px}' +
+    '.gnfb-box .katex{font-size:1.02em}.gnfb-m .katex-display{overflow-x:auto;margin:.4em 0}.gnfb-box.big .gnfb-m{font-size:15px}';
   document.head.appendChild(css);
 
   var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'gnfb-btn'; btn.innerHTML = '💬 Hỏi · Góp ý<span class="dot"></span>';
   var box = document.createElement('div'); box.className = 'gnfb-box';
-  box.innerHTML = '<div class="gnfb-h"><span>Hỏi · Góp ý</span><button type="button" class="gnfb-x" aria-label="Đóng">×</button></div>' +
+  box.innerHTML = '<div class="gnfb-h"><span>Hỏi · Góp ý</span><span class="gnfb-hb"><button type="button" class="gnfb-mx" aria-label="Phóng to / thu nhỏ" title="Phóng to / thu nhỏ khung (hoặc kéo góc khung)">⛶</button><button type="button" class="gnfb-x" aria-label="Đóng">×</button></span></div>' +
+    '<i class="gnfb-g" data-d="tl"></i><i class="gnfb-g" data-d="tr"></i><i class="gnfb-g" data-d="bl"></i><i class="gnfb-g" data-d="br"></i>' +
     '<div class="gnfb-tabs"><button type="button" data-t="t" class="on">👩‍🏫 Giáo viên</button><button type="button" data-t="a">🤖 Trợ lý AI</button></div>' +
     '<div class="gnfb-sub"></div><div class="gnfb-l"></div><div class="gnfb-f"><div class="gnfb-err"></div><textarea maxlength="1000"></textarea><div class="gnfb-row"><button type="button" class="gnfb-sel" hidden>Hỏi về đoạn đang bôi đen</button><small></small><button type="button" class="gnfb-go">Gửi</button></div></div>';
   document.body.appendChild(box); document.body.appendChild(btn);
@@ -79,13 +88,18 @@
   function saveH() { try { sessionStorage.setItem(AK, JSON.stringify(hist.slice(-20))); } catch (e) {} }
   function fmt(t) {   /* chat: bỏ dòng ---, gộp dòng trống, in đậm **, gạch đầu dòng → • */
     t = String(t || '').replace(/\r/g, '').replace(/^\s*[-*_]{3,}\s*$/gm, '').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
-    return E(t).replace(/\$\\(?:right)?arrow\$/g, '→').replace(/\$\\leftarrow\$/g, '←').replace(/^#{1,4} ?/gm, '').replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>').replace(/`([^`\n]+)`/g, '<code>$1</code>').replace(/^[ \t]*[-*] /gm, '• ').replace(/\n\n/g, '<div style="height:6px"></div>');
+    t = t.replace(/\\\(([^\n]+?)\\\)/g, '$$$1$$').replace(/\\\[([\s\S]+?)\\\]/g, '$$$$$1$$$$');
+    var maths = [];
+    if (window.katex) t = t.replace(/\$\$([\s\S]+?)\$\$|\$([^$\n]+?)\$/g, function (m, a, b) { maths.push({ tex: a || b, disp: !!a }); return '\u0001' + (maths.length - 1) + '\u0002'; });
+    var html = E(t).replace(/\$\\(?:right)?arrow\$/g, '→').replace(/\$\\leftarrow\$/g, '←').replace(/^#{1,4} ?/gm, '').replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>').replace(/`([^`\n]+)`/g, '<code>$1</code>').replace(/^[ \t]*[-*] /gm, '• ').replace(/\n\n/g, '<div style="height:6px"></div>');
+    return html.replace(/\u0001(\d+)\u0002/g, function (m, i) { var x = maths[+i]; try { return window.katex.renderToString(x.tex, { throwOnError: false, displayMode: x.disp }); } catch (e) { return E(x.tex); } });
   }
   /* Trang làm bài (có nút Nộp bài): AI chỉ mở SAU KHI nộp bài. Trang khác (trang chủ, điểm của tôi…): dùng được bình thường. */
   function isQuiz() { return !!(document.getElementById('submit') || document.getElementById('submitBtn') || RD.kind || document.body.classList.contains('testmode')); }
-  function isLive() { return !submitted && isQuiz(); }
+  function isLive() { if (window.GN_LY) return window.GN_LY.mode === 'test' && !submitted; return !submitted && isQuiz(); }   /* Vật lí: luyện tập dùng AI tự do; kiểm tra chỉ sau khi nộp */
   /* Đọc nội dung trang đang hiển thị (bài đọc + câu hỏi + đáp án/giải thích nếu đã hiện) để AI trả lời "câu 32" mà không cần bôi đen */
   function pageText(q) {
+    if (window.GN_LY_API) { try { return window.GN_LY_API.pageText(); } catch (e) {} }
     var od = box.style.display, bd = btn.style.display, t = '';
     box.style.display = 'none'; btn.style.display = 'none';
     try { t = String(document.body.innerText || ''); } catch (e) {}
@@ -101,10 +115,10 @@
   if (rm && window.MutationObserver) new MutationObserver(function () { if (!rm.classList.contains('hidden') && rm.style.display !== 'none' && (RD.kind === 'full' || RD.kind)) { submitted = true; if (tab === 'a') renderA(); } }).observe(rm, { attributes: true, attributeFilter: ['class', 'style'] });
   function renderA() {
     var live = isLive();
-    sub.innerHTML = live ? '🔒 Trợ lý AI chỉ mở sau khi bạn nộp bài. Hãy tự làm bài trước nhé!' : (ai.enabled ? 'AI có thể sai – hãy kiểm tra lại. Giáo viên có thể xem lại câu hỏi.' + (ai.left != null ? ' · Còn <b>' + ai.left + '</b> lượt hôm nay' : '') : 'Trợ lý AI chưa được bật.');
+    sub.innerHTML = live ? '🔒 Trợ lý AI chỉ mở sau khi bạn nộp bài. Hãy tự làm bài trước nhé!' : (window.GN_LY && ai.enabled ? 'AI có thể sai – hãy kiểm tra lại. Điểm tự luận do giáo viên duyệt.' + (ai.left != null ? ' · Còn <b>' + ai.left + '</b> lượt hôm nay' : '') : null) ||  (ai.enabled ? 'AI có thể sai – hãy kiểm tra lại. Giáo viên có thể xem lại câu hỏi.' + (ai.left != null ? ' · Còn <b>' + ai.left + '</b> lượt hôm nay' : '') : 'Trợ lý AI chưa được bật.');
     var h = hist.map(function (m) { return '<div class="gnfb-m ' + (m.role === 'user' ? 'me' : (m.bad ? 'bad' : 'ai')) + '">' + fmt(m.text) + (m.role === 'ai' && !m.bad ? '<small>🤖 Trợ lý AI</small>' : '') + '</div>'; }).join('');
     if (ai.busy) h += '<div class="gnfb-m ai">⏳ Trợ lý đang trả lời…</div>';
-    list.innerHTML = h || '<div class="gnfb-e">Mình đọc được nội dung trang bài này.<br>Cứ hỏi, ví dụ: “Giải thích chi tiết câu 32 giúp mình”, “Vì sao câu 5 chọn B?”, “Giải thích thì hiện tại hoàn thành”.</div>';
+    list.innerHTML = h || (window.GN_LY ? '<div class="gnfb-e">Mình đọc được đề và cả bài làm của bạn trên trang này.<br>Hãy hỏi, ví dụ: “Giải bài tự luận câu 2 từng bước”, “Xem bài làm của mình ở câu 5 sai chỗ nào?”, “Chấm giúp mình bài tự luận (cho điểm gợi ý)”.<br><small>Mẹo: kéo góc khung để phóng to, hoặc bấm ⛶.</small></div>' : '<div class="gnfb-e">Mình đọc được nội dung trang bài này.<br>Cứ hỏi, ví dụ: “Giải thích chi tiết câu 32 giúp mình”, “Vì sao câu 5 chọn B?”, “Giải thích thì hiện tại hoàn thành”.</div>');
     list.scrollTop = list.scrollHeight;
     var off = live || !ai.enabled; ta.disabled = off; send.disabled = off || ai.busy;
     ta.placeholder = off ? (live ? 'AI mở sau khi bạn nộp bài.' : 'Trợ lý AI chưa bật.') : 'Nhập câu hỏi (Ctrl+Enter để gửi)…';
@@ -151,6 +165,56 @@
     open = v; box.classList.toggle('on', v); clearInterval(timer);
     if (v) { setTab(tab); timer = setInterval(function () { if (tab === 't' && !document.hidden) loadT(); }, 20000); setTimeout(function () { if (!ta.disabled) ta.focus(); }, 50); }
   }
+  /* ---------- kéo to / thu nhỏ / di chuyển khung (nhớ kích thước) ---------- */
+  var SZK = 'gn_fb_geo', MINW = 300, MINH = 260;
+  function vw() { return window.innerWidth || document.documentElement.clientWidth; }
+  function vh() { return window.innerHeight || document.documentElement.clientHeight; }
+  function geo() { var r = box.getBoundingClientRect(); return { l: r.left, t: r.top, w: r.width, h: r.height }; }
+  function setGeo(g) {
+    var w = Math.max(Math.min(MINW, vw() - 8), Math.min(g.w, vw() - 8)), h = Math.max(Math.min(MINH, vh() - 8), Math.min(g.h, vh() - 8));
+    var l = Math.min(Math.max(4, g.l), vw() - w - 4), t = Math.min(Math.max(4, g.t), vh() - h - 4);
+    box.style.right = 'auto'; box.style.left = l + 'px'; box.style.top = t + 'px'; box.style.width = w + 'px'; box.style.height = h + 'px';
+    box.classList.toggle('big', w > 520);
+  }
+  function saveGeo() { try { localStorage.setItem(SZK, JSON.stringify(geo())); } catch (e) {} }
+  function restoreGeo() {
+    var g = null; try { g = JSON.parse(localStorage.getItem(SZK) || 'null'); } catch (e) {}
+    if (g && g.w > 0 && g.h > 0) { setGeo(g); } else if (vw() < 480) { setGeo({ l: 4, t: Math.round(vh() * .08), w: vw() - 8, h: Math.round(vh() * .8) }); }
+  }
+  function drag(ev, dir) {   /* dir: 'move' hoặc tl|tr|bl|br */
+    if (ev.button !== undefined && ev.button !== 0) return;
+    ev.preventDefault(); var g0 = geo(), sx = ev.clientX, sy = ev.clientY, el = ev.currentTarget; try { el.setPointerCapture(ev.pointerId); } catch (e) {}
+    function mv(e) {
+      var dx = e.clientX - sx, dy = e.clientY - sy, g = { l: g0.l, t: g0.t, w: g0.w, h: g0.h };
+      if (dir === 'move') { g.l += dx; g.t += dy; }
+      else {
+        if (dir.charAt(1) === 'r') g.w = g0.w + dx; else { g.w = g0.w - dx; g.l = g0.l + dx; }
+        if (dir.charAt(0) === 'b') g.h = g0.h + dy; else { g.h = g0.h - dy; g.t = g0.t + dy; }
+        if (g.w < MINW) { if (dir.charAt(1) === 'l') g.l -= MINW - g.w; g.w = MINW; }
+        if (g.h < MINH) { if (dir.charAt(0) === 't') g.t -= MINH - g.h; g.h = MINH; }
+      }
+      setGeo(g);
+    }
+    function up() { el.removeEventListener('pointermove', mv); el.removeEventListener('pointerup', up); el.removeEventListener('pointercancel', up); saveGeo(); }
+    el.addEventListener('pointermove', mv); el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+  }
+  [].forEach.call(box.querySelectorAll('.gnfb-g'), function (g) { g.addEventListener('pointerdown', function (e) { drag(e, g.getAttribute('data-d')); }); });
+  box.querySelector('.gnfb-h').addEventListener('pointerdown', function (e) { if (e.target.closest('button')) return; drag(e, 'move'); });
+  var prevGeo = null;
+  box.querySelector('.gnfb-mx').onclick = function () {
+    var g = geo(), full = { l: 8, t: 8, w: Math.min(vw() - 16, 980), h: vh() - 16 };
+    if (g.w >= full.w - 6 && g.h >= full.h - 6 && prevGeo) { setGeo(prevGeo); prevGeo = null; }
+    else { prevGeo = g; setGeo({ l: vw() - full.w - 8, t: 8, w: full.w, h: full.h }); }
+    saveGeo();
+  };
+  window.addEventListener('resize', function () { if (box.style.left && box.classList.contains('on')) setGeo(geo()); });
+  restoreGeo();
+  window.GNFB = {   /* cho trang bài mở khung chat với câu hỏi soạn sẵn */
+    open: function (t, text, auto) {
+      perm(); if (t === 'a' && !canA()) return; setOpen(true); setTab(t || tab);
+      if (text) { ta.value = text; if (auto) setTimeout(function () { if (!send.disabled && !ta.disabled) send.click(); }, 80); else ta.focus(); }
+    }
+  };
   perm(); window.addEventListener('gn-user', function () { perm(); if (open) setTab(tab); });
   btn.onclick = function () { perm(); lastSel = lastSel || selText(); setOpen(!open); };
   box.querySelector('.gnfb-x').onclick = function () { setOpen(false); };
